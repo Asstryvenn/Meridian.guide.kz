@@ -1,0 +1,167 @@
+.top {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 100%;
+}
+
+.ringValue {
+  font-size: 24px;
+  font-weight: 640;
+}
+
+.statusBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.deadlines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  list-style: none;
+}
+
+.deadlines li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.deadlines li span:first-child {
+  flex: 1;
+  font-weight: 560;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.requirements {
+  padding-left: 18px;
+  color: var(--text-muted);
+}
+
+.english {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.english > span:first-child {
+  color: var(--text-muted);
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.item:hover {
+  background: var(--surface-sunken);
+}
+
+.itemDone {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+}
+
+.itemDone .check,
+.taskDone .check {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.scholarships {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.scholarships li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.tasks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.taskTitle {
+  flex: 1;
+}
+
+.taskDone .taskTitle {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+@media (max-width: 900px) {
+  .top,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

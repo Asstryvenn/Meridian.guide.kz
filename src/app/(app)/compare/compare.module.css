@@ -1,0 +1,87 @@
+.verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.verdictTitle {
+  font-size: 24px;
+  max-width: 760px;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 18px;
+  color: var(--text-muted);
+}
+
+.points li::marker {
+  color: var(--amber);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  padding: 8px;
+}
+
+.table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tr:last-child th,
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  vertical-align: bottom;
+}
+
+.table thead th > * {
+  display: block;
+}
+
+.table tbody th {
+  width: 180px;
+  font-size: 13px;
+  font-weight: 560;
+  color: var(--text-muted);
+}
+
+.corner {
+  width: 180px;
+}
+
+.uniName {
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+
+.meterCell,
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meterCell {
+  max-width: 180px;
+}

@@ -1,0 +1,48 @@
+.card {
+  overflow: hidden;
+}
+
+.sm {
+  padding: 16px;
+}
+
+.md {
+  padding: 24px;
+}
+
+.lg {
+  padding: 32px;
+}
+
+.interactive {
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift), inset 0 1px 0 var(--highlight);
+  border-color: var(--border-strong);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin-top: 4px;
+  font-size: 19px;
+}
+
+@media (max-width: 640px) {
+  .md,
+  .lg {
+    padding: 18px;
+  }
+}

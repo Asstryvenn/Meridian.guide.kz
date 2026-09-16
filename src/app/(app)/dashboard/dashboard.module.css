@@ -1,0 +1,315 @@
+.topGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+}
+
+.nextWrap {
+  display: flex;
+}
+
+.next {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 32px;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.35), transparent 50%),
+    linear-gradient(135deg, var(--amber) 0%, #f0c35a 100%);
+  color: var(--deep);
+  box-shadow: 0 30px 60px -30px rgba(235, 174, 41, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  overflow: hidden;
+}
+
+.nextHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nextHead :global(span) {
+  color: rgba(19, 34, 40, 0.7);
+}
+
+.nextEyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nextTitle {
+  margin-top: 8px;
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 640;
+  max-width: 560px;
+}
+
+.nextReason {
+  font-size: 16px;
+  color: rgba(19, 34, 40, 0.78);
+}
+
+.nextDue {
+  font-size: 13px;
+  color: rgba(19, 34, 40, 0.6);
+}
+
+.nextActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nextActions > :first-child {
+  background: var(--deep);
+  color: var(--ivory);
+  box-shadow: none;
+}
+
+.nextActions > :first-child:hover {
+  background: #0c171b;
+}
+
+.progressCard {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 100%;
+}
+
+.ringValue {
+  display: block;
+  font-size: 30px;
+  font-weight: 640;
+  line-height: 1;
+}
+
+.ringCaption {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.progressText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.levelTitle {
+  font-size: 22px;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.span2 {
+  grid-column: span 2;
+}
+
+.tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.tierCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tierItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tierItem:hover {
+  transform: translateY(-2px);
+}
+
+.tierName {
+  font-weight: 620;
+}
+
+.tierMeta {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.tierEmpty {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+}
+
+.dimensionRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.deadlines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.deadline:hover {
+  background: var(--surface-sunken);
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: var(--green-soft);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.days strong {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.daysUrgent {
+  background: var(--amber-soft);
+}
+
+.deadlineText {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.deadlineUni {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.verify {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber-strong);
+}
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.alert > span:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert:hover {
+  background: var(--surface-sunken);
+}
+
+.alertTitle {
+  font-size: 14px;
+  font-weight: 580;
+}
+
+.alertDot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.alert_deadline {
+  background: var(--amber);
+}
+
+.alert_test_gap {
+  background: var(--danger);
+}
+
+.alert_scholarship {
+  background: var(--green);
+}
+
+@media (max-width: 1100px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .grid,
+  .tiers {
+    grid-template-columns: 1fr;
+  }
+
+  .span2 {
+    grid-column: auto;
+  }
+
+  .next {
+    padding: 24px;
+  }
+
+  .progressCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .progressText {
+    align-items: center;
+  }
+}

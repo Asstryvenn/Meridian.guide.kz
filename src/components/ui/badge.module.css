@@ -1,0 +1,77 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+.amber {
+  background: var(--amber-soft);
+  color: var(--text);
+}
+
+.green {
+  background: var(--green-soft);
+  color: var(--green-strong);
+}
+
+:global([data-theme="dark"]) .green {
+  color: #8fcab0;
+}
+
+.neutral {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.outline {
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+}
+
+.dataTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+
+.data_institutional .dot {
+  background: var(--text-muted);
+}
+
+.data_prediction .dot {
+  background: var(--amber);
+  border-radius: 999px;
+}
+
+.data_ai .dot {
+  background: var(--green);
+  transform: rotate(45deg);
+}
+
+.data_rules .dot {
+  background: transparent;
+  border: 1.5px solid var(--green);
+  border-radius: 999px;
+}

@@ -1,0 +1,58 @@
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.svg {
+  display: block;
+}
+
+.track {
+  stroke: var(--track);
+  fill: var(--track);
+}
+
+circle.track {
+  fill: none;
+}
+
+.indicator {
+  transition: stroke 0.3s ease;
+}
+
+.indicator.amber {
+  stroke: var(--amber);
+}
+
+.indicator.green {
+  stroke: var(--green);
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.meter {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: visible;
+}
+
+.fill.amber {
+  fill: var(--amber);
+}
+
+.fill.green {
+  fill: var(--green);
+}
+
+.fill.neutral {
+  fill: var(--text-faint);
+}

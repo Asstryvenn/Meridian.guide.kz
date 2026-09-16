@@ -1,0 +1,114 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 820px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+}
+
+.topActions {
+  display: flex;
+  gap: 8px;
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progressMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+}
+
+.dotButton {
+  width: 22px;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--track);
+  transition:
+    background-color 0.3s ease,
+    width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dotButton[data-state="done"] {
+  background: var(--green);
+}
+
+.dotButton[data-state="current"] {
+  width: 40px;
+  background: var(--amber);
+}
+
+.card {
+  padding: 36px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.stepHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  font-size: clamp(28px, 4vw, 36px);
+}
+
+.footer {
+  position: sticky;
+  bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow);
+}
+
+.footerRight {
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 20px;
+  }
+
+  .footerRight > :first-child {
+    display: none;
+  }
+}

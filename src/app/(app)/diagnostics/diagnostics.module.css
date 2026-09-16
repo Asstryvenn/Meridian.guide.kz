@@ -1,0 +1,172 @@
+.overview {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+.overall {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 100%;
+}
+
+.overallValue {
+  display: block;
+  font-size: 44px;
+  font-weight: 640;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.overallCaption {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.overallText {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary {
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.completeness {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.radarCard {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.narrativeText {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 820px;
+}
+
+.shimmer {
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--surface-sunken) 0%, var(--highlight) 50%, var(--surface-sunken) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.dimensions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.dimension {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+}
+
+.focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber), var(--shadow);
+}
+
+.dimensionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.dimensionTitle {
+  font-size: 17px;
+}
+
+.scoreRow {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.score {
+  font-size: 34px;
+  font-weight: 640;
+  letter-spacing: -0.04em;
+}
+
+.explanation {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.improve {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--green-soft);
+  font-size: 14px;
+}
+
+.improve span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.focusTag {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--amber-strong);
+}
+
+:global([data-theme="dark"]) .focusTag {
+  color: var(--amber);
+}
+
+@media (max-width: 960px) {
+  .overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .overall {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dimensions {
+    grid-template-columns: 1fr;
+  }
+}

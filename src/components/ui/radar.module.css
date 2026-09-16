@@ -1,0 +1,39 @@
+.radar {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--border);
+}
+
+.spoke {
+  stroke: var(--border);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 560;
+  fill: var(--text-muted);
+}
+
+.shape {
+  fill: var(--amber-soft);
+  stroke: var(--amber);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.vertex {
+  fill: var(--amber);
+}
+
+.missing {
+  fill: var(--bg);
+  stroke: var(--text-faint);
+  stroke-width: 1.5;
+}
