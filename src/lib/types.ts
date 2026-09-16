@@ -58,6 +58,8 @@ export interface Activity {
   hoursPerWeek: number;
 }
 
+export type ArchetypeId = "innovator" | "researcher" | "community_builder" | "strategist" | "creative_visionary";
+
 export interface StudentProfile {
   fullName: string;
   country: string;
@@ -89,6 +91,8 @@ export interface StudentProfile {
   size: "small" | "medium" | "large" | "any";
   careerGoal: string;
   gradSchool: "phd" | "masters" | "undecided" | "none";
+  archetype?: ArchetypeId;
+  pomodoroMinutes?: number;
 }
 
 export type Tier = "Dream" | "Target" | "Safety";
@@ -138,6 +142,11 @@ export interface University {
   campusLife: string;
   careerOutcomes: Sourced<string>;
   scholarshipIds: string[];
+  housing_cost?: number;
+  insurance_cost?: number;
+  visa_fees?: number;
+  food_estimate?: number;
+  flight_estimate?: number;
 }
 
 export interface Scholarship {

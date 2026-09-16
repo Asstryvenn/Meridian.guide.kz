@@ -171,3 +171,18 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+.eco-mode {
+  --bg: #111a1d;
+  --bg-accent-1: rgba(88, 156, 128, 0.08);
+  --bg-accent-2: rgba(19, 34, 40, 0.2);
+  --text: #e2ded0;
+  --text-muted: rgba(226, 222, 208, 0.6);
+  --text-faint: rgba(226, 222, 208, 0.35);
+  --surface: rgba(226, 222, 208, 0.035);
+  --border: rgba(88, 156, 128, 0.15);
+  --amber: #cca13b;
+  --green: #48846c;
+  filter: contrast(0.92) saturate(0.85);
+  transition: all 0.5s ease;
+}

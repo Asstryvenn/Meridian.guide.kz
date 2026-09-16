@@ -5,7 +5,7 @@ import { getScholarship } from "@/lib/data/scholarships";
 import { getUniversity } from "@/lib/data/universities";
 import { currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
 import { loadRemoteState, saveRemoteState } from "@/lib/supabase/sync";
-import type { Application, AuthUser, StudentProfile } from "@/lib/types";
+import type { Application, ArchetypeId, AuthUser, StudentProfile } from "@/lib/types";
 import { emptyProfile, newApplication } from "./defaults";
 
 const STORAGE_KEY = "locus:v1";
@@ -18,6 +18,8 @@ interface AppState {
   completedTasks: string[];
   dismissedNotifications: string[];
   compare: string[];
+  ecoMode: boolean;
+  pomodoroFocusMinutes: number;
 }
 
 interface AppActions {
@@ -36,6 +38,10 @@ interface AppActions {
   dismissNotification: (id: string) => void;
   toggleCompare: (slug: string) => void;
   setCompare: (slugs: string[]) => void;
+  toggleEcoMode: () => void;
+  setEcoMode: (active: boolean) => void;
+  addFocusTime: (minutes: number) => void;
+  setArchetype: (archetype: ArchetypeId) => void;
 }
 
 const initialState: AppState = {
@@ -46,6 +52,8 @@ const initialState: AppState = {
   completedTasks: [],
   dismissedNotifications: [],
   compare: [],
+  ecoMode: false,
+  pomodoroFocusMinutes: 0,
 };
 
 const AppContext = createContext<(AppState & AppActions) | null>(null);
@@ -172,6 +180,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, compare: slugs.slice(0, 3) }));
   }, []);
 
+  const toggleEcoMode = useCallback(() => {
+    setState((prev) => ({ ...prev, ecoMode: !prev.ecoMode }));
+  }, []);
+
+  const setEcoMode = useCallback((active: boolean) => {
+    setState((prev) => ({ ...prev, ecoMode: active }));
+  }, []);
+
+  const addFocusTime = useCallback((minutes: number) => {
+    setState((prev) => ({
+      ...prev,
+      pomodoroFocusMinutes: (prev.pomodoroFocusMinutes || 0) + minutes,
+      profile: {
+        ...prev.profile,
+        pomodoroMinutes: (prev.profile.pomodoroMinutes || 0) + minutes,
+      },
+    }));
+  }, []);
+
+  const setArchetype = useCallback((archetype: ArchetypeId) => {
+    setState((prev) => ({
+      ...prev,
+      profile: { ...prev.profile, archetype },
+    }));
+  }, []);
+
   const value = useMemo(
     () => ({
       ...state,
@@ -190,8 +224,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dismissNotification,
       toggleCompare,
       setCompare,
+      toggleEcoMode,
+      setEcoMode,
+      addFocusTime,
+      setArchetype,
     }),
-    [state, hydrated, syncError, signIn, signOut, updateProfile, replaceProfile, completeOnboarding, addApplication, removeApplication, updateApplication, toggleTask, markTask, dismissNotification, toggleCompare, setCompare],
+    [
+      state,
+      hydrated,
+      syncError,
+      signIn,
+      signOut,
+      updateProfile,
+      replaceProfile,
+      completeOnboarding,
+      addApplication,
+      removeApplication,
+      updateApplication,
+      toggleTask,
+      markTask,
+      dismissNotification,
+      toggleCompare,
+      setCompare,
+      toggleEcoMode,
+      setEcoMode,
+      addFocusTime,
+      setArchetype,
+    ],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

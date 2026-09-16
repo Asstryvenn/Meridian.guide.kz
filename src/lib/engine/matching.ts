@@ -90,6 +90,24 @@ function researchFit(profile: StudentProfile, university: University): number {
   return 1 - Math.abs(wantsResearch - university.researchStrength / 5) * 0.6;
 }
 
+function archetypeFit(profile: StudentProfile, university: University): number {
+  if (!profile.archetype) return 0.7;
+  switch (profile.archetype) {
+    case "innovator":
+      return (university.campus === "urban" ? 0.9 : 0.6) + (university.researchStrength >= 4 ? 0.1 : 0);
+    case "researcher":
+      return university.researchStrength / 5;
+    case "community_builder":
+      return university.type === "public" ? 0.95 : 0.75;
+    case "strategist":
+      return university.selectivityTier <= 2 ? 0.95 : 0.7;
+    case "creative_visionary":
+      return university.campus === "urban" || university.size === "medium" ? 0.9 : 0.65;
+    default:
+      return 0.7;
+  }
+}
+
 function tierFor(prediction: Prediction): Tier {
   if (prediction.high <= 30 || prediction.midpoint < 22) return "Dream";
   if (prediction.low >= 55) return "Safety";
@@ -116,7 +134,10 @@ export function recommend(profile: StudentProfile, pool: University[] = universi
       const prediction = predictAdmission(profile, university);
       const preference = preferenceFit(profile, university);
       const research = researchFit(profile, university);
-      const matchScore = Math.round((field.score * 0.35 + financial.score * 0.25 + preference * 0.25 + research * 0.15) * 100);
+      const archetype = archetypeFit(profile, university);
+
+      const baseScore = field.score * 0.30 + financial.score * 0.25 + preference * 0.20 + research * 0.15 + archetype * 0.10;
+      const matchScore = Math.round(baseScore * 100);
 
       const reasons: string[] = [];
       if (field.score === 1) reasons.push(`Offers ${field.programs[0]}`);
@@ -125,6 +146,8 @@ export function recommend(profile: StudentProfile, pool: University[] = universi
       if (financial.label === "Needs aid" && financial.score >= 0.8) reasons.push("Meets full need for international students");
       if (profile.preferredCountries.includes(university.country)) reasons.push(`In your preferred country (${university.country})`);
       if (profile.gradSchool === "phd" && university.researchStrength >= 5) reasons.push("Top research environment for a PhD path");
+      if (profile.archetype === "innovator" && university.campus === "urban") reasons.push("Matches your Innovator campus vibe");
+      if (profile.archetype === "researcher" && university.researchStrength >= 4) reasons.push("Matches your Researcher scholarly focus");
       if (university.scholarshipIds.length) reasons.push("Has scholarships you may qualify for");
 
       const recommendation: Recommendation = {

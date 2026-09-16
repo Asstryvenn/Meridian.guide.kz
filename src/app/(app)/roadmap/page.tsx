@@ -26,7 +26,7 @@ const kindLabel: Record<RoadmapTask["kind"], string> = {
 };
 
 export default function RoadmapPage() {
-  const { toggleTask, applications } = useApp();
+  const { toggleTask, applications, ecoMode } = useApp();
   const { roadmap, next } = useRoadmap();
   const [openLevel, setOpenLevel] = useState<number | null>(null);
   const [celebrate, setCelebrate] = useState<string | null>(null);
@@ -40,8 +40,27 @@ export default function RoadmapPage() {
     toggleTask(task.id);
   }
 
+  const allActiveTasks = roadmap.levels.flatMap((l) => l.tasks).filter((t) => !t.done);
+  const ecoCriticalTasks = allActiveTasks.slice(0, 2);
+
   return (
     <Page>
+      {ecoMode && (
+        <Reveal>
+          <div className="p-6 mb-6 rounded-2xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-2">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
+              <span>🌿</span> Burnout Eco-Mode Active
+            </div>
+            <h2 className="text-xl font-bold text-[#F5EED2]">
+              Showing only 2 immediate priorities. Take your time.
+            </h2>
+            <p className="text-xs text-[#F5EED2]/70 leading-relaxed">
+              Automatic 3-day deadline buffer applied to give you breathing room.
+            </p>
+          </div>
+        </Reveal>
+      )}
+
       <PageHeader
         eyebrow="Application roadmap"
         title="Your path, level by level"

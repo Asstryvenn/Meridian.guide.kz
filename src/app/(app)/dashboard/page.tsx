@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -9,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Meter, ProgressRing } from "@/components/ui/progress";
+import { ProgressRings } from "@/components/ui/progress-rings";
+import { ArchetypeQuiz } from "@/components/onboarding/archetype-quiz";
+import { ARCHETYPES } from "@/lib/data/archetype";
 import { PredictionRange } from "@/components/university/prediction-panel";
 import { TierBadge } from "@/components/university/tier";
 import { getUniversity } from "@/lib/data/universities";
@@ -26,11 +30,12 @@ function greeting() {
 }
 
 export default function Dashboard() {
-  const { profile, applications, toggleTask } = useApp();
+  const { profile, applications, toggleTask, ecoMode } = useApp();
   const diagnostics = useDiagnostics();
   const { tiers } = useRecommendations();
   const { roadmap, next } = useRoadmap();
   const notifications = useNotifications();
+  const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false);
   const firstName = profile.fullName.split(" ")[0];
 
   const deadlines = applications
@@ -42,9 +47,68 @@ export default function Dashboard() {
 
   const level = roadmap.levels.find((l) => l.level === roadmap.currentLevel);
 
+  const userArchetype = profile.archetype ? ARCHETYPES[profile.archetype] : null;
+
   return (
     <Page>
-      <PageHeader eyebrow={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })} title={`${greeting()}${firstName ? `, ${firstName}` : ""}.`} description={diagnostics.summary} />
+      {ecoMode && (
+        <Reveal>
+          <div className="p-6 mb-6 rounded-2xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-2">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
+              <span>🌿</span> Eco-Mode Active — Breathing Room Mode
+            </div>
+            <h2 className="text-xl font-bold text-[#F5EED2]">
+              &ldquo;Take a deep breath. Success is a marathon, not a sprint.&rdquo;
+            </h2>
+            <p className="text-xs text-[#F5EED2]/70 leading-relaxed">
+              Heavy metrics and dense roadmaps are hidden. Non-urgent deadlines have been cushioned to give you breathing room. Focus only on what matters right now.
+            </p>
+          </div>
+        </Reveal>
+      )}
+
+      <PageHeader
+        eyebrow={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+        title={`${greeting()}${firstName ? `, ${firstName}` : ""}.`}
+        description={ecoMode ? "Pace yourself today. You are making steady progress." : diagnostics.summary}
+      />
+
+      {showArchetypeQuiz && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <ArchetypeQuiz onClose={() => setShowArchetypeQuiz(false)} />
+        </div>
+      )}
+
+      <div className="mb-6 p-5 rounded-2xl bg-[#132228]/80 border border-[#589C80]/30 flex flex-col md:flex-row items-center justify-between gap-4 text-[#F5EED2]">
+        <div className="space-y-1 text-center md:text-left">
+          <div className="text-xs font-mono font-bold text-[#EBAE29] uppercase tracking-wider">
+            Student Psychographic Archetype
+          </div>
+          {userArchetype ? (
+            <div>
+              <h3 className="text-lg font-extrabold text-[#F5EED2] flex items-center gap-2 justify-center md:justify-start">
+                <span>{userArchetype.badge}</span>
+                <span>{userArchetype.title}</span>
+              </h3>
+              <p className="text-xs text-[#589C80]">{userArchetype.tagline}</p>
+            </div>
+          ) : (
+            <div>
+              <h3 className="text-base font-bold text-[#F5EED2]">Discover Your Student Archetype</h3>
+              <p className="text-xs text-[#F5EED2]/70">Take a 2-minute quiz to personalize your university match scoring.</p>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setShowArchetypeQuiz(true)}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-xs font-bold text-[#132228] shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
+        >
+          {userArchetype ? "Retake Archetype Quiz" : "Take Archetype Quiz"}
+        </button>
+      </div>
+
+      {!ecoMode && <ProgressRings className="mb-6" />}
 
       <div className={styles.topGrid}>
         <Reveal className={styles.nextWrap}>
@@ -76,24 +140,26 @@ export default function Dashboard() {
           )}
         </Reveal>
 
-        <Reveal>
-          <Card className={styles.progressCard}>
-            <ProgressRing value={roadmap.progress} size={132} stroke={11} label={`Roadmap ${Math.round(roadmap.progress * 100)}% complete`}>
-              <span className={styles.ringValue}>{Math.round(roadmap.progress * 100)}%</span>
-              <span className={styles.ringCaption}>roadmap</span>
-            </ProgressRing>
-            <div className={styles.progressText}>
-              <p className="eyebrow">Level {roadmap.currentLevel}</p>
-              <p className={styles.levelTitle}>{level?.title}</p>
-              <p className="muted tabular">
-                {roadmap.earnedXp} / {roadmap.totalXp} XP
-              </p>
-              <Button variant="quiet" size="sm" href="/roadmap">
-                Open roadmap <Icon name="arrow" size={14} />
-              </Button>
-            </div>
-          </Card>
-        </Reveal>
+        {!ecoMode && (
+          <Reveal>
+            <Card className={styles.progressCard}>
+              <ProgressRing value={roadmap.progress} size={132} stroke={11} label={`Roadmap ${Math.round(roadmap.progress * 100)}% complete`}>
+                <span className={styles.ringValue}>{Math.round(roadmap.progress * 100)}%</span>
+                <span className={styles.ringCaption}>roadmap</span>
+              </ProgressRing>
+              <div className={styles.progressText}>
+                <p className="eyebrow">Level {roadmap.currentLevel}</p>
+                <p className={styles.levelTitle}>{level?.title}</p>
+                <p className="muted tabular">
+                  {roadmap.earnedXp} / {roadmap.totalXp} XP
+                </p>
+                <Button variant="quiet" size="sm" href="/roadmap">
+                  Open roadmap <Icon name="arrow" size={14} />
+                </Button>
+              </div>
+            </Card>
+          </Reveal>
+        )}
       </div>
 
       <div className={styles.grid}>

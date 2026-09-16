@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { PomodoroTimer } from "@/components/ui/pomodoro-timer";
 import { useApp } from "@/lib/store/app-store";
 import { useNotifications } from "@/lib/store/derived";
 import { Logo } from "./logo";
@@ -127,9 +128,10 @@ function UserMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
+  const { ecoMode, toggleEcoMode } = useApp();
 
   return (
-    <div className={styles.shell}>
+    <div className={clsx(styles.shell, ecoMode && "eco-mode")}>
       <aside className={clsx("glass", styles.sidebar)}>
         <Link href="/dashboard" className={styles.brand}>
           <Logo />
@@ -154,6 +156,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className={styles.topActions}>
+            <button
+              type="button"
+              onClick={toggleEcoMode}
+              className={clsx(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer",
+                ecoMode
+                  ? "bg-[#589C80]/30 border-[#589C80] text-[#F5EED2]"
+                  : "bg-[#132228]/40 border-[#589C80]/30 text-[#F5EED2]/70 hover:border-[#589C80] hover:text-[#F5EED2]"
+              )}
+              title="Toggle Calming Eco Mode"
+            >
+              <span className="text-sm">{ecoMode ? "🌿" : "🌱"}</span>
+              <span className="hidden sm:inline font-mono">{ecoMode ? "Eco Mode On" : "Eco Mode"}</span>
+            </button>
             <button type="button" className={styles.iconButton} onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
               <Icon name={theme === "dark" ? "sun" : "moon"} />
             </button>
@@ -177,6 +193,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
       </nav>
+
+      <PomodoroTimer />
     </div>
   );
 }
