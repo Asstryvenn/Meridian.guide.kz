@@ -160,3 +160,25 @@ create policy "own roadmap_tasks" on public.roadmap_tasks for all using (auth.ui
 create policy "public universities" on public.universities for select using (true);
 create policy "public scholarships" on public.scholarships for select using (true);
 create policy "public professors" on public.professors for select using (true);
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (user_id, full_name, onboarded)
+  values (new.id, new.raw_user_meta_data->>'full_name', false)
+  on conflict (user_id) do nothing;
+
+  insert into public.academic_records (user_id)
+  values (new.id)
+  on conflict (user_id) do nothing;
+
+  return new;
+end;
+$$;
+
+create or replace trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
