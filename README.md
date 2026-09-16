@@ -40,7 +40,7 @@ The app runs without any keys:
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Enables real accounts and cloud sync |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | Enables real accounts and cloud sync |
 | `ANTHROPIC_API_KEY` | Enables Claude for the mentor, natural-language search and diagnostic narratives |
 
 ### Supabase
