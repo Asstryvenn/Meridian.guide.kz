@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Calendar, Clock, Award, FileText } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { universities } from "@/lib/data/universities";
@@ -147,14 +148,26 @@ export function DeadlineCalendar() {
     }
   };
 
-  const getKindBadge = (kind: EventKind) => {
+  const renderKindBadge = (kind: EventKind) => {
     switch (kind) {
       case "deadline":
-        return "⏳ Deadline";
+        return (
+          <span className="inline-flex items-center gap-1">
+            <Clock size={11} /> Deadline
+          </span>
+        );
       case "scholarship":
-        return "💰 Scholarship";
+        return (
+          <span className="inline-flex items-center gap-1">
+            <Award size={11} /> Scholarship
+          </span>
+        );
       case "exam":
-        return "📝 Exam";
+        return (
+          <span className="inline-flex items-center gap-1">
+            <FileText size={11} /> Exam
+          </span>
+        );
     }
   };
 
@@ -192,8 +205,8 @@ export function DeadlineCalendar() {
 
       <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">📅</span>
+          <div className="flex items-center gap-2.5">
+            <Calendar size={22} className="text-[#589C80]" />
             <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
               {t.calendar.title}
             </h2>
@@ -314,7 +327,7 @@ export function DeadlineCalendar() {
                             event.kind
                           )}`}
                         >
-                          {getKindBadge(event.kind)}
+                          {renderKindBadge(event.kind)}
                         </span>
                         {event.institution && (
                           <span className="text-xs font-mono text-[#589C80]">

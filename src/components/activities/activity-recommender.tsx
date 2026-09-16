@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Clock, Check, Plus } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { getRecommendationsForProfile } from "@/lib/engine/extracurricular-recommender";
@@ -100,8 +101,8 @@ export function ActivityRecommender() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 shadow-2xl backdrop-blur-xl">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🚀</span>
+          <div className="flex items-center gap-2.5">
+            <Sparkles size={22} className="text-[#EBAE29]" />
             <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
               {t.recommender.title}
             </h2>
@@ -178,8 +179,9 @@ export function ActivityRecommender() {
 
                   <div className="space-y-3 pt-2 border-t border-[#589C80]/20">
                     <div className="flex items-center justify-between text-xs font-mono text-[#F5EED2]/70">
-                      <span>
-                        ⏱ ~{rec.estimatedHoursPerWeek} {t.recommender.hoursWeek}
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} className="text-[#589C80]" />
+                        ~{rec.estimatedHoursPerWeek} {t.recommender.hoursWeek}
                       </span>
                       <span className="text-[#EBAE29] font-bold">
                         +{rec.xpReward} XP
@@ -196,7 +198,7 @@ export function ActivityRecommender() {
                           : "bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-[#132228] hover:brightness-110 shadow-lg shadow-[#589C80]/15"
                       }`}
                     >
-                      <span>{isAdded ? "✓" : "+"}</span>
+                      {isAdded ? <Check size={14} /> : <Plus size={14} />}
                       <span>
                         {isAdded
                           ? t.recommender.addedToRoadmap

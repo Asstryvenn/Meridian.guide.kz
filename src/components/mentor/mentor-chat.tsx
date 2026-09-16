@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { HeartHandshake, MessageSquare, Leaf } from "lucide-react";
 import { Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,13 @@ interface Message {
   source?: "ai" | "rules";
 }
 
-const suggestions = ["What are my real chances at my top matches?", "What should I focus on this month?", "Which scholarships should I apply for?", "Which deadlines are coming up?", "How can I strengthen my weakest area?"];
+const suggestions = [
+  "What are my real chances at my top matches?",
+  "What should I focus on this month?",
+  "Which scholarships should I apply for?",
+  "Which deadlines are coming up?",
+  "How can I strengthen my weakest area?",
+];
 
 function MessageBody({ content }: { content: string }) {
   const blocks = content.split(/\n{2,}/);
@@ -102,7 +109,7 @@ export function MentorChat() {
       setNotice(null);
 
       try {
-        const response = await fetch("/api/mentor", {
+        const response = await fetch("/api/ai/mentor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -170,7 +177,15 @@ export function MentorChat() {
             onClick={() => setSupportMode((prev) => !prev)}
             className="cursor-pointer"
           >
-            {supportMode ? "💚 Support Mode Active" : "💬 Switch to Support / Vent Mode"}
+            {supportMode ? (
+              <span className="inline-flex items-center gap-1.5">
+                <HeartHandshake size={15} /> Support Mode Active
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <MessageSquare size={15} /> Switch to Support / Vent Mode
+              </span>
+            )}
           </Button>
         }
       />
@@ -200,7 +215,7 @@ export function MentorChat() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
                   >
-                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor · Gemini" : "Rule-based guidance"} />}
+                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor" : "Rule-based guidance"} />}
                     {m.content ? <MessageBody content={m.content} /> : <span className={styles.typing} aria-label="Mentor is typing"><i /><i /><i /></span>}
                   </motion.div>
                 ))}
@@ -209,7 +224,10 @@ export function MentorChat() {
             </div>
             {showStressBanner && !supportMode && (
               <div className="p-3 mx-4 my-2 rounded-xl bg-[#589C80]/20 border border-[#589C80] flex items-center justify-between gap-3 text-xs text-[#F5EED2]">
-                <span>🌱 You sound a bit overwhelmed. Would you like to switch to Support / Vent Mode for empathetic CBT guidance?</span>
+                <span className="inline-flex items-center gap-2">
+                  <Leaf size={14} className="text-[#589C80] shrink-0" />
+                  You sound a bit overwhelmed. Would you like to switch to Support / Vent Mode for empathetic CBT guidance?
+                </span>
                 <button
                   type="button"
                   onClick={enableSupportMode}

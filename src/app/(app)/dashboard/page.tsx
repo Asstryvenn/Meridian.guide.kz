@@ -4,6 +4,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Leaf, Sparkles } from "lucide-react";
 import { EmptyState, Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,7 @@ export default function Dashboard() {
         <Reveal>
           <div className="p-6 mb-6 rounded-3xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-4">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
-              <span>🌿</span> Eco-Mode Active — Breathing Room Mode
+              <Leaf size={14} className="text-[#589C80]" /> Eco-Mode Active — Breathing Room Mode
             </div>
             <h2 className="text-xl font-bold text-[#F5EED2]">
               &ldquo;Take a deep breath. Success is a marathon, not a sprint.&rdquo;
@@ -96,7 +97,7 @@ export default function Dashboard() {
               onClick={() => setShowChanceBoostModal(true)}
               className="cursor-pointer"
             >
-              <span>✨</span>
+              <Sparkles size={14} className="mr-1.5 inline" />
               <span>Upload Achievement</span>
             </Button>
           </div>

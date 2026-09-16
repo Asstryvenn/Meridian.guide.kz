@@ -4,11 +4,13 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
+import { Leaf, Sparkles, Check, Lock, ChevronDown, ChevronUp } from "lucide-react";
 import { Page, PageHeader, Reveal } from "@/components/layout/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { ProgressRing } from "@/components/ui/progress";
+import { DuolingoRoadmap } from "@/components/roadmap/duolingo-roadmap";
 import { ActivityRecommender } from "@/components/activities/activity-recommender";
 import { ChanceBoostModal } from "@/components/diploma/chance-boost-modal";
 import { daysUntil, formatDate } from "@/lib/engine/deadlines";
@@ -33,6 +35,8 @@ export default function RoadmapPage() {
   const [openLevel, setOpenLevel] = useState<number | null>(null);
   const [celebrate, setCelebrate] = useState<string | null>(null);
   const [showChanceBoostModal, setShowChanceBoostModal] = useState(false);
+  const [viewMode, setViewMode] = useState<"duolingo" | "list">("duolingo");
+
   const expanded = openLevel ?? roadmap.currentLevel;
 
   function complete(task: RoadmapTask) {
@@ -52,7 +56,7 @@ export default function RoadmapPage() {
         <Reveal>
           <div className="p-6 mb-6 rounded-3xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-2">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
-              <span>🌿</span> Burnout Eco-Mode Active
+              <Leaf size={14} className="text-[#589C80]" /> Burnout Eco-Mode Active
             </div>
             <h2 className="text-xl font-bold text-[#F5EED2]">
               Showing only 2 immediate priorities. Take your time.
@@ -70,12 +74,37 @@ export default function RoadmapPage() {
         description="Finish at least half of a level to unlock the next. Dates are suggestions counted back from your earliest deadline."
         actions={
           <div className="flex items-center gap-2">
+            <div className="flex items-center bg-[#132228] p-1 rounded-2xl border border-[#589C80]/30 mr-2">
+              <button
+                type="button"
+                onClick={() => setViewMode("duolingo")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  viewMode === "duolingo"
+                    ? "bg-[#589C80] text-[#132228] shadow-md"
+                    : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                }`}
+              >
+                Serpentine Path
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-[#589C80] text-[#132228] shadow-md"
+                    : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                }`}
+              >
+                Full List
+              </button>
+            </div>
+
             <Button
               variant="secondary"
               onClick={() => setShowChanceBoostModal(true)}
               className="cursor-pointer"
             >
-              <span>✨</span>
+              <Sparkles size={14} className="mr-1.5 inline" />
               <span>Upload Achievement</span>
             </Button>
             {applications.length === 0 && (
@@ -139,6 +168,10 @@ export default function RoadmapPage() {
             </div>
           ))}
         </div>
+      ) : viewMode === "duolingo" ? (
+        <Reveal>
+          <DuolingoRoadmap onCompleteTask={complete} />
+        </Reveal>
       ) : (
         <ol className={styles.levels}>
           {roadmap.levels.map((level) => {
@@ -159,11 +192,11 @@ export default function RoadmapPage() {
                     </span>
                     {level.locked ? (
                       <span className={styles.lockBadge}>
-                        <Icon name="lock" size={14} /> Locked
+                        <Lock size={14} className="mr-1 inline" /> Locked
                       </span>
                     ) : (
                       <button type="button" className={styles.chevron} aria-label={isOpen ? "Collapse level" : "Expand level"}>
-                        <Icon name={isOpen ? "chevron-up" : "chevron-down"} size={16} />
+                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                     )}
                   </div>
@@ -187,7 +220,7 @@ export default function RoadmapPage() {
                                 animate={celebrate === task.id ? { scale: [1, 1.35, 1] } : { scale: 1 }}
                                 transition={{ duration: 0.45 }}
                               >
-                                {task.done && <Icon name="check" size={16} />}
+                                {task.done && <Check size={16} className="text-[#589C80]" />}
                               </motion.button>
                               <div className={styles.taskBody}>
                                 <span className={styles.taskTitle}>{task.title}</span>

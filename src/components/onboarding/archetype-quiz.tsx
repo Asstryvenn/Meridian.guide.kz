@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Check, Sparkles, Scale } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { ARCHETYPES, QUIZ_QUESTIONS, calculateArchetype } from "@/lib/data/archetype";
 import type { ArchetypeId } from "@/lib/types";
@@ -147,8 +148,9 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
 
             <div className="grid grid-cols-2 gap-2 max-w-md mx-auto pt-2">
               {ARCHETYPES[result].traits.map((trait, tIdx) => (
-                <div key={tIdx} className="px-3 py-2 rounded-lg bg-[#589C80]/10 border border-[#589C80]/30 text-xs font-medium text-[#F5EED2]">
-                  ✦ {trait}
+                <div key={tIdx} className="px-3 py-2 rounded-lg bg-[#589C80]/10 border border-[#589C80]/30 text-xs font-medium text-[#F5EED2] flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-[#EBAE29] shrink-0" />
+                  <span>{trait}</span>
                 </div>
               ))}
             </div>
@@ -160,7 +162,7 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
               <ul className="space-y-2 text-xs text-[#F5EED2]/80">
                 {ARCHETYPES[result].recommendedExtracurriculars.map((rec, rIdx) => (
                   <li key={rIdx} className="flex items-start gap-2">
-                    <span className="text-[#589C80] font-bold">✓</span>
+                    <Check size={14} className="text-[#589C80] shrink-0 mt-0.5" />
                     <span>{rec}</span>
                   </li>
                 ))}
@@ -171,7 +173,7 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
               <ul className="space-y-2 text-xs text-[#F5EED2]/80">
                 {ARCHETYPES[result].complementaryExtracurriculars.map((comp, cIdx) => (
                   <li key={cIdx} className="flex items-start gap-2">
-                    <span className="text-[#EBAE29] font-bold">⚖</span>
+                    <Scale size={14} className="text-[#EBAE29] shrink-0 mt-0.5" />
                     <span>{comp}</span>
                   </li>
                 ))}

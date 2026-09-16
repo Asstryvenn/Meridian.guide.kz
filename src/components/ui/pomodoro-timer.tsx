@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
 
@@ -115,8 +116,9 @@ export function PomodoroTimer() {
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className="text-xs text-[#F5EED2]/50 hover:text-[#F5EED2] transition-colors cursor-pointer"
+                  aria-label="Close"
                 >
-                  ✕
+                  <X size={14} />
                 </button>
               </div>
             </div>

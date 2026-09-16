@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Award, X, FileText, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
@@ -14,7 +15,7 @@ interface ChanceBoostModalProps {
 }
 
 export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
-  const { addAchievementBoost, profile } = useApp();
+  const { addAchievementBoost } = useApp();
   const { list } = useRecommendations();
   const { t } = useI18n();
 
@@ -75,8 +76,8 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
             className="w-full max-w-lg p-6 rounded-3xl bg-[#132228] border border-[#589C80]/40 shadow-2xl space-y-5"
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#589C80]/20">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🏆</span>
+              <div className="flex items-center gap-2.5">
+                <Award size={20} className="text-[#EBAE29]" />
                 <h3 className="text-base font-bold text-[#F5EED2]">
                   {t.diplomaModal.uploadDiploma}
                 </h3>
@@ -84,9 +85,10 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="text-xs text-[#F5EED2]/50 hover:text-[#F5EED2] cursor-pointer"
+                className="p-1 rounded-lg text-[#F5EED2]/50 hover:text-[#F5EED2] hover:bg-white/5 cursor-pointer"
+                aria-label="Close"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -125,7 +127,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="p-6 rounded-2xl border-2 border-dashed border-[#589C80]/30 hover:border-[#EBAE29] bg-[#132228]/60 transition-all cursor-pointer text-center space-y-1"
+                className="p-6 rounded-2xl border-2 border-dashed border-[#589C80]/30 hover:border-[#EBAE29] bg-[#132228]/60 transition-all cursor-pointer text-center space-y-2"
               >
                 <input
                   ref={fileInputRef}
@@ -133,7 +135,9 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                   accept=".pdf,.png,.jpg,.jpeg"
                   className="hidden"
                 />
-                <span className="text-2xl block">📜</span>
+                <div className="flex justify-center">
+                  <FileText size={32} className="text-[#589C80]" />
+                </div>
                 <p className="text-xs font-semibold text-[#F5EED2]">
                   Attach scanned certificate or verification link
                 </p>
@@ -175,8 +179,8 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="w-24 h-24 rounded-full bg-[#EBAE29]/20 absolute"
               />
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#589C80] to-[#EBAE29] flex items-center justify-center text-3xl shadow-xl shadow-[#EBAE29]/30 relative z-10">
-                ✨
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#589C80] to-[#EBAE29] flex items-center justify-center text-[#132228] shadow-xl shadow-[#EBAE29]/30 relative z-10">
+                <Sparkles size={28} />
               </div>
             </div>
 
@@ -186,7 +190,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
               </span>
 
               <h3 className="text-xl font-extrabold text-[#F5EED2] leading-tight">
-                Boom! Admission Probability Boosted!
+                Admission Probability Boosted
               </h3>
 
               <div className="p-4 rounded-2xl bg-[#132228]/90 border border-[#589C80]/30 space-y-1">

@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
+import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -174,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               )}
               title="Toggle Calming Eco Mode"
             >
-              <span className="text-sm">{ecoMode ? "🌿" : "🌱"}</span>
+              <Leaf size={14} className={ecoMode ? "text-[#589C80]" : "text-[#F5EED2]/70"} />
               <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
             </button>
             <button type="button" className={styles.iconButton} onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>

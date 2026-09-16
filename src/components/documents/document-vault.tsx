@@ -1,18 +1,49 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import {
+  Folder,
+  FileText,
+  Check,
+  X,
+  Globe,
+  Upload,
+  Trash2,
+  Landmark,
+  Briefcase,
+  FileCheck,
+  Shield,
+  Plus,
+} from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import type { DocumentCategory, DocumentStatus, VaultDocument } from "@/lib/types";
 
-const folderCategories: { key: DocumentCategory; label: string; icon: string }[] = [
-  { key: "passport", label: "Passports & Identity", icon: "🛂" },
-  { key: "bank_statement", label: "Bank Statements", icon: "🏛️" },
-  { key: "family_income", label: "Family Income", icon: "💼" },
-  { key: "tax", label: "Tax Payers Documents", icon: "📑" },
-  { key: "insurance", label: "Health Insurance", icon: "🏥" },
+const folderCategories: { key: DocumentCategory; label: string }[] = [
+  { key: "passport", label: "Passports & Identity" },
+  { key: "bank_statement", label: "Bank Statements" },
+  { key: "family_income", label: "Family Income" },
+  { key: "tax", label: "Tax Payers Documents" },
+  { key: "insurance", label: "Health Insurance" },
 ];
+
+function getCategoryIcon(key: DocumentCategory) {
+  switch (key) {
+    case "passport":
+      return <Shield size={16} className="text-[#589C80]" />;
+    case "bank_statement":
+      return <Landmark size={16} className="text-[#589C80]" />;
+    case "family_income":
+      return <Briefcase size={16} className="text-[#589C80]" />;
+    case "tax":
+      return <FileCheck size={16} className="text-[#589C80]" />;
+    case "insurance":
+      return <Shield size={16} className="text-[#589C80]" />;
+    default:
+      return <FileText size={16} className="text-[#589C80]" />;
+  }
+}
 
 export function DocumentVault() {
   const { documents, addVaultDocument, updateVaultDocument, removeVaultDocument } = useApp();
@@ -87,22 +118,22 @@ export function DocumentVault() {
     switch (status) {
       case "verified":
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#589C80]/20 text-[#589C80] border border-[#589C80]/40 flex items-center gap-1">
-            <span>✓</span>
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#589C80]/20 text-[#589C80] border border-[#589C80]/40 flex items-center gap-1.5">
+            <Check size={12} />
             <span>{t.common.verified}</span>
           </span>
         );
       case "missing":
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-red-950/30 text-red-400 border border-red-800/40 flex items-center gap-1">
-            <span>✕</span>
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-red-950/30 text-red-400 border border-red-800/40 flex items-center gap-1.5">
+            <X size={12} />
             <span>{t.common.missing}</span>
           </span>
         );
       case "needs_translation":
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#EBAE29]/20 text-[#EBAE29] border border-[#EBAE29]/40 flex items-center gap-1">
-            <span>🌐</span>
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#EBAE29]/20 text-[#EBAE29] border border-[#EBAE29]/40 flex items-center gap-1.5">
+            <Globe size={12} />
             <span>{t.common.needsTranslation}</span>
           </span>
         );
@@ -113,8 +144,8 @@ export function DocumentVault() {
     <div className="space-y-6">
       <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🗄️</span>
+          <div className="flex items-center gap-2.5">
+            <Folder size={22} className="text-[#589C80]" />
             <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
               {t.documents.title}
             </h2>
@@ -129,7 +160,7 @@ export function DocumentVault() {
           onClick={() => setShowUploadModal(true)}
           className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-[#132228] hover:brightness-110 shadow-lg cursor-pointer flex items-center gap-2 shrink-0"
         >
-          <span>+</span>
+          <Plus size={14} />
           <span>{t.common.upload}</span>
         </button>
       </div>
@@ -193,7 +224,9 @@ export function DocumentVault() {
             }
           }}
         />
-        <div className="text-3xl">📥</div>
+        <div className="flex justify-center">
+          <Upload size={32} className="text-[#589C80]" />
+        </div>
         <p className="text-sm font-semibold text-[#F5EED2]">
           {t.documents.dropPrompt}
         </p>
@@ -229,7 +262,7 @@ export function DocumentVault() {
                   : "bg-[#132228]/60 text-[#F5EED2]/70 hover:text-[#F5EED2] border border-[#589C80]/20"
               }`}
             >
-              <span>{cat.icon}</span>
+              {getCategoryIcon(cat.key)}
               <span>{cat.label}</span>
               <span className="text-[10px] opacity-75">({count})</span>
             </button>
@@ -248,9 +281,9 @@ export function DocumentVault() {
               className="p-5 rounded-2xl bg-[#132228]/85 border border-[#589C80]/30 hover:border-[#EBAE29] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl"
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl p-2 rounded-xl bg-[#132228] border border-[#589C80]/30 shrink-0">
-                  {catMeta?.icon || "📄"}
-                </span>
+                <div className="p-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 shrink-0">
+                  {getCategoryIcon(doc.category)}
+                </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-[#589C80]">
@@ -297,7 +330,7 @@ export function DocumentVault() {
                   className="p-2 text-xs text-[#F5EED2]/50 hover:text-red-400 transition-colors cursor-pointer"
                   title="Remove document"
                 >
-                  🗑️
+                  <Trash2 size={15} />
                 </button>
               </div>
             </motion.div>
@@ -315,9 +348,9 @@ export function DocumentVault() {
               <button
                 type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="text-xs text-[#F5EED2]/60 hover:text-[#F5EED2] cursor-pointer"
+                className="p-1 rounded-lg text-[#F5EED2]/60 hover:text-[#F5EED2] cursor-pointer"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 

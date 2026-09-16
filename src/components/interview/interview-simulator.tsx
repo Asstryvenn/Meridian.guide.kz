@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Mic, Video, Square, Circle, Bot, Check, Sparkles } from "lucide-react";
 import { useI18n } from "@/components/i18n/i18n-context";
 import type { InterviewFeedback, InterviewQuestion } from "@/lib/types";
 
@@ -61,7 +62,6 @@ export function InterviewSimulator() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -77,7 +77,7 @@ export function InterviewSimulator() {
         videoRef.current.srcObject = stream;
       }
 
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
         const audioCtx = new AudioCtx();
         const analyser = audioCtx.createAnalyser();
@@ -86,7 +86,6 @@ export function InterviewSimulator() {
         source.connect(analyser);
 
         audioContextRef.current = audioCtx;
-        analyserRef.current = analyser;
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         const updateAudioMetrics = () => {
@@ -221,8 +220,8 @@ export function InterviewSimulator() {
     <div className="space-y-6">
       <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🎙️</span>
+          <div className="flex items-center gap-2.5">
+            <Mic size={22} className="text-[#589C80]" />
             <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
               {t.interview.title}
             </h2>
@@ -266,8 +265,8 @@ export function InterviewSimulator() {
 
             {!cameraActive && (
               <div className="text-center p-8 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-[#132228] border border-[#589C80]/40 flex items-center justify-center mx-auto text-2xl shadow-inner">
-                  📹
+                <div className="w-16 h-16 rounded-full bg-[#132228] border border-[#589C80]/40 flex items-center justify-center mx-auto text-[#589C80] shadow-inner">
+                  <Video size={28} />
                 </div>
                 <p className="text-sm font-semibold text-[#F5EED2]">
                   Camera & Microphone are currently offline
@@ -344,7 +343,7 @@ export function InterviewSimulator() {
                   onClick={stopAndAnalyze}
                   className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-[#EBAE29] text-[#132228] hover:bg-[#EBAE29]/90 shadow-lg cursor-pointer flex items-center gap-2"
                 >
-                  <span>⏹</span>
+                  <Square size={13} />
                   <span>{t.interview.stopRecording}</span>
                 </button>
               ) : (
@@ -354,7 +353,7 @@ export function InterviewSimulator() {
                   disabled={!cameraActive || analyzing}
                   className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-[#132228] hover:brightness-110 shadow-lg cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  <span>⏺</span>
+                  <Circle size={13} className="fill-current text-red-500" />
                   <span>{t.interview.startRecording}</span>
                 </button>
               )}
@@ -436,7 +435,9 @@ export function InterviewSimulator() {
 
       {analyzing && (
         <div className="p-8 rounded-3xl bg-[#132228]/85 border border-[#EBAE29]/40 text-center space-y-3 shadow-2xl backdrop-blur-xl animate-pulse">
-          <span className="text-3xl">🤖</span>
+          <div className="flex justify-center">
+            <Bot size={32} className="text-[#589C80]" />
+          </div>
           <p className="text-base font-bold text-[#F5EED2]">
             {t.interview.analyzing}
           </p>
@@ -516,7 +517,7 @@ export function InterviewSimulator() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl bg-[#589C80]/10 border border-[#589C80]/30 space-y-2">
               <h4 className="text-xs font-mono font-bold text-[#589C80] uppercase tracking-wider flex items-center gap-1.5">
-                <span>✓</span>
+                <Check size={14} />
                 <span>{t.interview.strengths}</span>
               </h4>
               <ul className="text-xs text-[#F5EED2]/80 space-y-1 list-disc list-inside">
@@ -528,7 +529,7 @@ export function InterviewSimulator() {
 
             <div className="p-5 rounded-2xl bg-[#EBAE29]/10 border border-[#EBAE29]/30 space-y-2">
               <h4 className="text-xs font-mono font-bold text-[#EBAE29] uppercase tracking-wider flex items-center gap-1.5">
-                <span>⚡</span>
+                <Sparkles size={14} />
                 <span>{t.interview.improvements}</span>
               </h4>
               <ul className="text-xs text-[#F5EED2]/80 space-y-1 list-disc list-inside">

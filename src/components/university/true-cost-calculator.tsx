@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { BarChart3, Check, Sparkles } from "lucide-react";
 import type { University } from "@/lib/types";
 
 interface TrueCostCalculatorProps {
@@ -91,7 +92,7 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#589C80]/20 pb-4">
         <div>
           <h3 className="text-xl font-bold text-[#F5EED2] flex items-center gap-2">
-            <span>📊</span> True Cost of Attendance Calculator
+            <BarChart3 size={20} className="text-[#589C80]" /> True Cost of Attendance Calculator
           </h3>
           <p className="text-xs text-[#F5EED2]/70">
             Complete annual cost estimation tailored for applicants from {userCountry}.
@@ -106,7 +107,7 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
               : "bg-[#132228] border-[#589C80]/40 text-[#F5EED2]/70 hover:border-[#589C80]"
           }`}
         >
-          <span className="text-sm">{applyScholarships ? "✓" : "⚡"}</span>
+          {applyScholarships ? <Check size={14} /> : <Sparkles size={14} />}
           <span>Apply Estimated Scholarships</span>
         </button>
       </div>

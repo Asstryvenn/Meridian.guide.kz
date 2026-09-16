@@ -16,7 +16,7 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   innovator: {
     id: "innovator",
     title: "The Innovator",
-    badge: "🚀 Product & Venture Specialist",
+    badge: "Product & Venture Specialist",
     tagline: "Driven by high-impact problem solving, venture creation, and tech-forward initiatives.",
     description: "You thrive on turning abstract ideas into scalable solutions. You learn best by building, testing, and leading fast-paced interdisciplinary projects.",
     traits: ["Entrepreneurship", "Rapid Prototyping", "Risk Taking", "System Architecture"],
@@ -34,7 +34,7 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   researcher: {
     id: "researcher",
     title: "The Researcher",
-    badge: "🔬 Deep Domain Scholar",
+    badge: "Deep Domain Scholar",
     tagline: "Fascinated by empirical truth, advanced methodologies, and published discoveries.",
     description: "You possess remarkable intellectual curiosity and patience for complex systems. You love dissecting primary literature and validating hypotheses.",
     traits: ["Empirical Rigor", "Data Analysis", "Academic Writing", "Methodical Focus"],
@@ -52,7 +52,7 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   community_builder: {
     id: "community_builder",
     title: "The Community Builder",
-    badge: "🤝 Social Impact Catalyst",
+    badge: "Social Impact Catalyst",
     tagline: "Dedicated to advocacy, grassroots organization, and empowering marginalized voices.",
     description: "Your superpower is empathy and mobilization. You connect people, foster inclusivity, and build initiatives that leave a lasting social legacy.",
     traits: ["Empathetic Leadership", "Grassroots Mobilization", "Policy & Advocacy", "Cross-Cultural Communication"],
@@ -70,7 +70,7 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   strategist: {
     id: "strategist",
     title: "The Strategist",
-    badge: "📊 Tactical Systems Leader",
+    badge: "Tactical Systems Leader",
     tagline: "Master of optimization, competitive dynamics, and long-range execution.",
     description: "You look at challenges as strategic chess games. You excel at decision analysis, resource allocation, and leading teams to concrete victories.",
     traits: ["Strategic Planning", "Negotiation", "Financial Modeling", "Competitive Execution"],
@@ -88,7 +88,7 @@ export const ARCHETYPES: Record<ArchetypeId, ArchetypeDefinition> = {
   creative_visionary: {
     id: "creative_visionary",
     title: "The Creative Visionary",
-    badge: "🎨 Interdisciplinary Artist & Designer",
+    badge: "Interdisciplinary Artist & Designer",
     tagline: "Blending aesthetics, storytelling, and human-centered design to redefine culture.",
     description: "You see the world through a lens of possibilities, visual narrative, and human emotion. You bridge technology, philosophy, and creative arts.",
     traits: ["Design Thinking", "Narrative Storytelling", "Visual Aesthetics", "Unconventional Problem Solving"],

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { DollarSign, Check } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { universities } from "@/lib/data/universities";
@@ -82,8 +82,8 @@ export function CostCalculator() {
     <div className="space-y-6">
       <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">💰</span>
+          <div className="flex items-center gap-2.5">
+            <DollarSign size={22} className="text-[#EBAE29]" />
             <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
               {t.calculator.title}
             </h2>
@@ -337,9 +337,13 @@ export function CostCalculator() {
                   : t.calculator.coveredSurplus}
               </span>
               <p className="text-2xl font-extrabold font-mono">
-                {breakdown.gapUsd > 0
-                  ? formatCurrency(breakdown.gapUsd, currency)
-                  : "✓ Fully Covered"}
+                {breakdown.gapUsd > 0 ? (
+                  formatCurrency(breakdown.gapUsd, currency)
+                ) : (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check size={20} /> Fully Covered
+                  </span>
+                )}
               </p>
               <p className="text-[11px] font-mono opacity-80">
                 {breakdown.gapUsd > 0
