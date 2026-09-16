@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "@/lib/store/app-store";
-import { generateRoadmap } from "@/lib/engine/roadmap";
+import { useRoadmap } from "@/lib/store/derived";
 
 export function PomodoroTimer() {
-  const { profile, applications, completedTasks, addFocusTime, ecoMode } = useApp();
+  const { completedTasks, addFocusTime } = useApp();
+  const { roadmap } = useRoadmap();
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<"focus" | "break">("focus");
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
@@ -15,8 +16,7 @@ export function PomodoroTimer() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const roadmapTasks = generateRoadmap(profile, applications);
-  const activeTasks = roadmapTasks.filter((t) => !completedTasks.includes(t.id));
+  const activeTasks = roadmap.levels.flatMap((l) => l.tasks).filter((t) => !completedTasks.includes(t.id));
 
   const totalCycleSeconds = mode === "focus" ? 25 * 60 : 5 * 60;
   const progressPercent = Math.round(((totalCycleSeconds - secondsLeft) / totalCycleSeconds) * 100);
@@ -105,12 +105,14 @@ export function PomodoroTimer() {
 
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => switchMode(mode === "focus" ? "break" : "focus")}
                   className="text-[11px] font-mono text-[#EBAE29] hover:underline cursor-pointer"
                 >
                   Switch to {mode === "focus" ? "Break (5m)" : "Focus (25m)"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsOpen(false)}
                   className="text-xs text-[#F5EED2]/50 hover:text-[#F5EED2] transition-colors cursor-pointer"
                 >
@@ -160,6 +162,7 @@ export function PomodoroTimer() {
 
               <div className="flex items-center justify-center gap-3 pt-1">
                 <button
+                  type="button"
                   onClick={toggleRun}
                   className={`px-6 py-2 rounded-xl font-bold text-xs shadow-lg transition-all cursor-pointer ${
                     isRunning
@@ -170,6 +173,7 @@ export function PomodoroTimer() {
                   {isRunning ? "Pause" : "Start Focus"}
                 </button>
                 <button
+                  type="button"
                   onClick={handleReset}
                   className="px-4 py-2 rounded-xl border border-[#589C80]/30 text-xs text-[#F5EED2]/80 hover:text-[#F5EED2] hover:border-[#589C80] transition-all cursor-pointer"
                 >
@@ -180,6 +184,7 @@ export function PomodoroTimer() {
           </motion.div>
         ) : (
           <motion.button
+            type="button"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={() => setIsOpen(true)}

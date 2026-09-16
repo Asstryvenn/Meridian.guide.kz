@@ -200,7 +200,7 @@ export function MentorChat() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
                   >
-                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor · Claude" : "Rule-based guidance"} />}
+                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor · Gemini" : "Rule-based guidance"} />}
                     {m.content ? <MessageBody content={m.content} /> : <span className={styles.typing} aria-label="Mentor is typing"><i /><i /><i /></span>}
                   </motion.div>
                 ))}

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CLAUDE_MODEL, describeClaudeError, getClaude } from "@/lib/ai/claude";
+import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
 import { ruleBasedMentorReply } from "@/lib/ai/rule-mentor";
 
@@ -13,7 +14,7 @@ const requestSchema = studentStateSchema.extend({
   supportMode: z.boolean().optional(),
 });
 
-const SYSTEM_PROMPT = `You are the LOCUS admissions mentor for high school students applying to universities, often internationally.
+const SYSTEM_PROMPT = `You are the Meridian Guide admissions mentor by team Flaxyss for high school students applying to universities, often internationally.
 
 How to help:
 - Ground every statement in the STUDENT CONTEXT provided below. It contains computed diagnostics, recommendations, admission probability ranges, deadlines and scholarship matches.
@@ -22,7 +23,7 @@ How to help:
 - Be warm, direct and specific. Prefer short paragraphs and compact lists. Write for a 16–18 year old.
 - Finish with exactly one clearly labelled next action on its own line, starting with "Next action:". Prefer the roadmap's next action unless the student's question clearly calls for a different one.`;
 
-const PSYCHOLOGIST_SYSTEM_PROMPT = `You are an empathetic, active-listening AI Counselor and Mental Health Support Mentor using principles from Cognitive Behavioral Therapy (CBT).
+const PSYCHOLOGIST_SYSTEM_PROMPT = `You are an empathetic, active-listening AI Counselor and Mental Health Support Mentor at Meridian Guide by team Flaxyss using principles from Cognitive Behavioral Therapy (CBT).
 
 Counseling Principles:
 - Deeply validate feelings of stress, burnout, anxiety, exhaustion, or fear without any judgment.
@@ -44,6 +45,18 @@ export async function POST(request: Request) {
   const { messages, supportMode, ...state } = parsed.data;
   const context = buildStudentContext(state);
   const lastQuestion = messages[messages.length - 1].content;
+  const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : SYSTEM_PROMPT;
+
+  if (isGeminiConfigured()) {
+    try {
+      const prompt = `STUDENT CONTEXT:\n${JSON.stringify(context, null, 2)}\n\nCONVERSATION HISTORY:\n${messages
+        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+        .join("\n")}\n\nASSISTANT:`;
+      const reply = await callGemini(prompt, activeSystemPrompt);
+      return textResponse(reply, "ai");
+    } catch {}
+  }
+
   const claude = getClaude();
 
   if (!claude) {
@@ -52,8 +65,6 @@ export async function POST(request: Request) {
     }
     return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules");
   }
-
-  const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
   try {
     const stream = claude.beta.messages.stream({

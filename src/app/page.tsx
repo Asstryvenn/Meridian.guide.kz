@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Logo } from "@/components/layout/logo";
 import { rise, stagger } from "@/components/layout/page";
 import { useTheme } from "@/components/theme/theme-provider";
+import { LanguageSelector } from "@/components/i18n/language-selector";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -36,6 +37,7 @@ export default function Landing() {
       <header className={styles.nav}>
         <Logo />
         <div className={styles.navActions}>
+          <LanguageSelector />
           <button type="button" className={styles.themeButton} onClick={toggle} aria-label="Toggle theme">
             <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
@@ -60,7 +62,7 @@ export default function Landing() {
             Find the universities <span className="display">that fit you</span>
           </motion.h1>
           <motion.p variants={rise} className={styles.lede}>
-            LOCUS reads your whole profile — grades, tests, activities, budget and goals — and turns it into a personal shortlist, transparent admission estimates, matched scholarships and a clear next step.
+            Meridian Guide reads your whole profile — grades, tests, activities, budget and goals — and turns it into a personal shortlist, transparent admission estimates, matched scholarships and a clear next step.
           </motion.p>
           <motion.div variants={rise} className={styles.ctaRow}>
             <Button href={primaryHref} size="lg">
@@ -144,7 +146,7 @@ export default function Landing() {
 
       <footer className={styles.footer}>
         <Logo />
-        <span className="faint">Built for LOCUS Startup Hackathon 2026 · Case 2</span>
+        <span className="faint">Meridian Guide · Built by team Flaxyss</span>
       </footer>
     </div>
   );

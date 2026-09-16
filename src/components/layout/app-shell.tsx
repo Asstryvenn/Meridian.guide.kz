@@ -8,23 +8,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { PomodoroTimer } from "@/components/ui/pomodoro-timer";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { useI18n } from "@/components/i18n/i18n-context";
 import { useApp } from "@/lib/store/app-store";
 import { useNotifications } from "@/lib/store/derived";
 import { Logo } from "./logo";
 import styles from "./app-shell.module.css";
-
-const nav: { href: string; label: string; icon: IconName; mobile?: boolean }[] = [
-  { href: "/dashboard", label: "Home", icon: "home", mobile: true },
-  { href: "/diagnostics", label: "Diagnostics", icon: "spark" },
-  { href: "/matches", label: "Matches", icon: "target", mobile: true },
-  { href: "/universities", label: "Explore", icon: "search", mobile: true },
-  { href: "/compare", label: "Compare", icon: "compare" },
-  { href: "/scholarships", label: "Scholarships", icon: "award" },
-  { href: "/professors", label: "Professors", icon: "people" },
-  { href: "/roadmap", label: "Roadmap", icon: "path", mobile: true },
-  { href: "/applications", label: "Applications", icon: "folder" },
-  { href: "/mentor", label: "Mentor", icon: "chat", mobile: true },
-];
 
 function Notifications() {
   const notifications = useNotifications();
@@ -129,6 +118,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const { ecoMode, toggleEcoMode } = useApp();
+  const { t } = useI18n();
+
+  const nav: { href: string; label: string; icon: IconName; mobile?: boolean }[] = [
+    { href: "/dashboard", label: t.nav.home, icon: "home", mobile: true },
+    { href: "/matches", label: t.nav.matches, icon: "target", mobile: true },
+    { href: "/roadmap", label: t.nav.roadmap, icon: "path", mobile: true },
+    { href: "/calendar", label: t.nav.calendar, icon: "calendar", mobile: true },
+    { href: "/interview", label: t.nav.interview, icon: "spark", mobile: true },
+    { href: "/documents", label: t.nav.documents, icon: "folder" },
+    { href: "/calculator", label: t.nav.calculator, icon: "award" },
+    { href: "/universities", label: t.nav.explore, icon: "search" },
+    { href: "/compare", label: t.nav.compare, icon: "compare" },
+    { href: "/scholarships", label: t.nav.scholarships, icon: "award" },
+    { href: "/professors", label: t.nav.professors, icon: "people" },
+    { href: "/applications", label: t.nav.applications, icon: "folder" },
+    { href: "/mentor", label: t.nav.mentor, icon: "chat", mobile: true },
+  ];
 
   return (
     <div className={clsx(styles.shell, ecoMode && "eco-mode")}>
@@ -156,6 +162,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className={styles.topActions}>
+            <LanguageSelector />
             <button
               type="button"
               onClick={toggleEcoMode}
@@ -168,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               title="Toggle Calming Eco Mode"
             >
               <span className="text-sm">{ecoMode ? "🌿" : "🌱"}</span>
-              <span className="hidden sm:inline font-mono">{ecoMode ? "Eco Mode On" : "Eco Mode"}</span>
+              <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
             </button>
             <button type="button" className={styles.iconButton} onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
               <Icon name={theme === "dark" ? "sun" : "moon"} />

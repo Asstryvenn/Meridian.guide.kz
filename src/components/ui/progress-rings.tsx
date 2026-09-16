@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "@/lib/store/app-store";
-import { generateRoadmap } from "@/lib/engine/roadmap";
+import { useRoadmap } from "@/lib/store/derived";
 
 interface ProgressRingsProps {
   className?: string;
 }
 
 export function ProgressRings({ className = "" }: ProgressRingsProps) {
-  const { profile, applications, completedTasks, pomodoroFocusMinutes = 0 } = useApp();
-  const [period, setPeriod] = useState<"weekly" | "monthly">( "weekly" );
+  const { completedTasks, pomodoroFocusMinutes = 0 } = useApp();
+  const { roadmap } = useRoadmap();
+  const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
 
-  const roadmapTasks = generateRoadmap(profile, applications);
-  const totalTasksCount = roadmapTasks.length || 1;
+  const totalTasksCount = roadmap.levels.flatMap((l) => l.tasks).length || 1;
   const completedCount = completedTasks.length;
 
   const mult = period === "weekly" ? 1 : 4;
@@ -57,6 +57,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
 
         <div className="pt-2 flex items-center bg-[#132228] p-1 rounded-xl border border-[#589C80]/30">
           <button
+            type="button"
             onClick={() => setPeriod("weekly")}
             className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               period === "weekly"
@@ -67,6 +68,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
             Weekly Goal
           </button>
           <button
+            type="button"
             onClick={() => setPeriod("monthly")}
             className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               period === "monthly"

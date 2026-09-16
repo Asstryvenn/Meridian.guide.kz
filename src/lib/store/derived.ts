@@ -21,11 +21,11 @@ export function useRecommendations() {
 }
 
 export function useRoadmap() {
-  const { profile, applications, completedTasks } = useApp();
+  const { profile, applications, completedTasks, customRoadmapTasks } = useApp();
   return useMemo(() => {
-    const roadmap = buildRoadmap(profile, applications, completedTasks);
+    const roadmap = buildRoadmap(profile, applications, completedTasks, new Date(), customRoadmapTasks);
     return { roadmap, next: nextAction(roadmap) };
-  }, [profile, applications, completedTasks]);
+  }, [profile, applications, completedTasks, customRoadmapTasks]);
 }
 
 export function useNotifications() {

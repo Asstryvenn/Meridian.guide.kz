@@ -1,4 +1,4 @@
-import type { Application, StudentProfile } from "@/lib/types";
+import type { Application, StudentProfile, VaultDocument } from "@/lib/types";
 
 export const emptyProfile: StudentProfile = {
   fullName: "",
@@ -94,6 +94,49 @@ export const sampleProfile: StudentProfile = {
   careerGoal: "Machine learning engineer working on computer vision, possibly a PhD later",
   gradSchool: "phd",
 };
+
+export const defaultVaultDocuments: VaultDocument[] = [
+  {
+    id: "doc-pass-1",
+    category: "passport",
+    name: "International Passport (Bio-page)",
+    fileName: "passport_scan_valid2028.pdf",
+    fileSize: "2.4 MB",
+    status: "verified",
+    uploadedAt: "2026-09-01",
+  },
+  {
+    id: "doc-inc-1",
+    category: "family_income",
+    name: "Employer Income Certificate (Parents)",
+    fileName: "income_certificate_2025.pdf",
+    fileSize: "1.1 MB",
+    status: "needs_translation",
+    uploadedAt: "2026-09-05",
+    notes: "Requires certified apostilled English translation",
+  },
+  {
+    id: "doc-bank-1",
+    category: "bank_statement",
+    name: "Bank Statement (Last 6 Months)",
+    fileName: "halyk_bank_statement_6m.pdf",
+    fileSize: "3.8 MB",
+    status: "verified",
+    uploadedAt: "2026-09-10",
+  },
+  {
+    id: "doc-tax-1",
+    category: "tax",
+    name: "Annual Tax Return (Form 240 / 250)",
+    status: "missing",
+  },
+  {
+    id: "doc-ins-1",
+    category: "insurance",
+    name: "International Student Health Insurance Clearance",
+    status: "missing",
+  },
+];
 
 export function newApplication(universitySlug: string, scholarshipIds: string[] = []): Application {
   return {

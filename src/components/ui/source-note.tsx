@@ -18,7 +18,7 @@ export function SourceNote({ data, compact }: { data: SourceRef & Partial<Pick<S
           <span className={styles.sep} aria-hidden>·</span>
           <span>Confidence {data.confidence}</span>
           <span className={styles.sep} aria-hidden>·</span>
-          <span>{data.last_verified ? `Verified ${data.last_verified}` : "Not yet verified by LOCUS"}</span>
+          <span>{data.last_verified ? `Verified ${data.last_verified}` : "Not yet verified by Meridian Guide"}</span>
         </>
       )}
       <span className={styles.sep} aria-hidden>·</span>

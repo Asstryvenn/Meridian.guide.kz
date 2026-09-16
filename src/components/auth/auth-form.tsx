@@ -96,7 +96,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </form>
 
         <p className={styles.switch}>
-          {mode === "signup" ? "Already have an account?" : "New to LOCUS?"} <Link href={mode === "signup" ? "/login" : "/signup"}>{mode === "signup" ? "Log in" : "Create an account"}</Link>
+          {mode === "signup" ? "Already have an account?" : "New to Meridian Guide?"} <Link href={mode === "signup" ? "/login" : "/signup"}>{mode === "signup" ? "Log in" : "Create an account"}</Link>
         </p>
 
         {!configured && <p className={styles.demo}>Supabase is not configured, so accounts run in local demo mode and data stays in this browser.</p>}

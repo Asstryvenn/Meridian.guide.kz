@@ -41,6 +41,7 @@ export function buildRoadmap(
   applications: Application[],
   completedIds: string[],
   now = new Date(),
+  customTasks: RoadmapTask[] = [],
 ): Roadmap {
   const completed = new Set(completedIds);
   const tasks: RoadmapTask[] = [];
@@ -113,6 +114,10 @@ export function buildRoadmap(
     const next = upcomingDeadlines(university.deadlines, now)[0];
     if (!next) continue;
     tasks.push(task({ id: `submit-${university.slug}`, title: `Submit ${university.shortName} application`, detail: `${next.deadline.label}${next.deadline.status === "needs_verification" ? " · date needs verification" : ""}`, kind: "deadline", level: 7, xp: 100, dueDate: toIsoDate(next.date), universitySlug: university.slug }, completed));
+  }
+
+  for (const ct of customTasks) {
+    tasks.push(task(ct, completed));
   }
 
   const finalTasks = tasks.map((t) => ({ ...t, done: completed.has(t.id) }));

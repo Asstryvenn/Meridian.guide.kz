@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { ProgressRing } from "@/components/ui/progress";
+import { ActivityRecommender } from "@/components/activities/activity-recommender";
+import { ChanceBoostModal } from "@/components/diploma/chance-boost-modal";
 import { daysUntil, formatDate } from "@/lib/engine/deadlines";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
@@ -30,6 +32,7 @@ export default function RoadmapPage() {
   const { roadmap, next } = useRoadmap();
   const [openLevel, setOpenLevel] = useState<number | null>(null);
   const [celebrate, setCelebrate] = useState<string | null>(null);
+  const [showChanceBoostModal, setShowChanceBoostModal] = useState(false);
   const expanded = openLevel ?? roadmap.currentLevel;
 
   function complete(task: RoadmapTask) {
@@ -47,7 +50,7 @@ export default function RoadmapPage() {
     <Page>
       {ecoMode && (
         <Reveal>
-          <div className="p-6 mb-6 rounded-2xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-2">
+          <div className="p-6 mb-6 rounded-3xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-2">
             <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
               <span>🌿</span> Burnout Eco-Mode Active
             </div>
@@ -66,12 +69,27 @@ export default function RoadmapPage() {
         title="Your path, level by level"
         description="Finish at least half of a level to unlock the next. Dates are suggestions counted back from your earliest deadline."
         actions={
-          applications.length === 0 ? (
-            <Button href="/matches" variant="secondary">
-              Add universities to personalise
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setShowChanceBoostModal(true)}
+              className="cursor-pointer"
+            >
+              <span>✨</span>
+              <span>Upload Achievement</span>
             </Button>
-          ) : undefined
+            {applications.length === 0 && (
+              <Button href="/matches" variant="quiet">
+                Add universities
+              </Button>
+            )}
+          </div>
         }
+      />
+
+      <ChanceBoostModal
+        isOpen={showChanceBoostModal}
+        onClose={() => setShowChanceBoostModal(false)}
       />
 
       <Reveal>
@@ -101,98 +119,118 @@ export default function RoadmapPage() {
         </div>
       </Reveal>
 
-      <ol className={styles.path}>
-        {roadmap.levels.map((level, index) => {
-          const done = level.completed === level.tasks.length;
-          const current = level.level === roadmap.currentLevel;
-          const state = level.locked ? "locked" : done ? "done" : current ? "current" : "open";
-          const isOpen = expanded === level.level;
-          return (
-            <li key={level.level} className={clsx(styles.level, styles[`offset${index % 4}`])}>
-              {index > 0 && <span className={clsx(styles.connector, !level.locked && styles.connectorActive)} aria-hidden />}
-              <motion.button
-                type="button"
-                className={clsx(styles.node, styles[state])}
-                onClick={() => setOpenLevel(isOpen ? -1 : level.level)}
-                aria-expanded={isOpen}
-                whileHover={{ scale: level.locked ? 1 : 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                animate={current ? { y: [0, -5, 0] } : { y: 0 }}
-                transition={current ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" } : { type: "spring" }}
-              >
-                <ProgressRing value={level.completed / level.tasks.length} size={96} stroke={7} tone={done ? "green" : "amber"} label={`Level ${level.level}: ${level.completed} of ${level.tasks.length} tasks`}>
-                  <span className={styles.nodeInner}>{level.locked ? <Icon name="lock" size={24} /> : done ? <Icon name="check" size={28} /> : level.level}</span>
-                </ProgressRing>
-              </motion.button>
-              <div className={styles.levelText}>
-                <span className={styles.levelTitle}>{level.title}</span>
-                <span className="faint">
-                  {level.subtitle} · {level.completed}/{level.tasks.length}
-                </span>
+      {ecoMode ? (
+        <div className="my-6 space-y-3">
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
+            Today&apos;s 2 Critical Actions
+          </h3>
+          {ecoCriticalTasks.map((t) => (
+            <div
+              key={t.id}
+              className="p-5 rounded-2xl bg-[#132228]/90 border border-[#589C80]/40 flex items-center justify-between gap-4"
+            >
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-[#F5EED2]">{t.title}</p>
+                <p className="text-xs text-[#F5EED2]/70">{t.detail}</p>
               </div>
-
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    className={`glass ${styles.tasks}`}
-                    initial={{ opacity: 0, height: 0, y: -8 }}
-                    animate={{ opacity: 1, height: "auto", y: 0 }}
-                    exit={{ opacity: 0, height: 0, y: -8 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 30 }}
-                  >
-                    {level.locked && <p className={styles.lockedNote}>Complete half of the previous level to unlock these tasks.</p>}
-                    <ul className={styles.taskList}>
-                      {level.tasks.map((task) => {
-                        const days = task.dueDate ? daysUntil(new Date(`${task.dueDate}T00:00:00`)) : null;
-                        return (
-                          <li key={task.id} className={clsx(styles.task, task.done && styles.taskDone, next?.task.id === task.id && styles.taskNext)}>
-                            <motion.button
-                              type="button"
-                              className={styles.check}
-                              disabled={level.locked}
-                              aria-pressed={task.done}
-                              aria-label={task.done ? `Mark "${task.title}" as not done` : `Complete "${task.title}"`}
-                              onClick={() => complete(task)}
-                              animate={celebrate === task.id ? { scale: [1, 1.35, 1] } : { scale: 1 }}
-                              transition={{ duration: 0.45 }}
-                            >
-                              {task.done && <Icon name="check" size={16} />}
-                            </motion.button>
-                            <div className={styles.taskBody}>
-                              <span className={styles.taskTitle}>{task.title}</span>
-                              <span className={styles.taskDetail}>{task.detail}</span>
-                              <span className={styles.taskMeta}>
-                                <Badge tone="neutral">{kindLabel[task.kind]}</Badge>
-                                {task.dueDate && (
-                                  <span className={clsx(days !== null && days < 14 && !task.done && styles.soon)}>
-                                    {formatDate(task.dueDate)}
-                                    {days !== null && !task.done ? ` · ${days < 0 ? `${-days} days overdue` : `${days} days`}` : ""}
-                                  </span>
-                                )}
-                                {task.universitySlug && <Link href={`/applications/${task.universitySlug}`}>Open workspace</Link>}
+              <Button onClick={() => complete(t)} size="sm">
+                Mark as Done
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <ol className={styles.levels}>
+          {roadmap.levels.map((level) => {
+            const isOpen = expanded === level.level;
+            const completeCount = level.tasks.filter((t) => t.done).length;
+            const progress = level.tasks.length ? completeCount / level.tasks.length : 0;
+            return (
+              <li key={level.level} className={clsx(`glass ${styles.levelCard}`, level.locked && styles.locked, isOpen && styles.open)}>
+                <header className={styles.levelHeader} onClick={() => !level.locked && setOpenLevel(isOpen ? null : level.level)}>
+                  <div className={styles.levelMeta}>
+                    <span className={clsx(styles.levelNumber, progress >= 0.5 && styles.levelNumberPassing)}>Level {level.level}</span>
+                    <span className={styles.levelTitle}>{level.title}</span>
+                    <span className={styles.levelSubtitle}>{level.subtitle}</span>
+                  </div>
+                  <div className={styles.levelRight}>
+                    <span className="faint tabular">
+                      {completeCount}/{level.tasks.length}
+                    </span>
+                    {level.locked ? (
+                      <span className={styles.lockBadge}>
+                        <Icon name="lock" size={14} /> Locked
+                      </span>
+                    ) : (
+                      <button type="button" className={styles.chevron} aria-label={isOpen ? "Collapse level" : "Expand level"}>
+                        <Icon name={isOpen ? "chevron-up" : "chevron-down"} size={16} />
+                      </button>
+                    )}
+                  </div>
+                </header>
+                <AnimatePresence initial={false}>
+                  {isOpen && !level.locked && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ type: "spring", stiffness: 360, damping: 32 }}>
+                      <ul className={styles.tasks}>
+                        {level.tasks.map((task) => {
+                          const now = new Date();
+                          const days = task.dueDate ? daysUntil(new Date(`${task.dueDate}T00:00:00`), now) : null;
+                          return (
+                            <li key={task.id} className={clsx(styles.task, task.done && styles.taskDone)}>
+                              <motion.button
+                                type="button"
+                                className={styles.check}
+                                disabled={level.locked}
+                                aria-pressed={task.done}
+                                aria-label={task.done ? `Mark "${task.title}" as not done` : `Complete "${task.title}"`}
+                                onClick={() => complete(task)}
+                                animate={celebrate === task.id ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+                                transition={{ duration: 0.45 }}
+                              >
+                                {task.done && <Icon name="check" size={16} />}
+                              </motion.button>
+                              <div className={styles.taskBody}>
+                                <span className={styles.taskTitle}>{task.title}</span>
+                                <span className={styles.taskDetail}>{task.detail}</span>
+                                <span className={styles.taskMeta}>
+                                  <Badge tone="neutral">{kindLabel[task.kind]}</Badge>
+                                  {task.dueDate && (
+                                    <span className={clsx(days !== null && days < 14 && !task.done && styles.soon)}>
+                                      {formatDate(task.dueDate)}
+                                      {days !== null && !task.done ? ` · ${days < 0 ? `${-days} days overdue` : `${days} days`}` : ""}
+                                    </span>
+                                  )}
+                                  {task.universitySlug && <Link href={`/applications/${task.universitySlug}`}>Open workspace</Link>}
+                                </span>
+                              </div>
+                              <span className={styles.xp}>
+                                +{task.xp}
+                                <AnimatePresence>
+                                  {celebrate === task.id && (
+                                    <motion.span className={styles.xpFloat} initial={{ y: 0, opacity: 1 }} animate={{ y: -28, opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}>
+                                      +{task.xp} XP
+                                    </motion.span>
+                                  )}
+                                </AnimatePresence>
                               </span>
-                            </div>
-                            <span className={styles.xp}>
-                              +{task.xp}
-                              <AnimatePresence>
-                                {celebrate === task.id && (
-                                  <motion.span className={styles.xpFloat} initial={{ y: 0, opacity: 1 }} animate={{ y: -28, opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}>
-                                    +{task.xp} XP
-                                  </motion.span>
-                                )}
-                              </AnimatePresence>
-                            </span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </li>
-          );
-        })}
-      </ol>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {!ecoMode && (
+        <div className="my-10">
+          <ActivityRecommender />
+        </div>
+      )}
     </Page>
   );
 }
