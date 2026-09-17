@@ -22,6 +22,8 @@ create table if not exists public.profiles (
   size text not null default 'any',
   career_goal text,
   grad_school text not null default 'undecided',
+  archetype text,
+  pomodoro_minutes integer default 0,
   onboarded boolean not null default false,
   updated_at timestamptz not null default now()
 );
@@ -109,6 +111,34 @@ create table if not exists public.tasks (
   primary key (user_id, task_id)
 );
 
+create table if not exists public.documents (
+  id text not null,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  category text not null,
+  name text not null,
+  file_name text,
+  file_size text,
+  status text not null default 'missing',
+  uploaded_at timestamptz default now(),
+  notes text,
+  primary key (user_id, id)
+);
+
+create table if not exists public.roadmap_tasks (
+  id text not null,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  title text not null,
+  detail text not null default '',
+  kind text not null default 'activity',
+  level smallint not null default 1,
+  xp smallint not null default 100,
+  due_date date,
+  university_slug text,
+  done boolean not null default false,
+  created_at timestamptz not null default now(),
+  primary key (user_id, id)
+);
+
 alter table public.profiles enable row level security;
 alter table public.academic_records enable row level security;
 alter table public.activities enable row level security;
@@ -117,12 +147,38 @@ alter table public.tasks enable row level security;
 alter table public.universities enable row level security;
 alter table public.scholarships enable row level security;
 alter table public.professors enable row level security;
+alter table public.documents enable row level security;
+alter table public.roadmap_tasks enable row level security;
 
 create policy "own profile" on public.profiles for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own academic record" on public.academic_records for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own activities" on public.activities for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own applications" on public.applications for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own tasks" on public.tasks for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own documents" on public.documents for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own roadmap_tasks" on public.roadmap_tasks for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "public universities" on public.universities for select using (true);
 create policy "public scholarships" on public.scholarships for select using (true);
 create policy "public professors" on public.professors for select using (true);
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (user_id, full_name, onboarded)
+  values (new.id, new.raw_user_meta_data->>'full_name', false)
+  on conflict (user_id) do nothing;
+
+  insert into public.academic_records (user_id)
+  values (new.id)
+  on conflict (user_id) do nothing;
+
+  return new;
+end;
+$$;
+
+create or replace trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();

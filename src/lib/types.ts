@@ -58,6 +58,8 @@ export interface Activity {
   hoursPerWeek: number;
 }
 
+export type ArchetypeId = "innovator" | "researcher" | "community_builder" | "strategist" | "creative_visionary";
+
 export interface StudentProfile {
   fullName: string;
   country: string;
@@ -89,6 +91,8 @@ export interface StudentProfile {
   size: "small" | "medium" | "large" | "any";
   careerGoal: string;
   gradSchool: "phd" | "masters" | "undecided" | "none";
+  archetype?: ArchetypeId;
+  pomodoroMinutes?: number;
 }
 
 export type Tier = "Dream" | "Target" | "Safety";
@@ -138,6 +142,11 @@ export interface University {
   campusLife: string;
   careerOutcomes: Sourced<string>;
   scholarshipIds: string[];
+  housing_cost?: number;
+  insurance_cost?: number;
+  visa_fees?: number;
+  food_estimate?: number;
+  flight_estimate?: number;
 }
 
 export interface Scholarship {
@@ -205,3 +214,58 @@ export interface Application {
   notes: string;
   addedAt: string;
 }
+
+export type DocumentCategory =
+  | "family_income"
+  | "tax"
+  | "insurance"
+  | "bank_statement"
+  | "passport";
+
+export type DocumentStatus = "verified" | "missing" | "needs_translation";
+
+export interface VaultDocument {
+  id: string;
+  category: DocumentCategory;
+  name: string;
+  fileName?: string;
+  fileSize?: string;
+  status: DocumentStatus;
+  uploadedAt?: string;
+  notes?: string;
+}
+
+export interface InterviewQuestion {
+  id: string;
+  university: string;
+  category: "academic" | "leadership" | "personal" | "situational";
+  question: string;
+  tips: string[];
+}
+
+export interface InterviewFeedback {
+  overallScore: number;
+  cadenceScore: number;
+  clarityScore: number;
+  poiseScore: number;
+  contentScore: number;
+  strengths: string[];
+  improvements: string[];
+  qualitativeSummary: string;
+}
+
+export interface RecommendedActivity {
+  id: string;
+  title: string;
+  category: ActivityCategory;
+  field: FieldOfStudy;
+  role: string;
+  description: string;
+  impactPotential: "High" | "Very High" | "Elite";
+  level: ActivityLevel;
+  estimatedHoursPerWeek: number;
+  xpReward: number;
+  roadmapTaskTitle: string;
+}
+
+export type Locale = "en" | "kk" | "ru";

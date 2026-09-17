@@ -66,7 +66,7 @@ export async function signInWithEmail(email: string, password: string): Promise<
 
 export async function signInWithGoogle(next = "/dashboard"): Promise<AuthResult> {
   const supabase = getSupabase();
-  if (!supabase) return { user: localUser("demo.student@locus.local", "google"), error: null };
+  if (!supabase) return { user: localUser("demo.student@meridian.local", "google"), error: null };
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { redirectTo: callbackUrl(next), queryParams: { prompt: "select_account" } },

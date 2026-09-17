@@ -366,3 +366,84 @@
     display: none;
   }
 }
+
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+}
+
+.levelCard {
+  padding: 4px;
+  overflow: hidden;
+}
+
+.levelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.levelMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.levelNumber {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.levelNumberPassing {
+  color: var(--green);
+}
+
+.levelSubtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.levelRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.lockBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chevron {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.levelCard .tasks {
+  margin-top: 0;
+  padding: 0 4px 4px;
+  list-style: none;
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+}

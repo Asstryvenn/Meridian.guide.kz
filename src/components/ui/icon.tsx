@@ -24,6 +24,9 @@ const paths = {
   external: "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
   send: "M4 12 20 4l-4 16-4-7z",
   grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
+  calendar: "M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V10h14v10ZM5 8V6h14v2H5Z",
+  "chevron-up": "m18 15-6-6-6 6",
+  "chevron-down": "m6 9 6 6 6-6",
 } as const;
 
 export type IconName = keyof typeof paths;

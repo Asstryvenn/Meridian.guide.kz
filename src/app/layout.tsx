@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter, Manrope } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import { MotionProvider } from "@/components/theme/motion-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { ThemeProvider, themeBootScript } from "@/components/theme/theme-provider";
 import { AppProvider } from "@/lib/store/app-store";
+import { I18nProvider } from "@/components/i18n/i18n-context";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter", display: "swap" });
-const manrope = Manrope({ subsets: ["latin", "cyrillic"], variable: "--font-manrope", display: "swap" });
-const instrument = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument", display: "swap" });
+const montserrat = Montserrat({ subsets: ["latin", "cyrillic"], weight: ["400", "500", "600", "700", "800"], variable: "--font-montserrat", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "LOCUS — Find the universities that fit you",
-  description: "Personal university navigation: portfolio diagnostics, Dream/Target/Safety matching, admission estimates, scholarships and a step-by-step application roadmap.",
+  title: "Meridian Guide",
+  description: "Personal university admissions guidance by team Flaxyss: portfolio diagnostics, Dream/Target/Safety matching, admission estimates, document vault, interview simulator, and step-by-step application roadmap.",
 };
 
 export const viewport: Viewport = {
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable} ${instrument.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
@@ -35,7 +35,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider>
           <MotionProvider>
             <ToastProvider>
-              <AppProvider>{children}</AppProvider>
+              <AppProvider>
+                <I18nProvider>{children}</I18nProvider>
+              </AppProvider>
             </ToastProvider>
           </MotionProvider>
         </ThemeProvider>

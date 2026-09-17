@@ -1,16 +1,19 @@
-# LOCUS — University Navigator
+# Meridian Guide — Production University Admissions Platform
 
-Personal university discovery and admissions guidance for high school students. Built for LOCUS Startup Hackathon 2026, Case 2.
+Built by team **Flaxyss**, **Meridian Guide** is a full-featured, localized university admissions platform designed for high school students.
 
-A student completes an eight-step diagnostic profile and gets:
+## Features & Modules
 
-- **Portfolio diagnostics** across seven dimensions, with plain-language explanations
-- **Dream / Target / Safety recommendations** with match scores, financial fit, "why it fits" and "main gap"
-- **Admission estimates** as ranges with confidence, positive and negative factors, and stated assumptions
-- **Natural-language catalog search** that turns a sentence into editable filters
-- **University profiles, side-by-side comparison, scholarship matching and professor discovery**
-- **A gamified roadmap** with levels, XP and locked tasks, plus one clearly highlighted next action
-- **An application workspace** per university, a context-aware AI mentor, and low-noise notifications
+- **Trilingual Native Localization (EN / KZ / RU)**: Full UI, onboarding, and mentor response localization across English, Kazakh, and Russian.
+- **Major-Specific Extracurricular Recommender**: Activity recommendation engine targeting gaps in CS, AI, Economics, Business, Medicine, and Engineering with 1-Click Add to Roadmap.
+- **Deadline Calendar & Smart Notifications**: Interactive calendar tracking application cutoffs, standard exams (SAT, IELTS, TOEFL, ACT), and scholarship windows with proactive alerts.
+- **AI Video Interview Simulator**: Live camera & microphone mock interview module with real-time speech cadence (WPM), audio clarity, and stress/nervousness detection, evaluated by Google Gemini API.
+- **Financial & Legal Document Sorting Wizard**: Automated Document Vault workspace sorting files into Family Income, Tax, Health Insurance, Bank Statements, and Passports with compliance status badges.
+- **Chance Boost Diploma Upload Modal**: Gamified celebration popup when uploading certificates/diplomas with multi-color confetti and dynamic admission probability boost.
+- **True Cost Calculator (Expanded)**: Out-of-pocket financial forecasting for tuition, housing, health insurance, visa fees, air travel, and living expenses with multi-currency support ($ USD, ₸ KZT, € EUR, £ GBP) and animated SVG breakdown charts.
+- **Pomodoro Focus Timer & Apple Fitness Progress Rings**: Floating focus timer tied directly to roadmap tasks and concentric SVG activity rings for tasks, focus hours, and milestones.
+- **AI Psychologist & Burnout Eco-Mode**: Empathetic CBT-grounded counseling in the AI Mentor alongside a global Eco-Mode toggle that mutes contrast, reduces stress, and provides box breathing guidance.
+- **Google Gemini API & Supabase Integration**: Deep AI intelligence via `@google/genai` and cloud persistence via Supabase Postgres with Row Level Security.
 
 ## Stack
 
@@ -19,12 +22,12 @@ A student completes an eight-step diagnostic profile and gets:
 | App | Next.js 16 (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS v4 base layer + CSS Modules, Framer Motion |
 | Auth and data | Supabase (email and Google auth, Postgres with row-level security) |
-| AI | OpenAI (`OPENAI_MODEL`, default `gpt-5.4-mini`) for the mentor, search parsing, diagnostic narrative and document import |
+| AI | Google Gemini (`GEMINI_API_KEY`, used first when set) and OpenAI (`OPENAI_MODEL`, default `gpt-5.4-mini`) for the mentor, search parsing, diagnostic narrative and document import |
 | University directory | 10,000+ universities from an open dataset or your own API, seeded into Supabase |
 | ML | Python + scikit-learn logistic regression, exported to JSON and scored in TypeScript |
 | Deploy | Vercel |
 
-## Getting started
+## Getting Started
 
 ```bash
 npm install
@@ -44,6 +47,7 @@ The app runs without any keys:
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | Enables real accounts and cloud sync |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Used by the seeding script; never expose it to the browser |
+| `GEMINI_API_KEY` | Google Gemini for the mentor and AI modules; tried before OpenAI |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Enables AI mentor, natural-language search, diagnostic narratives and document import |
 | `UNIVERSITIES_SOURCE_URL`, `UNIVERSITIES_SOURCE_NAME`, `UNIVERSITIES_API_KEY` | Optional custom university API (Bearer auth, array or paginated `data`/`results` + `next`) |
 

@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/icon";
 import { ProgressRing } from "@/components/ui/progress";
 import { SourcedValue, SourceNote } from "@/components/ui/source-note";
 import { PredictionPanel } from "@/components/university/prediction-panel";
+import { TrueCostCalculator } from "@/components/university/true-cost-calculator";
 import { TierBadge } from "@/components/university/tier";
 import { professors } from "@/lib/data/professors";
 import { getScholarship } from "@/lib/data/scholarships";
@@ -179,6 +180,13 @@ export default function UniversityProfile() {
             <Fact label="Need-based aid" source={university.needBasedAidIntl}>
               <SourcedValue data={university.needBasedAidIntl} format={(v) => aidCopy[v]} />
             </Fact>
+          </div>
+          <div className="pt-4">
+            <TrueCostCalculator
+              university={university}
+              userCountry={profile.country || "Kazakhstan"}
+              userBudgetUsd={profile.annualBudgetUsd || 30000}
+            />
           </div>
           {university.scholarshipIds.length > 0 ? (
             <ul className={styles.scholarships}>

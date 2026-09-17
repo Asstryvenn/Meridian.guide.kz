@@ -63,7 +63,7 @@ export function Meter({ value, tone = "green", label, range }: MeterProps) {
           className={clsx(styles.fill, styles[tone])}
           initial={{ x: 0, width: 0 }}
           animate={{ x: range[0], width: Math.max(2, range[1] - range[0]) }}
-          transition={{ type: "spring", stiffness: 70, damping: 18 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       ) : (
         <motion.rect
@@ -74,7 +74,7 @@ export function Meter({ value, tone = "green", label, range }: MeterProps) {
           className={clsx(styles.fill, styles[tone])}
           initial={{ width: 0 }}
           animate={{ width: pct }}
-          transition={{ type: "spring", stiffness: 70, damping: 18 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       )}
     </svg>

@@ -125,7 +125,7 @@ export default function WorkspacePage() {
               <span>English minimum</span>
               <SourcedValue data={university.requirements.minIelts} format={(v) => `IELTS ${v.toFixed(1)}`} />
               {minIelts !== null && (
-                <Badge tone={ielts !== null && ielts >= minIelts ? "green" : "danger"}>{ielts === null ? "No test yet" : ielts >= minIelts ? `You: ${ielts.toFixed(1)} ✓` : `You: ${ielts.toFixed(1)}`}</Badge>
+                <Badge tone={ielts !== null && ielts >= minIelts ? "green" : "danger"}>{ielts === null ? "No test yet" : ielts >= minIelts ? `You: ${ielts.toFixed(1)} (Met)` : `You: ${ielts.toFixed(1)}`}</Badge>
               )}
             </div>
           </Card>

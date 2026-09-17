@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
 import { describeAIError, getOpenAI, modelOptions } from "@/lib/ai/openai";
 import { ruleBasedMentorReply } from "@/lib/ai/rule-mentor";
@@ -10,9 +11,10 @@ const requestSchema = studentStateSchema.extend({
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(4000) }))
     .min(1)
     .max(30),
+  supportMode: z.boolean().optional(),
 });
 
-const SYSTEM_PROMPT = `You are the LOCUS admissions mentor for high school students applying to universities, often internationally.
+const SYSTEM_PROMPT = `You are the Meridian Guide admissions mentor by team Flaxyss for high school students applying to universities, often internationally.
 
 How to help:
 - Ground every statement in the STUDENT CONTEXT below. It contains computed diagnostics, recommendations, admission probability ranges, deadlines and scholarship matches.
@@ -21,6 +23,15 @@ How to help:
 - Reply in the same language the student writes in.
 - Be warm, direct and specific. Use short paragraphs and compact bullet lists. Write for a 16–18 year old.
 - Finish with exactly one line that starts with "Next action:". Prefer the roadmap's next action unless the question clearly calls for a different one.`;
+
+const PSYCHOLOGIST_SYSTEM_PROMPT = `You are an empathetic, active-listening AI Counselor and Mental Health Support Mentor at Meridian Guide by team Flaxyss using principles from Cognitive Behavioral Therapy (CBT).
+
+Counseling Principles:
+- Deeply validate feelings of stress, burnout, anxiety, exhaustion, or fear without any judgment.
+- Reflect the student's emotions warmheartedly before offering gentle perspective.
+- Strictly DO NOT give aggressive to-do lists, task demands, or pressuring action items.
+- Focus on self-compassion, emotional grounding, taking pauses, and small achievable steps.
+- Provide a comforting, warm, and safe space for the student to vent.`;
 
 function textResponse(body: ReadableStream<Uint8Array> | string, source: "ai" | "rules", notice?: string) {
   const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8", "X-Guidance-Source": source, "Cache-Control": "no-store" };
@@ -32,19 +43,33 @@ export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
 
-  const { messages, ...state } = parsed.data;
+  const { messages, supportMode, ...state } = parsed.data;
   const context = buildStudentContext(state);
   const lastQuestion = messages[messages.length - 1].content;
-  const openai = getOpenAI();
+  const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const fallback = supportMode
+    ? "I hear how much pressure you're carrying right now. It is completely valid to feel exhausted or overwhelmed by admissions. Take a deep breath — you are doing better than you think, and it's okay to rest."
+    : ruleBasedMentorReply(lastQuestion, context);
 
-  if (!openai) return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules");
+  if (isGeminiConfigured()) {
+    try {
+      const prompt = `STUDENT CONTEXT:\n${JSON.stringify(context, null, 2)}\n\nCONVERSATION HISTORY:\n${messages
+        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+        .join("\n")}\n\nASSISTANT:`;
+      const reply = await callGemini(prompt, activeSystemPrompt);
+      return textResponse(reply, "ai");
+    } catch {}
+  }
+
+  const openai = getOpenAI();
+  if (!openai) return textResponse(fallback, "rules");
 
   try {
     const stream = await openai.chat.completions.create({
       ...modelOptions("low", 3000),
       stream: true,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: activeSystemPrompt },
         { role: "system", content: `STUDENT CONTEXT\n${JSON.stringify(context)}` },
         ...messages,
       ],
@@ -62,9 +87,9 @@ export async function POST(request: Request) {
               controller.enqueue(encoder.encode(text));
             }
           }
-          if (!sent) controller.enqueue(encoder.encode(ruleBasedMentorReply(lastQuestion, context)));
+          if (!sent) controller.enqueue(encoder.encode(fallback));
         } catch (error) {
-          controller.enqueue(encoder.encode(`\n\n${describeAIError(error)}\n\n${ruleBasedMentorReply(lastQuestion, context)}`));
+          controller.enqueue(encoder.encode(`\n\n${describeAIError(error)}\n\n${fallback}`));
         } finally {
           controller.close();
         }
@@ -76,6 +101,6 @@ export async function POST(request: Request) {
 
     return textResponse(body, "ai");
   } catch (error) {
-    return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules", describeAIError(error));
+    return textResponse(fallback, "rules", describeAIError(error));
   }
 }

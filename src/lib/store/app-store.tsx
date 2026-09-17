@@ -6,10 +6,10 @@ import { getUniversity } from "@/lib/data/universities";
 import { onAuthChange, currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadRemoteState, persistTask, saveRemoteState } from "@/lib/supabase/sync";
-import type { Application, AuthUser, StudentProfile } from "@/lib/types";
-import { emptyProfile, newApplication } from "./defaults";
+import type { ActivityCategory, Application, ArchetypeId, AuthUser, RoadmapTask, StudentProfile, VaultDocument } from "@/lib/types";
+import { defaultVaultDocuments, emptyProfile, newApplication } from "./defaults";
 
-const STORAGE_KEY = "locus:v1";
+const STORAGE_KEY = "meridian:v1";
 const SAVE_DELAY_MS = 900;
 
 interface AppState {
@@ -20,6 +20,10 @@ interface AppState {
   completedTasks: string[];
   dismissedNotifications: string[];
   compare: string[];
+  ecoMode: boolean;
+  pomodoroFocusMinutes: number;
+  documents: VaultDocument[];
+  customRoadmapTasks: RoadmapTask[];
 }
 
 export type SyncStatus = "idle" | "saving" | "saved" | "error";
@@ -38,10 +42,20 @@ interface AppActions {
   removeApplication: (slug: string) => void;
   updateApplication: (slug: string, patch: Partial<Application>) => void;
   setTaskDone: (id: string, done: boolean) => void;
+  toggleTask: (id: string) => void;
   markTask: (id: string) => void;
   dismissNotification: (id: string) => void;
   toggleCompare: (slug: string) => void;
   setCompare: (slugs: string[]) => void;
+  toggleEcoMode: () => void;
+  setEcoMode: (active: boolean) => void;
+  addFocusTime: (minutes: number) => void;
+  setArchetype: (archetype: ArchetypeId) => void;
+  addVaultDocument: (doc: VaultDocument) => void;
+  updateVaultDocument: (id: string, patch: Partial<VaultDocument>) => void;
+  removeVaultDocument: (id: string) => void;
+  addCustomRoadmapTask: (task: RoadmapTask) => void;
+  addAchievementBoost: (title: string, category: ActivityCategory, boostPercent: number) => void;
 }
 
 const initialState: AppState = {
@@ -52,6 +66,10 @@ const initialState: AppState = {
   completedTasks: [],
   dismissedNotifications: [],
   compare: [],
+  ecoMode: false,
+  pomodoroFocusMinutes: 0,
+  documents: defaultVaultDocuments,
+  customRoadmapTasks: [],
 };
 
 const AppContext = createContext<(AppState & AppActions) | null>(null);
@@ -61,7 +79,13 @@ function readLocal(): AppState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState;
     const parsed = JSON.parse(raw) as Partial<AppState>;
-    return { ...initialState, ...parsed, profile: { ...emptyProfile, ...parsed.profile } };
+    return {
+      ...initialState,
+      ...parsed,
+      profile: { ...emptyProfile, ...parsed.profile },
+      documents: parsed.documents && parsed.documents.length > 0 ? parsed.documents : defaultVaultDocuments,
+      customRoadmapTasks: parsed.customRoadmapTasks || [],
+    };
   } catch {
     return initialState;
   }
@@ -219,6 +243,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const markTask = useCallback((id: string) => setTaskDone(id, true), [setTaskDone]);
 
+  const toggleTask = useCallback((id: string) => setTaskDone(id, !stateRef.current.completedTasks.includes(id)), [setTaskDone]);
+
   const dismissNotification = useCallback((id: string) => {
     setState((prev) => ({ ...prev, dismissedNotifications: [...prev.dismissedNotifications, id] }));
   }, []);
@@ -232,6 +258,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setCompare = useCallback((slugs: string[]) => {
     setState((prev) => ({ ...prev, compare: slugs.slice(0, 3) }));
+  }, []);
+
+  const toggleEcoMode = useCallback(() => {
+    setState((prev) => ({ ...prev, ecoMode: !prev.ecoMode }));
+  }, []);
+
+  const setEcoMode = useCallback((active: boolean) => {
+    setState((prev) => ({ ...prev, ecoMode: active }));
+  }, []);
+
+  const addFocusTime = useCallback((minutes: number) => {
+    setState((prev) => ({
+      ...prev,
+      pomodoroFocusMinutes: (prev.pomodoroFocusMinutes || 0) + minutes,
+      profile: {
+        ...prev.profile,
+        pomodoroMinutes: (prev.profile.pomodoroMinutes || 0) + minutes,
+      },
+    }));
+  }, []);
+
+  const setArchetype = useCallback((archetype: ArchetypeId) => {
+    setState((prev) => ({
+      ...prev,
+      profile: { ...prev.profile, archetype },
+    }));
+  }, []);
+
+  const addVaultDocument = useCallback((doc: VaultDocument) => {
+    setState((prev) => ({
+      ...prev,
+      documents: [doc, ...prev.documents],
+    }));
+  }, []);
+
+  const updateVaultDocument = useCallback((id: string, patch: Partial<VaultDocument>) => {
+    setState((prev) => ({
+      ...prev,
+      documents: prev.documents.map((d) => (d.id === id ? { ...d, ...patch } : d)),
+    }));
+  }, []);
+
+  const removeVaultDocument = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      documents: prev.documents.filter((d) => d.id !== id),
+    }));
+  }, []);
+
+  const addCustomRoadmapTask = useCallback((task: RoadmapTask) => {
+    setState((prev) => {
+      if (prev.customRoadmapTasks.some((t) => t.id === task.id)) return prev;
+      return {
+        ...prev,
+        customRoadmapTasks: [task, ...prev.customRoadmapTasks],
+      };
+    });
+  }, []);
+
+  const addAchievementBoost = useCallback((title: string, category: ActivityCategory, boostPercent: number) => {
+    setState((prev) => {
+      const newActivity = {
+        id: `boost-${Date.now()}`,
+        category,
+        title,
+        role: "Awardee / Contributor",
+        level: "national" as const,
+        impact: `Boosted admission probability by +${boostPercent}%`,
+        evidence: "Verified Document",
+        link: "",
+        hoursPerWeek: 4,
+      };
+      return {
+        ...prev,
+        profile: {
+          ...prev.profile,
+          activities: [newActivity, ...prev.profile.activities],
+        },
+      };
+    });
   }, []);
 
   const value = useMemo(
@@ -250,12 +356,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
       removeApplication,
       updateApplication,
       setTaskDone,
+      toggleTask,
       markTask,
       dismissNotification,
       toggleCompare,
       setCompare,
+      toggleEcoMode,
+      setEcoMode,
+      addFocusTime,
+      setArchetype,
+      addVaultDocument,
+      updateVaultDocument,
+      removeVaultDocument,
+      addCustomRoadmapTask,
+      addAchievementBoost,
     }),
-    [state, hydrated, syncStatus, syncError, signIn, signOut, saveNow, updateProfile, replaceProfile, completeOnboarding, addApplication, removeApplication, updateApplication, setTaskDone, markTask, dismissNotification, toggleCompare, setCompare],
+    [
+      state,
+      hydrated,
+      syncStatus,
+      syncError,
+      signIn,
+      signOut,
+      saveNow,
+      updateProfile,
+      replaceProfile,
+      completeOnboarding,
+      addApplication,
+      removeApplication,
+      updateApplication,
+      setTaskDone,
+      toggleTask,
+      markTask,
+      dismissNotification,
+      toggleCompare,
+      setCompare,
+      toggleEcoMode,
+      setEcoMode,
+      addFocusTime,
+      setArchetype,
+      addVaultDocument,
+      updateVaultDocument,
+      removeVaultDocument,
+      addCustomRoadmapTask,
+      addAchievementBoost,
+    ],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

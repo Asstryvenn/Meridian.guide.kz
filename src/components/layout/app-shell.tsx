@@ -2,30 +2,23 @@
 
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
+import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { PomodoroTimer } from "@/components/ui/pomodoro-timer";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { useI18n } from "@/components/i18n/i18n-context";
 import { useApp } from "@/lib/store/app-store";
 import { useNotifications } from "@/lib/store/derived";
 import { Logo } from "./logo";
 import styles from "./app-shell.module.css";
 
-const nav: { href: string; label: string; icon: IconName; mobile?: boolean }[] = [
-  { href: "/dashboard", label: "Home", icon: "home", mobile: true },
-  { href: "/diagnostics", label: "Diagnostics", icon: "spark" },
-  { href: "/matches", label: "Matches", icon: "target", mobile: true },
-  { href: "/universities", label: "Explore", icon: "search", mobile: true },
-  { href: "/compare", label: "Compare", icon: "compare" },
-  { href: "/scholarships", label: "Scholarships", icon: "award" },
-  { href: "/professors", label: "Professors", icon: "people" },
-  { href: "/roadmap", label: "Roadmap", icon: "path", mobile: true },
-  { href: "/applications", label: "Applications", icon: "folder" },
-  { href: "/mentor", label: "Mentor", icon: "chat" },
-];
+type NavItem = { href: string; label: string; icon: IconName; mobile?: boolean };
 
-function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => void; pathname: string }) {
+function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open: boolean; onClose: () => void; pathname: string }) {
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
@@ -62,7 +55,7 @@ function MoreSheet({ open, onClose, pathname }: { open: boolean; onClose: () => 
           >
             <span className={styles.grabber} aria-hidden />
             <nav className={styles.sheetGrid} aria-label="All sections">
-              {nav.map((item) => {
+              {items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link key={item.href} href={item.href} className={clsx(styles.sheetItem, active && styles.sheetItemActive)} onClick={onClose}>
@@ -185,12 +178,30 @@ function UserMenu() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
+  const { ecoMode, toggleEcoMode } = useApp();
+  const { t } = useI18n();
+
+  const nav: NavItem[] = [
+    { href: "/dashboard", label: t.nav.home, icon: "home", mobile: true },
+    { href: "/matches", label: t.nav.matches, icon: "target", mobile: true },
+    { href: "/roadmap", label: t.nav.roadmap, icon: "path", mobile: true },
+    { href: "/calendar", label: t.nav.calendar, icon: "calendar" },
+    { href: "/interview", label: t.nav.interview, icon: "spark" },
+    { href: "/documents", label: t.nav.documents, icon: "folder" },
+    { href: "/calculator", label: t.nav.calculator, icon: "award" },
+    { href: "/universities", label: t.nav.explore, icon: "search" },
+    { href: "/compare", label: t.nav.compare, icon: "compare" },
+    { href: "/scholarships", label: t.nav.scholarships, icon: "award" },
+    { href: "/professors", label: t.nav.professors, icon: "people" },
+    { href: "/applications", label: t.nav.applications, icon: "folder" },
+    { href: "/mentor", label: t.nav.mentor, icon: "chat", mobile: true },
+  ];
   const [moreOpen, setMoreOpen] = useState(false);
   const closeMore = useCallback(() => setMoreOpen(false), []);
   const moreActive = !nav.some((item) => item.mobile && (pathname === item.href || pathname.startsWith(`${item.href}/`)));
 
   return (
-    <div className={styles.shell}>
+    <div className={clsx(styles.shell, ecoMode && "eco-mode")}>
       <aside className={clsx("glass", styles.sidebar)}>
         <Link href="/dashboard" className={styles.brand}>
           <Logo />
@@ -215,6 +226,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className={styles.topActions}>
+            <LanguageSelector />
+            <button
+              type="button"
+              onClick={toggleEcoMode}
+              className={clsx(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer",
+                ecoMode
+                  ? "bg-[#589C80]/30 border-[#589C80] text-[#F5EED2]"
+                  : "bg-[#132228]/40 border-[#589C80]/30 text-[#F5EED2]/70 hover:border-[#589C80] hover:text-[#F5EED2]"
+              )}
+              title="Toggle Calming Eco Mode"
+            >
+              <Leaf size={14} className={ecoMode ? "text-[#589C80]" : "text-[#F5EED2]/70"} />
+              <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
+            </button>
             <button type="button" className={clsx(styles.iconButton, styles.themeToggle)} onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
               <Icon name={theme === "dark" ? "sun" : "moon"} />
             </button>
@@ -244,7 +270,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span>More</span>
         </button>
       </nav>
-      <MoreSheet open={moreOpen} onClose={closeMore} pathname={pathname} />
+      <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
+
+      <PomodoroTimer />
     </div>
   );
 }

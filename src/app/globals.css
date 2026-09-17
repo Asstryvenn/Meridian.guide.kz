@@ -37,8 +37,8 @@
   --blur: 22px;
 
   --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-  --font-heading: var(--font-manrope), var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  --font-display: var(--font-instrument), "New York", Georgia, serif;
+  --font-heading: var(--font-montserrat), var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-montserrat), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -136,10 +136,13 @@
 
   h1,
   h2,
-  h3 {
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading);
-    letter-spacing: -0.03em;
-    line-height: 1.12;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
     font-weight: 700;
     text-wrap: balance;
   }
@@ -230,4 +233,19 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.eco-mode {
+  --bg: #111a1d;
+  --bg-accent-1: rgba(88, 156, 128, 0.08);
+  --bg-accent-2: rgba(19, 34, 40, 0.2);
+  --text: #e2ded0;
+  --text-muted: rgba(226, 222, 208, 0.6);
+  --text-faint: rgba(226, 222, 208, 0.35);
+  --surface: rgba(226, 222, 208, 0.035);
+  --border: rgba(88, 156, 128, 0.15);
+  --amber: #cca13b;
+  --green: #48846c;
+  filter: contrast(0.92) saturate(0.85);
+  transition: all 0.5s ease;
 }

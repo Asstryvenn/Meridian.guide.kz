@@ -8,6 +8,10 @@ export function isOpenAIConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY);
 }
 
+export function getOpenAIApiKey(): string | null {
+  return process.env.OPENAI_API_KEY || null;
+}
+
 export function getOpenAI(): OpenAI | null {
   if (!isOpenAIConfigured()) return null;
   if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 60_000, maxRetries: 2 });
@@ -33,3 +37,5 @@ export function describeAIError(error: unknown): string {
   if (error instanceof OpenAI.APIError) return "The AI service returned an error. Showing rule-based guidance instead.";
   return "AI guidance is unavailable. Showing rule-based guidance instead.";
 }
+
+export const getOpenAIClient = getOpenAI;

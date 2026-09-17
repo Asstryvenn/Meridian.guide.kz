@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { HeartHandshake, MessageSquare, Leaf } from "lucide-react";
 import { Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,13 @@ interface Message {
   source?: "ai" | "rules";
 }
 
-const suggestions = ["What are my real chances at my top matches?", "What should I focus on this month?", "Which scholarships should I apply for?", "Which deadlines are coming up?", "How can I strengthen my weakest area?"];
+const suggestions = [
+  "What are my real chances at my top matches?",
+  "What should I focus on this month?",
+  "Which scholarships should I apply for?",
+  "Which deadlines are coming up?",
+  "How can I strengthen my weakest area?",
+];
 
 function MessageBody({ content }: { content: string }) {
   const blocks = content.split(/\n{2,}/);
@@ -63,6 +70,9 @@ export function MentorChat() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [supportMode, setSupportMode] = useState(false);
+  const [showStressBanner, setShowStressBanner] = useState(false);
+
   const endRef = useRef<HTMLDivElement>(null);
   const asked = useRef(false);
 
@@ -70,10 +80,26 @@ export function MentorChat() {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
+  const checkStressKeywords = (text: string) => {
+    const keywords = ["tired", "burned out", "scared", "overwhelmed", "anxious", "stressed", "exhausted", "panic", "depressed"];
+    const lower = text.toLowerCase();
+    return keywords.some((k) => lower.includes(k));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInput(val);
+    if (!supportMode && checkStressKeywords(val)) {
+      setShowStressBanner(true);
+    }
+  };
+
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, overrideSupport?: boolean) => {
       const question = text.trim();
       if (!question || streaming) return;
+
+      const activeSupport = overrideSupport !== undefined ? overrideSupport : supportMode;
       const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: question };
       const assistantId = crypto.randomUUID();
       const history = [...messages, userMessage];
@@ -83,13 +109,14 @@ export function MentorChat() {
       setNotice(null);
 
       try {
-        const response = await fetch("/api/mentor", {
+        const response = await fetch("/api/ai/mentor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             profile,
             applications,
             completedTasks,
+            supportMode: activeSupport,
             messages: history.slice(-20).map(({ role, content }) => ({ role, content })),
           }),
         });
@@ -113,7 +140,7 @@ export function MentorChat() {
         setStreaming(false);
       }
     },
-    [messages, streaming, profile, applications, completedTasks],
+    [messages, streaming, profile, applications, completedTasks, supportMode],
   );
 
   useEffect(() => {
@@ -129,9 +156,39 @@ export function MentorChat() {
     send(input);
   }
 
+  const enableSupportMode = () => {
+    setSupportMode(true);
+    setShowStressBanner(false);
+  };
+
   return (
     <Page>
-      <PageHeader eyebrow="AI mentor" title="Ask anything about your applications" description="The mentor sees your profile, diagnostics, matches, deadlines and roadmap. It will not invent statistics." />
+      <PageHeader
+        eyebrow="AI mentor"
+        title={supportMode ? "AI Mental Health Counselor (Support / Vent Mode)" : "Ask anything about your applications"}
+        description={
+          supportMode
+            ? "Empathetic, judgment-free psychological support mode focused on emotional grounding and stress validation."
+            : "The mentor sees your profile, diagnostics, matches, deadlines and roadmap. It will not invent statistics."
+        }
+        actions={
+          <Button
+            variant={supportMode ? "primary" : "secondary"}
+            onClick={() => setSupportMode((prev) => !prev)}
+            className="cursor-pointer"
+          >
+            {supportMode ? (
+              <span className="inline-flex items-center gap-1.5">
+                <HeartHandshake size={15} /> Support Mode Active
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5">
+                <MessageSquare size={15} /> Switch to Support / Vent Mode
+              </span>
+            )}
+          </Button>
+        }
+      />
 
       <div className={styles.layout}>
         <Reveal className={styles.chatWrap}>
@@ -158,16 +215,38 @@ export function MentorChat() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
                   >
-                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor · Claude" : "Rule-based guidance"} />}
+                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor" : "Rule-based guidance"} />}
                     {m.content ? <MessageBody content={m.content} /> : <span className={styles.typing} aria-label="Mentor is typing"><i /><i /><i /></span>}
                   </motion.div>
                 ))}
               </AnimatePresence>
               <div ref={endRef} />
             </div>
+            {showStressBanner && !supportMode && (
+              <div className="p-3 mx-4 my-2 rounded-xl bg-[#589C80]/20 border border-[#589C80] flex items-center justify-between gap-3 text-xs text-[#F5EED2]">
+                <span className="inline-flex items-center gap-2">
+                  <Leaf size={14} className="text-[#589C80] shrink-0" />
+                  You sound a bit overwhelmed. Would you like to switch to Support / Vent Mode for empathetic CBT guidance?
+                </span>
+                <button
+                  type="button"
+                  onClick={enableSupportMode}
+                  className="px-3 py-1 rounded-lg bg-[#589C80] text-[#132228] font-bold hover:bg-[#589C80]/90 transition-all cursor-pointer flex-shrink-0"
+                >
+                  Switch to Support Mode
+                </button>
+              </div>
+            )}
             {notice && <p className={styles.notice}>{notice}</p>}
             <form className={styles.composer} onSubmit={onSubmit}>
-              <input className={styles.input} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about chances, essays, scholarships, deadlines…" aria-label="Message the mentor" disabled={streaming} />
+              <input
+                className={styles.input}
+                value={input}
+                onChange={handleInputChange}
+                placeholder={supportMode ? "Express what's on your mind... we're here to listen." : "Ask about chances, essays, scholarships, deadlines…"}
+                aria-label="Message the mentor"
+                disabled={streaming}
+              />
               <Button type="submit" size="md" disabled={streaming || !input.trim()} aria-label="Send">
                 <Icon name="send" size={16} />
               </Button>
