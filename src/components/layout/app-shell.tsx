@@ -192,6 +192,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/dashboard", label: t.nav.home, icon: "home", mobile: true },
     { href: "/matches", label: t.nav.matches, icon: "target", mobile: true },
     { href: "/roadmap", label: t.nav.roadmap, icon: "path", mobile: true },
+    { href: "/essays", label: t.nav.essays, icon: "fileText", mobile: true },
     { href: "/diagnostics", label: t.nav.diagnostics, icon: "spark" },
     { href: "/calendar", label: t.nav.calendar, icon: "calendar" },
     { href: "/interview", label: t.nav.interview, icon: "spark" },
@@ -240,13 +241,36 @@ export function AppShell({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={toggleEcoMode}
                 className={clsx(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer",
-                  ecoMode ? "bg-[#589C80]/30 border-[#589C80] text-ink" : "bg-panel/40 border-[#589C80]/30 text-ink/70 hover:border-[#589C80] hover:text-ink",
+                  "group relative flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-300 cursor-pointer select-none",
+                  ecoMode
+                    ? "bg-[#589C80]/25 border-[#589C80]/60 text-ink shadow-[0_0_12px_rgba(88,156,128,0.25)]"
+                    : "bg-panel/50 border-line text-ink/70 hover:border-[#589C80]/50 hover:text-ink hover:bg-panel",
                 )}
                 title={tx("Toggle Calming Eco Mode")}
               >
-                <Leaf size={14} className={ecoMode ? "text-green-ink" : "text-ink/70"} />
-                <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
+                <div
+                  className={clsx(
+                    "w-4 h-4 rounded-full flex items-center justify-center transition-all duration-300",
+                    ecoMode ? "text-green-ink" : "text-ink/60 group-hover:text-ink"
+                  )}
+                >
+                  <Leaf
+                    size={13}
+                    className={clsx(
+                      "transition-all duration-300",
+                      ecoMode ? "stroke-[#589C80] fill-[#589C80]/40 scale-110" : "stroke-current fill-transparent"
+                    )}
+                  />
+                </div>
+                <span className="hidden sm:inline font-mono text-[11px] tracking-tight">
+                  {ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}
+                </span>
+                <span
+                  className={clsx(
+                    "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                    ecoMode ? "bg-[#589C80] shadow-[0_0_6px_#589C80]" : "bg-ink/20"
+                  )}
+                />
               </button>
               <button type="button" className={clsx(styles.iconButton, styles.themeToggle)} onClick={toggle} aria-label={theme === "dark" ? tx("Switch to light mode") : tx("Switch to dark mode")}>
                 <Icon name={theme === "dark" ? "sun" : "moon"} />

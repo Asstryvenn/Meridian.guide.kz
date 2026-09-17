@@ -6,7 +6,7 @@ import { getUniversity } from "@/lib/data/universities";
 import { onAuthChange, currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadRemoteState, persistTask, saveRemoteState } from "@/lib/supabase/sync";
-import type { ActivityCategory, Application, ArchetypeId, AuthUser, RoadmapTask, StudentProfile, VaultDocument } from "@/lib/types";
+import type { ActivityCategory, Application, ArchetypeId, AuthUser, CareerAssessmentResult, RoadmapTask, StudentProfile, VaultDocument } from "@/lib/types";
 import { defaultVaultDocuments, emptyProfile, newApplication } from "./defaults";
 
 const STORAGE_KEY = "meridian:v1";
@@ -56,6 +56,7 @@ interface AppActions {
   removeVaultDocument: (id: string) => void;
   addCustomRoadmapTask: (task: RoadmapTask) => void;
   addAchievementBoost: (title: string, category: ActivityCategory, boostPercent: number) => void;
+  saveCareerAssessment: (result: CareerAssessmentResult) => void;
 }
 
 const initialState: AppState = {
@@ -286,6 +287,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const saveCareerAssessment = useCallback((result: CareerAssessmentResult) => {
+    setState((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        careerAssessment: result,
+        careerGoal: result.topMatches[0]?.title || prev.profile.careerGoal,
+      },
+    }));
+  }, []);
+
   const addVaultDocument = useCallback((doc: VaultDocument) => {
     setState((prev) => ({
       ...prev,
@@ -370,6 +382,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       removeVaultDocument,
       addCustomRoadmapTask,
       addAchievementBoost,
+      saveCareerAssessment,
     }),
     [
       state,
@@ -400,6 +413,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       removeVaultDocument,
       addCustomRoadmapTask,
       addAchievementBoost,
+      saveCareerAssessment,
     ],
   );
 

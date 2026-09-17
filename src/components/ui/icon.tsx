@@ -28,6 +28,7 @@ const paths = {
   calendar: "M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V10h14v10ZM5 8V6h14v2H5Z",
   "chevron-up": "m18 15-6-6-6 6",
   "chevron-down": "m6 9 6 6 6-6",
+  fileText: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
 } as const;
 
 export type IconName = keyof typeof paths;

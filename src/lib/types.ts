@@ -99,6 +99,7 @@ export interface StudentProfile {
   onlineCertifications?: number | null;
   socialMediaHours?: number | null;
   pomodoroMinutes?: number;
+  careerAssessment?: CareerAssessmentResult;
 }
 
 export type Tier = "Dream" | "Target" | "Safety";
@@ -275,3 +276,62 @@ export interface RecommendedActivity {
 }
 
 export type Locale = "en" | "kk" | "ru";
+
+export interface CareerPathMatch {
+  id: string;
+  title: string;
+  matchPercent: number;
+  matchScore?: number;
+  description: string;
+  foundationalSkills: string[];
+  recommendedMajors: string[];
+}
+
+export interface CareerAssessmentResult {
+  completedAt: string;
+  topMatches: CareerPathMatch[];
+  dominantStrengths: string[];
+  workStyle: string;
+}
+
+export interface SentenceImprovement {
+  original: string;
+  suggested: string;
+  reason: string;
+  category: "clarity" | "impact" | "tone" | "conciseness";
+}
+
+export interface StructuralSectionFeedback {
+  sectionTitle: string;
+  status: "strong" | "needs_work" | "excellent";
+  analysis: string;
+  recommendation: string;
+}
+
+export interface EssayCorpusMetrics {
+  wordCount: number;
+  sentenceCount: number;
+  avgSentenceLength: number;
+  avgWordLength: number;
+  lexicalRichness: number;
+  corpusPercentile: number;
+}
+
+export interface EssayEvaluationResult {
+  id: string;
+  evaluatedAt: string;
+  overallScore: number;
+  percentile: number;
+  scores: {
+    contentDepth: number;
+    storyArc: number;
+    clarityTone: number;
+    competitiveness: number;
+  };
+  metrics: EssayCorpusMetrics;
+  structuralCritique: StructuralSectionFeedback[];
+  sentenceImprovements: SentenceImprovement[];
+  strengths: string[];
+  weaknesses: string[];
+  admissionsVerdict: string;
+}

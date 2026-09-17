@@ -35,17 +35,30 @@ export function PageHeader({
   actions?: ReactNode;
   centered?: boolean;
 }) {
+  if (centered) {
+    return (
+      <motion.header
+        className="w-full flex flex-col items-center justify-center text-center mx-auto pt-2 gap-4"
+        variants={rise}
+      >
+        <div className="flex flex-col items-center justify-center text-center mx-auto w-full max-w-2xl gap-2">
+          {eyebrow && <p className="eyebrow text-center mx-auto">{eyebrow}</p>}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-center mx-auto w-full">{title}</h1>
+          {description && <p className="text-base text-muted text-center mx-auto max-w-xl">{description}</p>}
+        </div>
+        {actions && <div className="flex flex-wrap items-center justify-center gap-2.5 mx-auto">{actions}</div>}
+      </motion.header>
+    );
+  }
+
   return (
-    <motion.header
-      className={`${styles.header} ${centered ? `${styles.headerCentered} text-center mx-auto w-full` : ""}`}
-      variants={rise}
-    >
-      <div className={`${styles.headerText} ${centered ? "text-center mx-auto w-full items-center" : ""}`}>
-        {eyebrow && <p className={`eyebrow ${centered ? "text-center mx-auto" : ""}`}>{eyebrow}</p>}
-        <h1 className={`${styles.title} ${centered ? "text-center mx-auto w-full" : ""}`}>{title}</h1>
-        {description && <p className={`${styles.description} ${centered ? "text-center mx-auto" : ""}`}>{description}</p>}
+    <motion.header className={styles.header} variants={rise}>
+      <div className={styles.headerText}>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+        <h1 className={styles.title}>{title}</h1>
+        {description && <p className={styles.description}>{description}</p>}
       </div>
-      {actions && <div className={`${styles.actions} ${centered ? "justify-center mx-auto w-full" : ""}`}>{actions}</div>}
+      {actions && <div className={styles.actions}>{actions}</div>}
     </motion.header>
   );
 }

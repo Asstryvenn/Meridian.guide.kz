@@ -60,7 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               transition={{ type: "spring", stiffness: 520, damping: 34 }}
             >
               <span className={styles.badge} aria-hidden>
-                {toast.tone === "xp" || toast.tone === "level" ? "★" : <Icon name={toast.tone === "error" ? "close" : "check"} size={16} />}
+                {toast.tone === "xp" || toast.tone === "level" ? <Icon name="spark" size={16} /> : <Icon name={toast.tone === "error" ? "close" : "check"} size={16} />}
               </span>
               <span className={styles.text}>
                 <span className={styles.title}>{toast.title}</span>

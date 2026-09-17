@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Leaf, Sparkles } from "lucide-react";
+import { Compass, Leaf, Sparkles } from "lucide-react";
 import { EmptyState, Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Icon } from "@/components/ui/icon";
 import { Meter, ProgressRing } from "@/components/ui/progress";
 import { ProgressRings } from "@/components/ui/progress-rings";
 import { ArchetypeQuiz } from "@/components/onboarding/archetype-quiz";
+import { CareerAssessmentModal } from "@/components/onboarding/career-assessment-modal";
 import { ActivityRecommender } from "@/components/activities/activity-recommender";
 import { ChanceBoostModal } from "@/components/diploma/chance-boost-modal";
 import { ARCHETYPES } from "@/lib/data/archetype";
@@ -44,8 +45,18 @@ export default function Dashboard() {
   const { roadmap, next } = useRoadmap();
   const notifications = useNotifications();
   const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false);
+  const [showCareerAssessment, setShowCareerAssessment] = useState(false);
   const [showChanceBoostModal, setShowChanceBoostModal] = useState(false);
   const firstName = profile.fullName.split(" ")[0];
+
+  useEffect(() => {
+    if (!profile.careerAssessment) {
+      const timer = setTimeout(() => {
+        setShowCareerAssessment(true);
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [profile.careerAssessment]);
 
   const deadlines = applications
     .map((a) => getUniversity(a.universitySlug))
@@ -118,11 +129,58 @@ export default function Dashboard() {
         onClose={() => setShowChanceBoostModal(false)}
       />
 
+      <CareerAssessmentModal
+        isOpen={showCareerAssessment}
+        onClose={() => setShowCareerAssessment(false)}
+      />
+
       {showArchetypeQuiz && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto overscroll-contain scroll-touch">
           <ArchetypeQuiz onClose={() => setShowArchetypeQuiz(false)} />
         </div>
       )}
+
+      <div className="mb-6 p-5 rounded-3xl bg-panel/80 border border-[#EBAE29]/30 flex flex-col md:flex-row items-center justify-between gap-4 text-ink shadow-sm">
+        <div className="space-y-1 text-center md:text-left">
+          <div className="text-xs font-mono font-bold text-amber-ink uppercase tracking-wider flex items-center justify-center md:justify-start gap-1.5">
+            <Compass size={14} className="text-[#EBAE29]" />
+            <span>{t("Career Guidance & Trajectory")}</span>
+          </div>
+          {profile.careerAssessment ? (
+            <div>
+              <h3 className="text-lg font-extrabold text-ink flex items-center gap-2 justify-center md:justify-start">
+                <span>{profile.careerAssessment.topMatches[0]?.title}</span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#589C80]/20 text-green-ink border border-[#589C80]/40">
+                  {profile.careerAssessment.topMatches[0]?.matchPercent}% {t("Fit")}
+                </span>
+              </h3>
+              <p className="text-xs text-ink/80 max-w-xl">
+                {profile.careerAssessment.topMatches[0]?.description}
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-2 justify-center md:justify-start">
+                {profile.careerAssessment.topMatches[0]?.foundationalSkills.map((skill) => (
+                  <span key={skill} className="px-2 py-0.5 rounded-md text-[10px] font-mono font-medium bg-black/5 dark:bg-white/5 border border-line text-ink/70">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h3 className="text-base font-bold text-ink">{t("Discover Your Best-Fit Career Trajectory")}</h3>
+              <p className="text-xs text-ink/70">{t("Complete a 7-minute assessment to identify high-impact career pathways and required foundational competencies.")}</p>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowCareerAssessment(true)}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#EBAE29] to-[#589C80] text-xs font-bold text-white shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
+        >
+          {profile.careerAssessment ? t("Review Assessment") : t("Start Career Assessment")}
+        </button>
+      </div>
 
       <div className="mb-6 p-5 rounded-3xl bg-panel/80 border border-[#589C80]/30 flex flex-col md:flex-row items-center justify-between gap-4 text-ink">
         <div className="space-y-1 text-center md:text-left">

@@ -16,6 +16,7 @@ export interface Translations {
     interview: string;
     documents: string;
     calculator: string;
+    essays: string;
     ecoMode: string;
     ecoModeOn: string;
   };
@@ -175,6 +176,7 @@ export const translations: Record<Locale, Translations> = {
       interview: "Interview AI",
       documents: "Vault",
       calculator: "Cost Calculator",
+      essays: "Essays",
       ecoMode: "Eco Mode",
       ecoModeOn: "Eco Mode On",
     },
@@ -332,6 +334,7 @@ export const translations: Record<Locale, Translations> = {
       interview: "Сұхбат AI",
       documents: "Құжаттар қоймасы",
       calculator: "Шығын есептегіші",
+      essays: "Эссе",
       ecoMode: "Эко-режим",
       ecoModeOn: "Эко-режим қосулы",
     },
@@ -489,6 +492,7 @@ export const translations: Record<Locale, Translations> = {
       interview: "Интервью AI",
       documents: "Сейф документов",
       calculator: "Калькулятор затрат",
+      essays: "Эссе",
       ecoMode: "Эко-режим",
       ecoModeOn: "Эко-режим включен",
     },
