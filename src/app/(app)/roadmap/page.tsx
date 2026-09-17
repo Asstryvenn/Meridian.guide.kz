@@ -83,7 +83,7 @@ export default function RoadmapPage() {
         title={tx("Roadmap")}
         description={tx("Finish at least half of a level to unlock the next. Dates are suggestions counted back from your earliest deadline.")}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 mx-auto">
             <div className="flex items-center bg-panel p-1 rounded-2xl border border-[#589C80]/30">
               <button
                 type="button"

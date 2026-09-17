@@ -192,7 +192,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/dashboard", label: t.nav.home, icon: "home", mobile: true },
     { href: "/matches", label: t.nav.matches, icon: "target", mobile: true },
     { href: "/roadmap", label: t.nav.roadmap, icon: "path", mobile: true },
-    { href: "/essays", label: t.nav.essays, icon: "fileText", mobile: true },
+    { href: "/mentor", label: t.nav.mentor, icon: "chat", mobile: true },
+    { href: "/essays", label: t.nav.essays, icon: "fileText" },
     { href: "/diagnostics", label: t.nav.diagnostics, icon: "spark" },
     { href: "/calendar", label: t.nav.calendar, icon: "calendar" },
     { href: "/interview", label: t.nav.interview, icon: "spark" },
@@ -203,7 +204,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/scholarships", label: t.nav.scholarships, icon: "award" },
     { href: "/professors", label: t.nav.professors, icon: "people" },
     { href: "/applications", label: t.nav.applications, icon: "folder" },
-    { href: "/mentor", label: t.nav.mentor, icon: "chat", mobile: true },
   ];
   const [moreOpen, setMoreOpen] = useState(false);
   const closeMore = useCallback(() => setMoreOpen(false), []);

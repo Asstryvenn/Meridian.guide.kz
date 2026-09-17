@@ -19,9 +19,9 @@ import { useT } from "@/lib/i18n/use-t";
 import { msg } from "@/lib/i18n/catalog";
 
 const steps = [
-  { title: msg("Diagnose"), body: msg("Eight short steps turn your grades, tests and activities into an honest picture of where you stand.") },
-  { title: msg("Match"), body: msg("Dream, Target and Safety universities ranked by fit, budget and an admission range — never fake precision.") },
-  { title: msg("Act"), body: msg("A level-by-level roadmap and a mentor that always tells you the one thing to do next.") },
+  { id: "diagnose", title: "Diagnose", body: "Eight short steps turn your grades, tests and activities into an honest picture of where you stand." },
+  { id: "match", title: "Match", body: "Dream, Target and Safety universities ranked by fit, budget and an admission range — never fake precision." },
+  { id: "act", title: "Act", body: "A level-by-level roadmap and a mentor that always tells you the one thing to do next." },
 ];
 
 function LandingView() {
@@ -35,14 +35,16 @@ function LandingView() {
     setMounted(true);
   }, []);
 
-  const hasUser = mounted && Boolean(user && typeof user === "object");
+  const hasUser = mounted && hydrated && Boolean(user && typeof user === "object" && (user.id || user.email));
   const isOnboarded = Boolean(onboarded);
 
   useEffect(() => {
-    if (mounted && hydrated && user && router && typeof router.prefetch === "function") {
-      router.prefetch(isOnboarded ? "/dashboard" : "/onboarding");
+    if (mounted && hydrated && hasUser && router && typeof router.prefetch === "function") {
+      try {
+        router.prefetch(isOnboarded ? "/dashboard" : "/onboarding");
+      } catch {}
     }
-  }, [mounted, hydrated, user, isOnboarded, router]);
+  }, [mounted, hydrated, hasUser, isOnboarded, router]);
 
   const primaryHref = hasUser ? (isOnboarded ? "/dashboard" : "/onboarding") : "/signup";
 
@@ -53,21 +55,25 @@ function LandingView() {
         <div className={styles.navActions}>
           <LanguageSelector />
           <button type="button" className={styles.themeButton} onClick={toggle} aria-label={t("Toggle theme")}>
-            <Icon name={mounted && theme === "dark" ? "sun" : "moon"} size={18} />
+            <Icon name={mounted ? (theme === "dark" ? "sun" : "moon") : "moon"} size={18} />
           </button>
-          {hasUser ? (
-            <Button href={primaryHref} size="sm">
-              {t("Open app")}
-            </Button>
+          {mounted && hydrated ? (
+            hasUser ? (
+              <Button href={primaryHref} size="sm">
+                {t("Open app")}
+              </Button>
+            ) : (
+              <>
+                <Button href="/login" variant="ghost" size="sm" className={styles.navLogin}>
+                  {t("Log in")}
+                </Button>
+                <Button href="/signup" size="sm">
+                  {t("Register")}
+                </Button>
+              </>
+            )
           ) : (
-            <>
-              <Button href="/login" variant="ghost" size="sm" className={styles.navLogin}>
-                {t("Log in")}
-              </Button>
-              <Button href="/signup" size="sm">
-                {t("Register")}
-              </Button>
-            </>
+            <div className="w-20 h-8 rounded-xl bg-black/5 dark:bg-white/5 animate-pulse" />
           )}
         </div>
       </header>
@@ -153,7 +159,7 @@ function LandingView() {
 
       <motion.section className={styles.steps} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
         {steps.map((step, index) => (
-          <motion.article key={step.title} variants={rise} className={`glass ${styles.step}`}>
+          <motion.article key={step.id} variants={rise} className={`glass ${styles.step}`}>
             <span className={styles.stepIndex}>0{index + 1}</span>
             <h2 className={styles.stepTitle}>{t(step.title)}</h2>
             <p className="muted">{t(step.body)}</p>

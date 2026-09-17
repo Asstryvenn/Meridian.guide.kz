@@ -3,16 +3,15 @@ import { generateText } from "@/lib/ai/text";
 import { isGeminiConfigured } from "@/lib/ai/gemini";
 import { isOpenAIConfigured } from "@/lib/ai/openai";
 import {
-  calculateCorpusPercentile,
-  extractEssayCorpusMetrics,
-  generateCalibratedFallbackEvaluation,
+  computeStage1MlMetrics,
+  generateHybridFallback,
 } from "@/lib/engine/essay-dataset-corpus";
-import type { EssayEvaluationResult, Locale } from "@/lib/types";
+import type { HybridEssayEvaluationResult, Locale } from "@/lib/types";
 
 export const runtime = "nodejs";
 
 const requestSchema = z.object({
-  essayText: z.string().min(50).max(10000),
+  essayText: z.string().min(50).max(12000),
   prompt: z.string().optional().default("Personal Statement / Admissions Essay"),
   targetUniversity: z.string().optional().default("Selective Global University"),
   locale: z.enum(["en", "kk", "ru"]).optional().default("en"),
@@ -27,85 +26,60 @@ export async function POST(request: Request) {
     }
 
     const { essayText, prompt, targetUniversity, locale } = parsed.data;
-    const metrics = extractEssayCorpusMetrics(essayText);
+    const mlMetrics = computeStage1MlMetrics(essayText);
     const hasAiKey = isOpenAIConfigured() || isGeminiConfigured();
 
     if (!hasAiKey) {
-      const fallback = generateCalibratedFallbackEvaluation(essayText, prompt, targetUniversity, locale as Locale);
-      return Response.json({ result: fallback, source: "corpus_calibrated" });
+      const fallback = generateHybridFallback(essayText, prompt, targetUniversity, locale as Locale);
+      return Response.json({ result: fallback, source: "ml_calibrated" });
     }
 
-    const systemPrompt = `You are a Senior Admissions Dean and admissions essay evaluator at Meridian Guide by team Flaxyss.
-You evaluate undergraduate admissions essays calibrated against a corpus benchmark of 1,002 admitted student essays.
-Statistical corpus benchmarks:
-- Mean Lexical Richness: 0.65 (Top quartile > 0.79)
-- Mean Sentence Length: 9.2 words (optimal dynamic variation: 8-16 words)
-- Mean Admitted Score: 74.5/100 (90th percentile = 85.5/100)
+    const systemPrompt = `You are an Elite Admissions Dean supervising a hybrid Machine Learning admissions evaluation pipeline at Meridian Guide by team Flaxyss.
+You supervise and validate the Stage 1 ML baseline metrics:
+- ML Baseline Score: ${mlMetrics.ml_baseline_score}/100
+- ML Structural Coherence: ${mlMetrics.structural_coherence}/100
+- ML Lexical Density: ${(mlMetrics.lexical_density * 100).toFixed(1)}% (Kaggle admissions dataset baseline: 64.8%)
+- ML Admission Probability: ${mlMetrics.admission_probability}%
+- Word Count: ${mlMetrics.word_count}
+- Avg Sentence Length: ${mlMetrics.avg_sentence_length} words
 
-Evaluate the applicant's essay strictly across these 4 core dimensions (scale 0-100):
-1. Content Depth & Substance (Content Value): authenticity, technical or cognitive depth, avoiding superficial platitudes.
-2. Significance, Impact, and Story Arc: narrative friction, vulnerability, personal stakes, transformational realization.
-3. Clarity, Tone, and Voice: lexical richness, active agency verbs, syntactic cadence, avoiding passive bloat.
-4. Overall Admission Competitiveness: institutional compatibility, distinctiveness among 1,000+ applicants.
+Your mission:
+1. Validate and fine-tune the final score (0–100) based on narrative arc, core impact, distinctiveness, and personal authenticity.
+2. Determine the ml_confidence_match (a percentage score 0–100 indicating alignment with selective admissions standards).
+3. Provide a thorough narrative_evaluation summarizing the candidate's trajectory and depth.
+4. Detail actionable strengths (array of strings).
+5. Detail concrete weaknesses / areas for high-impact improvement (array of strings).
+6. Provide sentence_improvements (array of objects with exact keys: "original", "issue", "suggested").
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {
-  "scores": {
-    "contentDepth": number (1-100),
-    "storyArc": number (1-100),
-    "clarityTone": number (1-100),
-    "competitiveness": number (1-100)
-  },
-  "structuralCritique": [
+  "final_score": number (0-100),
+  "ml_confidence_match": number (0-100),
+  "narrative_evaluation": "string",
+  "strengths": ["string", "string", "string"],
+  "weaknesses": ["string", "string", "string"],
+  "sentence_improvements": [
     {
-      "sectionTitle": "In Media Res Narrative Hook",
-      "status": "strong" | "needs_work" | "excellent",
-      "analysis": "Specific critique of the opening",
-      "recommendation": "Actionable revision advice"
-    },
-    {
-      "sectionTitle": "Intellectual Crucible & Friction",
-      "status": "strong" | "needs_work" | "excellent",
-      "analysis": "Specific critique of the core tension/problem",
-      "recommendation": "Actionable revision advice"
-    },
-    {
-      "sectionTitle": "Epiphany & Skill Metamorphosis",
-      "status": "strong" | "needs_work" | "excellent",
-      "analysis": "Specific critique of the turning point",
-      "recommendation": "Actionable revision advice"
-    },
-    {
-      "sectionTitle": "Forward Vision & Institutional Fit",
-      "status": "strong" | "needs_work" | "excellent",
-      "analysis": "Specific critique of future orientation and fit",
-      "recommendation": "Actionable revision advice"
+      "original": "exact sentence from essay",
+      "issue": "specific reason this sentence is weak, passive, or cliché",
+      "suggested": "punchy active rewrite"
     }
-  ],
-  "sentenceImprovements": [
-    {
-      "original": "exact sentence from the essay needing work",
-      "suggested": "revised punchy rewrite demonstrating active voice and precision",
-      "reason": "precise pedagogical explanation of why this revision is stronger",
-      "category": "clarity" | "impact" | "tone" | "conciseness"
-    }
-  ],
-  "strengths": ["Specific strength 1", "Specific strength 2", "Specific strength 3"],
-  "weaknesses": ["Actionable improvement 1", "Actionable improvement 2", "Actionable improvement 3"],
-  "admissionsVerdict": "Two-sentence conclusive admissions committee appraisal"
+  ]
 }
 
-Language requirement: All analyses, recommendations, reasons, strengths, weaknesses, and verdicts MUST be written in ${locale === "kk" ? "Kazakh" : locale === "ru" ? "Russian" : "English"}.`;
+Language requirement: All narrative_evaluation, strengths, weaknesses, issues, and suggestions MUST be written in ${locale === "kk" ? "Kazakh" : locale === "ru" ? "Russian" : "English"}.`;
 
     const userPrompt = `Target Institution: ${targetUniversity}
 Prompt: ${prompt}
 Applicant Corpus Statistics:
-- Word Count: ${metrics.wordCount}
-- Sentence Count: ${metrics.sentenceCount}
-- Lexical Richness: ${(metrics.lexicalRichness * 100).toFixed(1)}%
-- Avg Sentence Length: ${metrics.avgSentenceLength} words
+- Word Count: ${mlMetrics.word_count}
+- Sentence Count: ${mlMetrics.sentence_count}
+- Lexical Density: ${(mlMetrics.lexical_density * 100).toFixed(1)}%
+- Avg Sentence Length: ${mlMetrics.avg_sentence_length} words
+- Structural Coherence Score: ${mlMetrics.structural_coherence}/100
+- Admission Probability Estimate: ${mlMetrics.admission_probability}%
 
-Applicant Essay:
+Applicant Essay Text:
 "${essayText}"`;
 
     try {
@@ -113,43 +87,26 @@ Applicant Essay:
       const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
       const parsedAi = JSON.parse(cleaned);
 
-      const contentDepth = Number(parsedAi.scores?.contentDepth) || 75;
-      const storyArc = Number(parsedAi.scores?.storyArc) || 75;
-      const clarityTone = Number(parsedAi.scores?.clarityTone) || 75;
-      const competitiveness = Number(parsedAi.scores?.competitiveness) || 75;
+      const final_score = Math.min(100, Math.max(20, Math.round(Number(parsedAi.final_score) || mlMetrics.ml_baseline_score)));
+      const ml_confidence_match = Math.min(100, Math.max(40, Math.round(Number(parsedAi.ml_confidence_match) || 88)));
 
-      const overallScore = Math.round(
-        (contentDepth * 0.3) +
-        (storyArc * 0.3) +
-        (clarityTone * 0.2) +
-        (competitiveness * 0.2)
-      );
-
-      const percentile = calculateCorpusPercentile(Number((overallScore / 10).toFixed(2)));
-
-      const result: EssayEvaluationResult = {
+      const result: HybridEssayEvaluationResult = {
         id: `eval_${Date.now()}`,
         evaluatedAt: new Date().toISOString(),
-        overallScore,
-        percentile,
-        scores: {
-          contentDepth,
-          storyArc,
-          clarityTone,
-          competitiveness,
-        },
-        metrics,
-        structuralCritique: Array.isArray(parsedAi.structuralCritique) ? parsedAi.structuralCritique : [],
-        sentenceImprovements: Array.isArray(parsedAi.sentenceImprovements) ? parsedAi.sentenceImprovements : [],
+        final_score,
+        ml_confidence_match,
+        narrative_evaluation: typeof parsedAi.narrative_evaluation === "string" ? parsedAi.narrative_evaluation : "",
         strengths: Array.isArray(parsedAi.strengths) ? parsedAi.strengths : [],
         weaknesses: Array.isArray(parsedAi.weaknesses) ? parsedAi.weaknesses : [],
-        admissionsVerdict: typeof parsedAi.admissionsVerdict === "string" ? parsedAi.admissionsVerdict : "",
+        sentence_improvements: Array.isArray(parsedAi.sentence_improvements) ? parsedAi.sentence_improvements : [],
+        ml_metrics: mlMetrics,
+        source,
       };
 
       return Response.json({ result, source });
     } catch {
-      const fallback = generateCalibratedFallbackEvaluation(essayText, prompt, targetUniversity, locale as Locale);
-      return Response.json({ result: fallback, source: "corpus_fallback" });
+      const fallback = generateHybridFallback(essayText, prompt, targetUniversity, locale as Locale);
+      return Response.json({ result: fallback, source: "ml_calibrated" });
     }
   } catch {
     return Response.json({ error: "Internal essay evaluation failure" }, { status: 500 });

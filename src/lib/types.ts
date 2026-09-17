@@ -335,3 +335,33 @@ export interface EssayEvaluationResult {
   weaknesses: string[];
   admissionsVerdict: string;
 }
+
+export interface HybridSentenceImprovement {
+  original: string;
+  issue: string;
+  suggested: string;
+}
+
+export interface HybridMlMetrics {
+  admission_probability: number;
+  structural_coherence: number;
+  lexical_density: number;
+  word_count: number;
+  sentence_count: number;
+  avg_sentence_length: number;
+  avg_word_length: number;
+  ml_baseline_score: number;
+}
+
+export interface HybridEssayEvaluationResult {
+  id: string;
+  evaluatedAt: string;
+  final_score: number;
+  ml_confidence_match: number;
+  narrative_evaluation: string;
+  strengths: string[];
+  weaknesses: string[];
+  sentence_improvements: HybridSentenceImprovement[];
+  ml_metrics: HybridMlMetrics;
+  source: "openai" | "gemini" | "ml_calibrated";
+}
