@@ -13,7 +13,7 @@ Built by team **Flaxyss**, **Meridian Guide** is a full-featured, localized univ
 - **True Cost Calculator (Expanded)**: Out-of-pocket financial forecasting for tuition, housing, health insurance, visa fees, air travel, and living expenses with multi-currency support ($ USD, ₸ KZT, € EUR, £ GBP) and animated SVG breakdown charts.
 - **Pomodoro Focus Timer & Apple Fitness Progress Rings**: Floating focus timer tied directly to roadmap tasks and concentric SVG activity rings for tasks, focus hours, and milestones.
 - **AI Psychologist & Burnout Eco-Mode**: Empathetic CBT-grounded counseling in the AI Mentor alongside a global Eco-Mode toggle that mutes contrast, reduces stress, and provides box breathing guidance.
-- **Google Gemini API & Supabase Integration**: Deep AI intelligence via `@google/genai` and cloud persistence via Supabase Postgres with Row Level Security.
+- **OpenAI, Gemini & Supabase Integration**: AI guidance with OpenAI and optional Gemini fallback, plus cloud persistence via Supabase Postgres with Row Level Security.
 
 ## Stack
 
@@ -22,7 +22,7 @@ Built by team **Flaxyss**, **Meridian Guide** is a full-featured, localized univ
 | App | Next.js 16 (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS v4 base layer + CSS Modules, Framer Motion |
 | Auth and data | Supabase (email and Google auth, Postgres with row-level security) |
-| AI | Google Gemini (`GEMINI_API_KEY`, used first when set) and OpenAI (`OPENAI_MODEL`, default `gpt-5.4-mini`) for the mentor, search parsing, diagnostic narrative and document import |
+| AI | OpenAI (`OPENAI_API_KEY`, `OPENAI_MODEL`, default `gpt-5.4-mini`) for the mentor, search, diagnostics, document import, interview feedback, activity ideas and essay help; Gemini is an optional fallback |
 | University directory | 10,000+ universities from an open dataset or your own API, seeded into Supabase |
 | ML | Python + scikit-learn logistic regression, exported to JSON and scored in TypeScript |
 | Deploy | Vercel |
@@ -38,7 +38,7 @@ npm run dev
 The app runs without any keys:
 
 - **No Supabase keys** → accounts run in local demo mode and state is saved in the browser.
-- **No OpenAI key (or no credit)** → the mentor, search and diagnostics fall back to deterministic rule-based logic, and the UI labels them as rule-based.
+- **No working AI key** → the mentor, search and diagnostics fall back to deterministic rule-based logic, and the UI labels them as rule-based.
 - **Empty `university_directory` table** → the directory API reads the open dataset live and caches it in memory.
 
 ### Environment variables
@@ -47,7 +47,7 @@ The app runs without any keys:
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | Enables real accounts and cloud sync |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Used by the seeding script; never expose it to the browser |
-| `GEMINI_API_KEY` | Google Gemini for the mentor and AI modules; tried before OpenAI |
+| `GEMINI_API_KEY` | Optional Google Gemini fallback for AI modules |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | Enables AI mentor, natural-language search, diagnostic narratives and document import |
 | `UNIVERSITIES_SOURCE_URL`, `UNIVERSITIES_SOURCE_NAME`, `UNIVERSITIES_API_KEY` | Optional custom university API (Bearer auth, array or paginated `data`/`results` + `next`) |
 
@@ -105,7 +105,7 @@ src/app/                 routes (landing, auth, onboarding, app pages, API route
 src/components/          UI primitives, layout shell, onboarding, university, mentor
 src/lib/data/            universities, scholarships, professors with source metadata
 src/lib/engine/          diagnostics, prediction, matching, search, roadmap, notifications
-src/lib/ai/              Claude client, student context builder, rule-based mentor
+src/lib/ai/              OpenAI and Gemini clients, student context builder, rule-based mentor
 src/lib/store/           client state, persistence, derived selectors
 src/lib/supabase/        auth and sync
 supabase/schema.sql      relational schema with RLS

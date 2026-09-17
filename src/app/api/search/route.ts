@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   try {
     const completion = await openai.chat.completions.parse({
-      ...modelOptions("minimal", 1500),
+      ...modelOptions("low", 1500),
       response_format: zodResponseFormat(searchFiltersSchema, "search_filters"),
       messages: [
         { role: "system", content: INSTRUCTIONS },

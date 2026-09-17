@@ -1,4 +1,6 @@
-import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
+import { isGeminiConfigured } from "@/lib/ai/gemini";
+import { isOpenAIConfigured } from "@/lib/ai/openai";
+import { generateText } from "@/lib/ai/text";
 import type { InterviewFeedback } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const { action, payload, locale = "en" } = body;
-    const hasKey = isGeminiConfigured();
+    const hasKey = isOpenAIConfigured() || isGeminiConfigured();
 
     if (action === "interview_feedback") {
       const question = payload?.question || "Tell me about yourself.";
@@ -47,10 +49,10 @@ Return ONLY a valid JSON object matching this exact schema:
 Candidate Transcript: "${answer}"`;
 
         try {
-          const raw = await callGemini(prompt, systemPrompt);
-          const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+          const { text, source } = await generateText(prompt, systemPrompt);
+          const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
           const parsed = JSON.parse(cleaned);
-          return Response.json({ feedback: parsed, source: "gemini" });
+          return Response.json({ feedback: parsed, source });
         } catch {
           return Response.json({
             feedback: getFallbackInterviewFeedback(locale),
@@ -91,10 +93,10 @@ Return ONLY a valid JSON array of objects:
         const prompt = `Student Current Activities: ${JSON.stringify(existing)}`;
 
         try {
-          const raw = await callGemini(prompt, systemPrompt);
-          const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+          const { text, source } = await generateText(prompt, systemPrompt);
+          const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
           const parsed = JSON.parse(cleaned);
-          return Response.json({ recommendations: parsed, source: "gemini" });
+          return Response.json({ recommendations: parsed, source });
         } catch {
           return Response.json({
             recommendations: getFallbackRecommendations(field, locale),
@@ -122,11 +124,11 @@ Prompt: ${essayPrompt}
 Candidate context: ${studentInterests}`;
 
         try {
-          const text = await callGemini(
+          const { text, source } = await generateText(
             "Provide the 4-part essay structure: Hook & Context, Intellectual Curiosity, Specific Institutional Alignment, and Future Vision.",
             systemPrompt
           );
-          return Response.json({ outline: text, source: "gemini" });
+          return Response.json({ outline: text, source });
         } catch {
           return Response.json({
             outline: getFallbackEssayOutline(university, essayPrompt, locale),
@@ -150,8 +152,8 @@ Language: ${locale}.
 Validate stress and burnout warmly. Do not issue stressful to-do lists. Focus on emotional grounding and deep self-compassion.`;
 
         try {
-          const text = await callGemini(userMessage, systemPrompt);
-          return Response.json({ reply: text, source: "gemini" });
+          const { text, source } = await generateText(userMessage, systemPrompt);
+          return Response.json({ reply: text, source });
         } catch {
           return Response.json({
             reply: getFallbackPsychologistReply(locale),
@@ -173,8 +175,8 @@ Validate stress and burnout warmly. Do not issue stressful to-do lists. Focus on
         const systemPrompt = `You are an academic advisor at Meridian Guide by Flaxyss.
 Suggest the top 3 best-fitting majors for this student profile in language ${locale}.`;
         try {
-          const text = await callGemini(interests, systemPrompt);
-          return Response.json({ result: text, source: "gemini" });
+          const { text, source } = await generateText(interests, systemPrompt);
+          return Response.json({ result: text, source });
         } catch {
           return Response.json({
             result: `Recommended majors based on profile: Computer Science, Artificial Intelligence, and Data Science.`,

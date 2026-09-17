@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getOpenAIClient, isOpenAIConfigured } from "@/lib/ai/openai";
+import { getOpenAIClient, isOpenAIConfigured, modelOptions } from "@/lib/ai/openai";
 import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
 import { ruleBasedMentorReply } from "@/lib/ai/rule-mentor";
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       const openai = getOpenAIClient();
       if (openai) {
         const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          ...modelOptions("low", 3000),
           stream: true,
           messages: [
             { role: "system", content: `${activeSystemPrompt}\n\nSTUDENT CONTEXT:\n${JSON.stringify(context, null, 2)}` },

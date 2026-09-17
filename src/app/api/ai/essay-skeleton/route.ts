@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getOpenAIClient, isOpenAIConfigured } from "@/lib/ai/openai";
+import { getOpenAIClient, isOpenAIConfigured, modelOptions } from "@/lib/ai/openai";
 import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
 
 export const runtime = "nodejs";
@@ -48,7 +48,7 @@ Provide the 4-part architectural essay skeleton in ${locale === "kk" ? "Kazakh" 
       const openai = getOpenAIClient();
       if (openai) {
         const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          ...modelOptions("low", 3000),
           stream: true,
           messages: [
             { role: "system", content: ESSAY_SYSTEM_PROMPT },

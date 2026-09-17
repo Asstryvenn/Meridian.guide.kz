@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getOpenAIClient, isOpenAIConfigured } from "@/lib/ai/openai";
+import { getOpenAIClient, isOpenAIConfigured, modelOptions } from "@/lib/ai/openai";
 import { callGemini, isGeminiConfigured } from "@/lib/ai/gemini";
 import { diagnose } from "@/lib/engine/diagnostics";
 import type { StudentProfile } from "@/lib/types";
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       const openai = getOpenAIClient();
       if (openai) {
         const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          ...modelOptions("low", 3000),
           stream: true,
           messages: [
             { role: "system", content: DIAGNOSTIC_SYSTEM_PROMPT },
