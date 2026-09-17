@@ -3,7 +3,28 @@
   grid-template-columns: 248px minmax(0, 1fr);
   gap: 20px;
   min-height: 100dvh;
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
   padding: 16px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.content {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .sidebar {
@@ -294,6 +315,9 @@
   .shell {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
+    max-width: 100vw;
+    width: 100%;
+    overflow-x: hidden;
     padding: env(safe-area-inset-top) 16px calc(92px + env(safe-area-inset-bottom));
   }
 
@@ -455,7 +479,16 @@
 
 @media (max-width: 520px) {
   .shell {
+    max-width: 100vw;
+    width: 100%;
+    overflow-x: hidden;
     padding: env(safe-area-inset-top) 12px calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .main {
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .topbar {
@@ -465,6 +498,11 @@
   }
 
   .content {
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
     padding: 8px 0 20px;
   }
 

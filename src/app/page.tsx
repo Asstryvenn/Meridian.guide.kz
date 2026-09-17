@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/layout/logo";
 import { rise, stagger } from "@/components/layout/page";
 import { useTheme } from "@/components/theme/theme-provider";
@@ -11,6 +11,7 @@ import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { ProgressRing } from "@/components/ui/progress";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { universities } from "@/lib/data/universities";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./landing.module.css";
@@ -23,17 +24,27 @@ const steps = [
   { title: msg("Act"), body: msg("A level-by-level roadmap and a mentor that always tells you the one thing to do next.") },
 ];
 
-export default function Landing() {
+function LandingView() {
   const t = useT();
   const { user, onboarded, hydrated } = useApp();
   const { theme, toggle } = useTheme();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (hydrated && user) router.prefetch(onboarded ? "/dashboard" : "/onboarding");
-  }, [hydrated, user, onboarded, router]);
+    setMounted(true);
+  }, []);
 
-  const primaryHref = user ? (onboarded ? "/dashboard" : "/onboarding") : "/signup";
+  const hasUser = mounted && Boolean(user && typeof user === "object");
+  const isOnboarded = Boolean(onboarded);
+
+  useEffect(() => {
+    if (mounted && hydrated && user && router && typeof router.prefetch === "function") {
+      router.prefetch(isOnboarded ? "/dashboard" : "/onboarding");
+    }
+  }, [mounted, hydrated, user, isOnboarded, router]);
+
+  const primaryHref = hasUser ? (isOnboarded ? "/dashboard" : "/onboarding") : "/signup";
 
   return (
     <div className={styles.wrap}>
@@ -42,9 +53,9 @@ export default function Landing() {
         <div className={styles.navActions}>
           <LanguageSelector />
           <button type="button" className={styles.themeButton} onClick={toggle} aria-label={t("Toggle theme")}>
-            <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
+            <Icon name={mounted && theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
-          {user ? (
+          {hasUser ? (
             <Button href={primaryHref} size="sm">
               {t("Open app")}
             </Button>
@@ -75,7 +86,7 @@ export default function Landing() {
             )}
           </motion.p>
           <motion.div variants={rise} className={styles.ctaRow}>
-            {user ? (
+            {hasUser ? (
               <Button href={primaryHref} size="lg" className={styles.ctaPrimary}>
                 {t("Continue your plan")}
                 <Icon name="arrow" size={18} />
@@ -128,7 +139,7 @@ export default function Landing() {
 
       <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
         {[
-          [String(universities.length), t("universities with sourced data")],
+          [String(universities && Array.isArray(universities) ? universities.length : 0), t("universities with sourced data")],
           ["7", t("portfolio dimensions diagnosed")],
           ["3", t("tiers: Dream, Target, Safety")],
           ["1", t("clear next action, always")],
@@ -176,5 +187,13 @@ export default function Landing() {
         <span className="faint">{t("Meridian Guide · Built by team Flaxyss")}</span>
       </footer>
     </div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <ErrorBoundary>
+      <LandingView />
+    </ErrorBoundary>
   );
 }

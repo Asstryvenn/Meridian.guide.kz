@@ -221,10 +221,10 @@ export function InterviewSimulator() {
 
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <Mic size={22} className="text-green-ink" />
+            <Mic size={22} className="text-green-ink shrink-0" />
             <h2 className="text-xl font-bold tracking-tight text-ink">
               {t.interview.title}
             </h2>
@@ -234,7 +234,7 @@ export function InterviewSimulator() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
           <label className="text-xs font-mono font-bold text-amber-ink uppercase">
             {t.interview.questionSelector}:
           </label>
@@ -244,7 +244,7 @@ export function InterviewSimulator() {
               const q = questions.find((item) => item.id === e.target.value);
               if (q) setSelectedQuestion(q);
             }}
-            className="text-xs px-3 py-2 rounded-xl bg-panel border border-[#589C80]/40 text-ink font-semibold focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+            className="w-full sm:w-auto max-w-full text-xs px-3 py-2 rounded-xl bg-panel border border-[#589C80]/40 text-ink font-semibold focus:outline-none focus:border-[#EBAE29] cursor-pointer"
           >
             {questions.map((q) => (
               <option key={q.id} value={q.id}>
@@ -257,7 +257,7 @@ export function InterviewSimulator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-4">
-          <div className="relative rounded-3xl overflow-hidden bg-black/80 border border-[#589C80]/40 aspect-video shadow-2xl flex items-center justify-center">
+          <div className="relative rounded-3xl overflow-hidden bg-black/80 border border-[#589C80]/40 w-full aspect-[4/3] sm:aspect-video min-h-[300px] sm:min-h-[380px] shadow-2xl flex items-center justify-center">
             <video
               ref={videoRef}
               autoPlay
@@ -267,12 +267,11 @@ export function InterviewSimulator() {
             />
 
             {!cameraActive && (
-              <div className="text-center p-8 space-y-3">
-                <div className="w-16 h-16 rounded-full bg-panel border border-[#589C80]/40 flex items-center justify-center mx-auto text-green-ink shadow-inner">
-                  <Video size={28} />
+              <div className="text-center p-6 sm:p-8 space-y-3">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-panel border border-[#589C80]/40 flex items-center justify-center mx-auto text-green-ink shadow-inner">
+                  <Video size={26} />
                 </div>
                 <p className="text-sm font-semibold text-ink">
-                  
                   {tx("Camera & Microphone are currently offline")}
                 </p>
                 <button
@@ -286,21 +285,21 @@ export function InterviewSimulator() {
             )}
 
             {cameraActive && (
-              <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-panel/85 border border-[#589C80]/40 backdrop-blur-md">
+              <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between pointer-events-none gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-panel/85 border border-[#589C80]/40 backdrop-blur-md">
                   <span
-                    className={`w-2.5 h-2.5 rounded-full ${
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
                       recording ? "bg-red-500 animate-pulse" : "bg-[#589C80]"
                     }`}
                   />
-                  <span className="text-xs font-mono font-bold text-ink">
+                  <span className="text-[11px] sm:text-xs font-mono font-bold text-ink">
                     {recording ? tx("REC {minutes}:{seconds}", { minutes: minutes, seconds: seconds }) : "STANDBY"}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-panel/85 border border-[#589C80]/40 backdrop-blur-md">
-                  <span className="text-xs font-mono text-ink/70">{tx("Mic Level:")}</span>
-                  <div className="w-16 h-2 rounded-full bg-panel overflow-hidden border border-[#589C80]/30">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-panel/85 border border-[#589C80]/40 backdrop-blur-md">
+                  <span className="text-[11px] sm:text-xs font-mono text-ink/70">{tx("Mic Level:")}</span>
+                  <div className="w-12 sm:w-16 h-1.5 sm:h-2 rounded-full bg-panel overflow-hidden border border-[#589C80]/30">
                     <div className="h-full bg-gradient-to-r from-[#589C80] to-[#EBAE29] w-3/4" />
                   </div>
                 </div>
@@ -308,11 +307,11 @@ export function InterviewSimulator() {
             )}
 
             {cameraActive && (
-              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-panel/90 border border-[#589C80]/40 backdrop-blur-xl shadow-lg">
-                <p className="text-[11px] font-mono font-bold text-amber-ink uppercase tracking-wider">
+              <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 p-3 sm:p-4 rounded-2xl bg-panel/90 border border-[#589C80]/40 backdrop-blur-xl shadow-lg">
+                <p className="text-[10px] sm:text-[11px] font-mono font-bold text-amber-ink uppercase tracking-wider">
                   {tx("{university} interview prompt", { university: selectedQuestion.university })}
                 </p>
-                <p className="text-sm font-bold text-ink mt-0.5 leading-snug">
+                <p className="text-xs sm:text-sm font-bold text-ink mt-0.5 leading-snug">
                   &ldquo;{tx(selectedQuestion.question)}&rdquo;
                 </p>
               </div>

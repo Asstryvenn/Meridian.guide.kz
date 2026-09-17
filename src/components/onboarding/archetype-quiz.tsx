@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, Scale } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
@@ -19,6 +19,14 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [result, setResult] = useState<ArchetypeId | null>(null);
+
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, []);
 
   const currentQuestion = QUIZ_QUESTIONS[currentIndex];
   const progressPercent = Math.round(((currentIndex + 1) / QUIZ_QUESTIONS.length) * 100);
@@ -46,13 +54,12 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
   };
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto p-6 rounded-2xl bg-panel/90 border border-[#589C80]/30 shadow-2xl backdrop-blur-xl text-ink">
+    <div className="relative w-full max-w-2xl mx-auto max-h-[85vh] overflow-y-auto overscroll-contain scroll-touch p-5 sm:p-6 rounded-3xl bg-panel/95 border border-[#589C80]/30 shadow-2xl backdrop-blur-xl text-ink">
       {onClose && (
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full border border-[#589C80]/40 text-ink/70 hover:text-ink hover:border-[#EBAE29] transition-all cursor-pointer"
         >
-          
           {t("Close")}
         </button>
       )}
@@ -61,11 +68,11 @@ export function ArchetypeQuiz({ onComplete, onClose }: ArchetypeQuizProps) {
         {!result ? (
           <motion.div
             key={currentQuestion.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.25 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6 transform-gpu"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-amber-ink">

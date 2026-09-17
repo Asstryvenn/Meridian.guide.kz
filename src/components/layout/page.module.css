@@ -40,21 +40,47 @@
 }
 
 .headerCentered {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .headerCentered .headerText {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
 }
 
+.headerCentered .title {
+  text-align: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.headerCentered .description {
+  text-align: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .headerCentered .actions {
+  display: flex;
+  align-items: center;
   justify-content: center;
   width: 100%;
+  margin: 0 auto;
 }
 
 .empty {

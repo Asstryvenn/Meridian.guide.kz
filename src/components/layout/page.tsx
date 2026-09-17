@@ -36,13 +36,16 @@ export function PageHeader({
   centered?: boolean;
 }) {
   return (
-    <motion.header className={`${styles.header} ${centered ? styles.headerCentered : ""}`} variants={rise}>
-      <div className={styles.headerText}>
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1 className={styles.title}>{title}</h1>
-        {description && <p className={styles.description}>{description}</p>}
+    <motion.header
+      className={`${styles.header} ${centered ? `${styles.headerCentered} text-center mx-auto w-full` : ""}`}
+      variants={rise}
+    >
+      <div className={`${styles.headerText} ${centered ? "text-center mx-auto w-full items-center" : ""}`}>
+        {eyebrow && <p className={`eyebrow ${centered ? "text-center mx-auto" : ""}`}>{eyebrow}</p>}
+        <h1 className={`${styles.title} ${centered ? "text-center mx-auto w-full" : ""}`}>{title}</h1>
+        {description && <p className={`${styles.description} ${centered ? "text-center mx-auto" : ""}`}>{description}</p>}
       </div>
-      {actions && <div className={styles.actions}>{actions}</div>}
+      {actions && <div className={`${styles.actions} ${centered ? "justify-center mx-auto w-full" : ""}`}>{actions}</div>}
     </motion.header>
   );
 }
