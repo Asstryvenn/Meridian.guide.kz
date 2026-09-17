@@ -3,11 +3,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Meter } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/toast";
 import { sampleProfile } from "@/lib/store/defaults";
 import { useApp } from "@/lib/store/app-store";
 import {
@@ -21,6 +22,7 @@ import {
   PreferencesStep,
   type StepProps,
 } from "./steps";
+import { DocumentImport } from "./document-import";
 import styles from "./onboarding-flow.module.css";
 
 const steps: { title: string; description: string; Component: ComponentType<StepProps> }[] = [
@@ -39,8 +41,12 @@ export function OnboardingFlow() {
   const params = useSearchParams();
   const editing = params.get("edit") === "1";
   const { hydrated, user, profile, updateProfile, replaceProfile, completeOnboarding, markTask } = useApp();
+  const { notify } = useToast();
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (hydrated && !user) router.replace("/signup");
@@ -52,18 +58,28 @@ export function OnboardingFlow() {
   function go(delta: number) {
     setDirection(delta);
     setIndex((i) => Math.min(steps.length - 1, Math.max(0, i + delta)));
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function finish() {
-    completeOnboarding();
+  async function finish() {
+    if (saving) return;
+    setSaving(true);
+    setSaveError(null);
+    const error = await completeOnboarding();
+    if (error) {
+      setSaving(false);
+      setSaveError(`We couldn't save your profile: ${error}. Your answers are kept on this device — try again.`);
+      return;
+    }
     markTask("foundation-profile");
+    notify({ tone: "success", title: editing ? "Profile saved" : "Profile complete", body: editing ? undefined : "+20 XP · Your diagnostics are ready" });
     router.push(editing ? "/dashboard" : "/diagnostics");
   }
 
   if (!hydrated || !user) return null;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} ref={topRef}>
       <header className={styles.top}>
         <Link href="/">
           <Logo />
@@ -83,8 +99,8 @@ export function OnboardingFlow() {
             </Button>
           )}
           {editing && (
-            <Button variant="secondary" size="sm" onClick={finish}>
-              Save and close
+            <Button variant="secondary" size="sm" onClick={finish} disabled={saving}>
+              {saving ? "Saving…" : "Save and close"}
             </Button>
           )}
         </div>
@@ -112,34 +128,41 @@ export function OnboardingFlow() {
           <motion.section
             key={index}
             custom={direction}
-            initial={{ opacity: 0, x: direction * 40, filter: "blur(6px)" }}
-            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, x: direction * -40, filter: "blur(6px)" }}
-            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            initial={{ opacity: 0, x: direction * 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -28 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className={styles.step}
           >
             <header className={styles.stepHeader}>
               <h1 className={styles.title}>{step.title}</h1>
               <p className="muted">{step.description}</p>
             </header>
+            {index === 1 && <DocumentImport profile={profile} onApply={replaceProfile} />}
             <step.Component profile={profile} update={updateProfile} />
           </motion.section>
         </AnimatePresence>
       </main>
 
+      {saveError && (
+        <p className={styles.saveError} role="alert">
+          {saveError}
+        </p>
+      )}
+
       <footer className={styles.footer}>
-        <Button variant="quiet" onClick={() => go(-1)} disabled={index === 0}>
+        <Button variant="quiet" className={styles.back} onClick={() => go(-1)} disabled={index === 0 || saving}>
           Back
         </Button>
         <div className={styles.footerRight}>
           {!last && (
-            <Button variant="quiet" onClick={() => go(1)}>
-              Skip for now
+            <Button variant="quiet" className={styles.skip} onClick={() => go(1)}>
+              Skip
             </Button>
           )}
-          <Button onClick={last ? finish : () => go(1)} size="lg">
-            {last ? (editing ? "Save changes" : "See my diagnostics") : "Continue"}
-            <Icon name="arrow" size={18} />
+          <Button className={styles.primary} onClick={last ? finish : () => go(1)} size="lg" disabled={saving}>
+            {last ? (saving ? "Saving…" : editing ? "Save changes" : "Finish") : "Continue"}
+            {!saving && <Icon name={last ? "check" : "arrow"} size={18} />}
           </Button>
         </div>
       </footer>

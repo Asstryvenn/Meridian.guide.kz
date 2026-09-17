@@ -6,11 +6,13 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Segmented } from "@/components/ui/fields";
 import { Icon } from "@/components/ui/icon";
 import { SourcedValue } from "@/components/ui/source-note";
 import { CompareTray } from "@/components/university/compare-tray";
 import { PredictionRange } from "@/components/university/prediction-panel";
 import { TierBadge } from "@/components/university/tier";
+import { WorldDirectory } from "@/components/university/world-directory";
 import { universities } from "@/lib/data/universities";
 import { recommend } from "@/lib/engine/matching";
 import { applyFilters, describeFilters, emptyFilters, parseQueryLocally, type SearchFilters } from "@/lib/engine/search";
@@ -21,7 +23,7 @@ const examples = ["Affordable computer science in Europe", "Top AI programs in t
 
 const usdRange = ([min, max]: [number, number]) => (min === max ? `$${Math.round(min / 1000)}k` : `$${Math.round(min / 1000)}–${Math.round(max / 1000)}k`);
 
-export default function CatalogPage() {
+function MatchedCatalog() {
   const { profile, compare, toggleCompare } = useApp();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<SearchFilters>(emptyFilters);
@@ -71,9 +73,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <Page>
-      <PageHeader eyebrow="University catalog" title="Search the way you think" description="Describe what you want in plain language. We translate it into filters you can see and edit." />
-
+    <>
       <Reveal>
         <form className={`glass ${styles.search}`} onSubmit={onSubmit} role="search">
           <Icon name="search" className={styles.searchIcon} />
@@ -114,13 +114,13 @@ export default function CatalogPage() {
         {results.length} {results.length === 1 ? "university" : "universities"}
       </p>
 
-      <motion.ul layout className={styles.results}>
+      <ul className={styles.results}>
         <AnimatePresence mode="popLayout">
           {results.map((u) => {
             const rec = recommendations.get(u.slug);
             const comparing = compare.includes(u.slug);
             return (
-              <motion.li key={u.slug} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className={`glass ${styles.row}`}>
+              <motion.li key={u.slug} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className={`glass ${styles.row}`}>
                 <div className={styles.rowMain}>
                   <Link href={`/universities/${u.slug}`} className={styles.rowName}>
                     {u.name}
@@ -164,10 +164,36 @@ export default function CatalogPage() {
             );
           })}
         </AnimatePresence>
-      </motion.ul>
+      </ul>
 
       {results.length === 0 && <p className="muted">No universities in the catalog match every filter. Remove a filter to widen the search.</p>}
       <CompareTray />
+    </>
+  );
+}
+
+export default function CatalogPage() {
+  const [view, setView] = useState<"world" | "matched">("world");
+
+  return (
+    <Page>
+      <PageHeader
+        eyebrow="Universities"
+        title="Explore universities"
+        description={view === "world" ? "Search more than 10,000 universities worldwide." : "Profiles with admission estimates, costs and sources. Describe what you want in plain language."}
+      />
+      <Reveal>
+        <Segmented
+          label="Browse"
+          value={view}
+          onChange={setView}
+          options={[
+            { value: "world", label: "All universities" },
+            { value: "matched", label: `Detailed profiles · ${universities.length}` },
+          ]}
+        />
+      </Reveal>
+      {view === "world" ? <WorldDirectory /> : <MatchedCatalog />}
     </Page>
   );
 }

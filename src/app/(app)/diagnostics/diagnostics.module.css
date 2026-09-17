@@ -1,6 +1,6 @@
 .overview {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -79,7 +79,7 @@
 
 .dimensions {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: 18px;
 }
 
@@ -108,7 +108,7 @@
 
 .scoreRow {
   display: grid;
-  grid-template-columns: 56px 1fr;
+  grid-template-columns: 56px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
@@ -156,7 +156,7 @@
 
 @media (max-width: 960px) {
   .overview {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -167,6 +167,6 @@
   }
 
   .dimensions {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

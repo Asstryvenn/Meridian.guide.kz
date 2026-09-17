@@ -1,23 +1,46 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { currentSupabaseUser } from "@/lib/supabase/auth";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { completeAuthRedirect } from "@/lib/supabase/auth";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./callback.module.css";
+
+function safeNext(value: string | null) {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
+}
 
 export default function AuthCallback() {
   const router = useRouter();
   const { signIn } = useApp();
-  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
 
   useEffect(() => {
-    currentSupabaseUser().then(async (user) => {
-      if (!user) return setFailed(true);
-      await signIn(user);
-      router.replace("/onboarding");
+    if (started.current) return;
+    started.current = true;
+    const url = new URL(window.location.href);
+    completeAuthRedirect(url).then(async (result) => {
+      if (!result.user) return setError(result.error);
+      await signIn(result.user);
+      router.replace(safeNext(url.searchParams.get("next")));
     });
   }, [router, signIn]);
 
-  return <p className={styles.message}>{failed ? "Sign-in could not be completed. Please try again." : "Signing you in…"}</p>;
+  return (
+    <div className={styles.wrap}>
+      {error ? (
+        <>
+          <p className={styles.error}>{error}</p>
+          <Button href="/login">Back to login</Button>
+        </>
+      ) : (
+        <>
+          <span className={styles.spinner} aria-hidden />
+          <p className={styles.message}>Signing you in…</p>
+        </>
+      )}
+    </div>
+  );
 }

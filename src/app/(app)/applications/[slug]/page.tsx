@@ -21,6 +21,7 @@ import { recommend } from "@/lib/engine/matching";
 import { ieltsEquivalent } from "@/lib/engine/profile-metrics";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
+import { useTaskCompletion } from "@/lib/store/use-task-completion";
 import type { Application, ApplicationDocument } from "@/lib/types";
 import styles from "./workspace.module.css";
 
@@ -28,7 +29,8 @@ export default function WorkspacePage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const university = getUniversity(slug);
-  const { profile, applications, updateApplication, removeApplication, addApplication, toggleTask } = useApp();
+  const { profile, applications, updateApplication, removeApplication, addApplication } = useApp();
+  const completeTask = useTaskCompletion();
   const { roadmap } = useRoadmap();
 
   if (!university) notFound();
@@ -184,7 +186,7 @@ export default function WorkspacePage() {
             <ul className={styles.tasks}>
               {tasks.map((t) => (
                 <li key={t.id} className={clsx(t.done && styles.taskDone)}>
-                  <button type="button" className={styles.check} aria-pressed={t.done} aria-label={t.title} onClick={() => toggleTask(t.id)}>
+                  <button type="button" className={styles.check} aria-pressed={t.done} aria-label={t.title} onClick={() => completeTask(t, !t.done)}>
                     {t.done && <Icon name="check" size={14} />}
                   </button>
                   <span className={styles.taskTitle}>{t.title}</span>

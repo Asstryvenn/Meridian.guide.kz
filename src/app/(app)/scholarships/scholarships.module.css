@@ -10,7 +10,7 @@
 
 .card {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 24px;
   padding: 24px;
   transition: opacity 0.3s ease;
@@ -116,7 +116,7 @@
 
 @media (max-width: 640px) {
   .card {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ring {

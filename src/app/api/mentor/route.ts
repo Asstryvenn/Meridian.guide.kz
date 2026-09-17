@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CLAUDE_MODEL, describeClaudeError, getClaude } from "@/lib/ai/claude";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
+import { describeAIError, getOpenAI, modelOptions } from "@/lib/ai/openai";
 import { ruleBasedMentorReply } from "@/lib/ai/rule-mentor";
 
 export const runtime = "nodejs";
@@ -15,14 +15,15 @@ const requestSchema = studentStateSchema.extend({
 const SYSTEM_PROMPT = `You are the LOCUS admissions mentor for high school students applying to universities, often internationally.
 
 How to help:
-- Ground every statement in the STUDENT CONTEXT provided below. It contains computed diagnostics, recommendations, admission probability ranges, deadlines and scholarship matches.
-- Admission chances come from a prototype model trained on synthetic data. Always quote them as the ranges given, never as precise numbers, and say they are estimates.
-- Never invent acceptance rates, tuition figures, deadlines, scholarship amounts or requirements. If something is not in the context, say it is unavailable and point the student to the university's official site. If a deadline is marked needs_verification, say so.
-- Be warm, direct and specific. Prefer short paragraphs and compact lists. Write for a 16–18 year old.
-- Finish with exactly one clearly labelled next action on its own line, starting with "Next action:". Prefer the roadmap's next action unless the student's question clearly calls for a different one.`;
+- Ground every statement in the STUDENT CONTEXT below. It contains computed diagnostics, recommendations, admission probability ranges, deadlines and scholarship matches.
+- Admission chances come from a prototype model trained on synthetic data. Quote them only as the ranges given and say they are estimates.
+- Never invent acceptance rates, tuition figures, deadlines, scholarship amounts or requirements. If something is missing from the context, say it is unavailable and point to the university's official site. If a deadline is marked needs_verification, say so.
+- Reply in the same language the student writes in.
+- Be warm, direct and specific. Use short paragraphs and compact bullet lists. Write for a 16–18 year old.
+- Finish with exactly one line that starts with "Next action:". Prefer the roadmap's next action unless the question clearly calls for a different one.`;
 
 function textResponse(body: ReadableStream<Uint8Array> | string, source: "ai" | "rules", notice?: string) {
-  const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8", "X-Guidance-Source": source };
+  const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8", "X-Guidance-Source": source, "Cache-Control": "no-store" };
   if (notice) headers["X-Guidance-Notice"] = encodeURIComponent(notice);
   return new Response(body, { headers });
 }
@@ -34,48 +35,47 @@ export async function POST(request: Request) {
   const { messages, ...state } = parsed.data;
   const context = buildStudentContext(state);
   const lastQuestion = messages[messages.length - 1].content;
-  const claude = getClaude();
+  const openai = getOpenAI();
 
-  if (!claude) return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules");
+  if (!openai) return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules");
 
   try {
-    const stream = claude.beta.messages.stream({
-      model: CLAUDE_MODEL,
-      max_tokens: 4000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      thinking: { type: "adaptive" },
-      output_config: { effort: "medium" },
-      system: [
-        { type: "text", text: SYSTEM_PROMPT },
-        { type: "text", text: `STUDENT CONTEXT\n${JSON.stringify(context, null, 2)}` },
+    const stream = await openai.chat.completions.create({
+      ...modelOptions("low", 3000),
+      stream: true,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: `STUDENT CONTEXT\n${JSON.stringify(context)}` },
+        ...messages,
       ],
-      messages,
     });
 
     const encoder = new TextEncoder();
     const body = new ReadableStream<Uint8Array>({
       async start(controller) {
+        let sent = false;
         try {
-          for await (const event of stream) {
-            if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-              controller.enqueue(encoder.encode(event.delta.text));
+          for await (const chunk of stream) {
+            const text = chunk.choices[0]?.delta?.content;
+            if (text) {
+              sent = true;
+              controller.enqueue(encoder.encode(text));
             }
           }
-          const final = await stream.finalMessage();
-          if (final.stop_reason === "refusal") {
-            controller.enqueue(encoder.encode(`\n\n${ruleBasedMentorReply(lastQuestion, context)}`));
-          }
+          if (!sent) controller.enqueue(encoder.encode(ruleBasedMentorReply(lastQuestion, context)));
         } catch (error) {
-          controller.enqueue(encoder.encode(`\n\n${describeClaudeError(error)}\n\n${ruleBasedMentorReply(lastQuestion, context)}`));
+          controller.enqueue(encoder.encode(`\n\n${describeAIError(error)}\n\n${ruleBasedMentorReply(lastQuestion, context)}`));
         } finally {
           controller.close();
         }
+      },
+      cancel() {
+        stream.controller.abort();
       },
     });
 
     return textResponse(body, "ai");
   } catch (error) {
-    return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules", describeClaudeError(error));
+    return textResponse(ruleBasedMentorReply(lastQuestion, context), "rules", describeAIError(error));
   }
 }

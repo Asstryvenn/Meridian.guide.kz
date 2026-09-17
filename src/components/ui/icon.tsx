@@ -23,6 +23,7 @@ const paths = {
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0",
   external: "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
   send: "M4 12 20 4l-4 16-4-7z",
+  grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
 } as const;
 
 export type IconName = keyof typeof paths;

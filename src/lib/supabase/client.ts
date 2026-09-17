@@ -12,7 +12,9 @@ export function isSupabaseConfigured(): boolean {
 export function getSupabase(): SupabaseClient | null {
   if (!isSupabaseConfigured()) return null;
   if (!client) {
-    client = createClient(supabaseUrl as string, supabaseKey as string);
+    client = createClient(supabaseUrl as string, supabaseKey as string, {
+      auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    });
   }
   return client;
 }

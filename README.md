@@ -19,7 +19,8 @@ A student completes an eight-step diagnostic profile and gets:
 | App | Next.js 16 (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS v4 base layer + CSS Modules, Framer Motion |
 | Auth and data | Supabase (email and Google auth, Postgres with row-level security) |
-| AI | Claude (`claude-opus-5`) via `@anthropic-ai/sdk` for the mentor, search parsing and diagnostic narrative |
+| AI | OpenAI (`OPENAI_MODEL`, default `gpt-5.4-mini`) for the mentor, search parsing, diagnostic narrative and document import |
+| University directory | 10,000+ universities from an open dataset or your own API, seeded into Supabase |
 | ML | Python + scikit-learn logistic regression, exported to JSON and scored in TypeScript |
 | Deploy | Vercel |
 
@@ -34,20 +35,40 @@ npm run dev
 The app runs without any keys:
 
 - **No Supabase keys** → accounts run in local demo mode and state is saved in the browser.
-- **No Anthropic key** → the mentor, search and diagnostics fall back to deterministic rule-based logic, and the UI labels them as rule-based.
+- **No OpenAI key (or no credit)** → the mentor, search and diagnostics fall back to deterministic rule-based logic, and the UI labels them as rule-based.
+- **Empty `university_directory` table** → the directory API reads the open dataset live and caches it in memory.
 
 ### Environment variables
 
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | Enables real accounts and cloud sync |
-| `ANTHROPIC_API_KEY` | Enables Claude for the mentor, natural-language search and diagnostic narratives |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Used by the seeding script; never expose it to the browser |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | Enables AI mentor, natural-language search, diagnostic narratives and document import |
+| `UNIVERSITIES_SOURCE_URL`, `UNIVERSITIES_SOURCE_NAME`, `UNIVERSITIES_API_KEY` | Optional custom university API (Bearer auth, array or paginated `data`/`results` + `next`) |
 
 ### Supabase
 
-1. Create a project and run `supabase/schema.sql` in the SQL editor.
+1. Create a project and run the files in `supabase/migrations/` in order in the SQL editor.
 2. Enable the Email and Google providers under Authentication.
 3. Add `https://<your-domain>/auth/callback` as a redirect URL.
+
+## University directory (10,000+)
+
+```bash
+npm run seed:universities
+```
+
+The script fetches every page from the source, normalises and de-duplicates records, and upserts them into `university_directory` in batches of 500. `GET /api/universities?q=&country=&page=` serves paginated results (database first, live dataset as fallback); the Universities page renders them with debounced search, a country filter and infinite scroll.
+
+## AI features
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /api/mentor` | Streams mentor replies grounded in the student's computed context |
+| `POST /api/search` | Turns a natural-language query (any language) into structured filters |
+| `POST /api/diagnostics` | Writes a short portfolio review from computed diagnostics |
+| `POST /api/ai/import` | Reads a transcript, test report, certificate or CV (PDF, image, TXT), extracts scores and activities, and sorts activities by level |
 
 ## Admission model
 

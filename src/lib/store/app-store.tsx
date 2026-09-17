@@ -3,12 +3,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getScholarship } from "@/lib/data/scholarships";
 import { getUniversity } from "@/lib/data/universities";
-import { currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
-import { loadRemoteState, saveRemoteState } from "@/lib/supabase/sync";
+import { onAuthChange, currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { loadRemoteState, persistTask, saveRemoteState } from "@/lib/supabase/sync";
 import type { Application, AuthUser, StudentProfile } from "@/lib/types";
 import { emptyProfile, newApplication } from "./defaults";
 
 const STORAGE_KEY = "locus:v1";
+const SAVE_DELAY_MS = 900;
 
 interface AppState {
   user: AuthUser | null;
@@ -20,18 +22,22 @@ interface AppState {
   compare: string[];
 }
 
+export type SyncStatus = "idle" | "saving" | "saved" | "error";
+
 interface AppActions {
   hydrated: boolean;
+  syncStatus: SyncStatus;
   syncError: string | null;
   signIn: (user: AuthUser) => Promise<void>;
   signOut: () => Promise<void>;
+  flush: () => Promise<string | null>;
   updateProfile: (patch: Partial<StudentProfile>) => void;
   replaceProfile: (profile: StudentProfile) => void;
-  completeOnboarding: () => void;
+  completeOnboarding: () => Promise<string | null>;
   addApplication: (slug: string) => void;
   removeApplication: (slug: string) => void;
   updateApplication: (slug: string, patch: Partial<Application>) => void;
-  toggleTask: (id: string) => void;
+  setTaskDone: (id: string, done: boolean) => void;
   markTask: (id: string) => void;
   dismissNotification: (id: string) => void;
   toggleCompare: (slug: string) => void;
@@ -61,58 +67,102 @@ function readLocal(): AppState {
   }
 }
 
+function writeLocal(state: AppState) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {}
+}
+
+async function resolveSession(local: AppState): Promise<AppState> {
+  const remoteUser = await currentSupabaseUser();
+  if (!remoteUser) {
+    const staleSession = local.user?.mode === "supabase" || (local.user?.mode === "local" && isSupabaseConfigured());
+    return staleSession ? { ...local, user: null } : local;
+  }
+  const remote = await loadRemoteState(remoteUser.id);
+  if (remote) return { ...local, ...remote, user: remoteUser };
+  const sameUser = local.user?.id === remoteUser.id;
+  return sameUser || local.user === null ? { ...local, user: remoteUser } : { ...initialState, user: remoteUser };
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [syncError, setSyncError] = useState<string | null>(null);
+  const stateRef = useRef(state);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveQueue = useRef<Promise<string | null>>(Promise.resolve(null));
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const saveNow = useCallback((override?: AppState): Promise<string | null> => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    const snapshot = override ?? stateRef.current;
+    if (snapshot.user?.mode !== "supabase") return Promise.resolve(null);
+    const userId = snapshot.user.id;
+    setSyncStatus("saving");
+    saveQueue.current = saveQueue.current
+      .catch(() => null)
+      .then(() => saveRemoteState(userId, snapshot))
+      .catch((error: Error) => error.message)
+      .then((error) => {
+        setSyncError(error);
+        setSyncStatus(error ? "error" : "saved");
+        return error;
+      });
+    return saveQueue.current;
+  }, []);
 
   useEffect(() => {
     let active = true;
-    const local = readLocal();
-    currentSupabaseUser()
-      .then(async (remoteUser) => {
-        if (!remoteUser) return local;
-        const remote = await loadRemoteState(remoteUser.id);
-        return remote ? { ...local, ...remote, user: remoteUser } : { ...local, user: remoteUser };
-      })
-      .catch(() => local)
+    resolveSession(readLocal())
+      .catch(() => readLocal())
       .then((next) => {
         if (!active) return;
         setState(next);
         setHydrated(true);
       });
+
+    const unsubscribe = onAuthChange((event, user) => {
+      if (event === "SIGNED_OUT") setState((prev) => (prev.user?.mode === "supabase" ? { ...prev, user: null } : prev));
+      if (event === "SIGNED_IN" && user) {
+        setState((prev) => (prev.user?.id === user.id ? prev : { ...prev, user }));
+      }
+    });
+
     return () => {
       active = false;
+      unsubscribe();
     };
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {}
+    writeLocal(state);
     if (state.user?.mode !== "supabase") return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    const userId = state.user.id;
-    saveTimer.current = setTimeout(() => {
-      saveRemoteState(userId, state).then(setSyncError).catch((error: Error) => setSyncError(error.message));
-    }, 1200);
-  }, [state, hydrated]);
+    saveTimer.current = setTimeout(() => void saveNow(), SAVE_DELAY_MS);
+  }, [state, hydrated, saveNow]);
 
   const signIn = useCallback(async (user: AuthUser) => {
     const remote = user.mode === "supabase" ? await loadRemoteState(user.id).catch(() => null) : null;
     setState((prev) => {
-      const sameUser = prev.user?.id === user.id;
-      const base = sameUser || prev.user === null ? prev : initialState;
+      const base = prev.user?.id === user.id || prev.user === null ? prev : initialState;
       return remote ? { ...base, ...remote, user } : { ...base, user };
     });
   }, []);
 
   const signOut = useCallback(async () => {
+    await saveNow();
     await signOutEverywhere();
-    setState((prev) => ({ ...prev, user: null }));
-  }, []);
+    setState((prev) => (prev.user?.mode === "supabase" ? { ...initialState } : { ...prev, user: null }));
+  }, [saveNow]);
 
   const updateProfile = useCallback((patch: Partial<StudentProfile>) => {
     setState((prev) => ({ ...prev, profile: { ...prev.profile, ...patch } }));
@@ -123,8 +173,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const completeOnboarding = useCallback(() => {
-    setState((prev) => ({ ...prev, onboarded: true }));
-  }, []);
+    const next = { ...stateRef.current, onboarded: true };
+    stateRef.current = next;
+    setState(next);
+    writeLocal(next);
+    return saveNow(next);
+  }, [saveNow]);
 
   const addApplication = useCallback((slug: string) => {
     setState((prev) => {
@@ -146,16 +200,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const toggleTask = useCallback((id: string) => {
-    setState((prev) => ({
-      ...prev,
-      completedTasks: prev.completedTasks.includes(id) ? prev.completedTasks.filter((t) => t !== id) : [...prev.completedTasks, id],
-    }));
+  const setTaskDone = useCallback((id: string, done: boolean) => {
+    const user = stateRef.current.user;
+    setState((prev) => {
+      const has = prev.completedTasks.includes(id);
+      if (has === done) return prev;
+      return { ...prev, completedTasks: done ? [...prev.completedTasks, id] : prev.completedTasks.filter((t) => t !== id) };
+    });
+    if (user?.mode === "supabase") {
+      persistTask(user.id, id, done).then((error) => {
+        if (error) {
+          setSyncError(error);
+          setSyncStatus("error");
+        }
+      });
+    }
   }, []);
 
-  const markTask = useCallback((id: string) => {
-    setState((prev) => (prev.completedTasks.includes(id) ? prev : { ...prev, completedTasks: [...prev.completedTasks, id] }));
-  }, []);
+  const markTask = useCallback((id: string) => setTaskDone(id, true), [setTaskDone]);
 
   const dismissNotification = useCallback((id: string) => {
     setState((prev) => ({ ...prev, dismissedNotifications: [...prev.dismissedNotifications, id] }));
@@ -176,22 +238,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       hydrated,
+      syncStatus,
       syncError,
       signIn,
       signOut,
+      flush: () => saveNow(),
       updateProfile,
       replaceProfile,
       completeOnboarding,
       addApplication,
       removeApplication,
       updateApplication,
-      toggleTask,
+      setTaskDone,
       markTask,
       dismissNotification,
       toggleCompare,
       setCompare,
     }),
-    [state, hydrated, syncError, signIn, signOut, updateProfile, replaceProfile, completeOnboarding, addApplication, removeApplication, updateApplication, toggleTask, markTask, dismissNotification, toggleCompare, setCompare],
+    [state, hydrated, syncStatus, syncError, signIn, signOut, saveNow, updateProfile, replaceProfile, completeOnboarding, addApplication, removeApplication, updateApplication, setTaskDone, markTask, dismissNotification, toggleCompare, setCompare],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

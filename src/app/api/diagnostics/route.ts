@@ -1,5 +1,5 @@
-import { CLAUDE_MODEL, getClaude } from "@/lib/ai/claude";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
+import { getOpenAI, modelOptions } from "@/lib/ai/openai";
 
 export const runtime = "nodejs";
 
@@ -12,31 +12,19 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
 
   const context = buildStudentContext(parsed.data);
-  const claude = getClaude();
-  if (!claude) return Response.json({ narrative: null, source: "rules" });
+  const openai = getOpenAI();
+  if (!openai) return Response.json({ narrative: null, source: "rules" });
 
   try {
-    const response = await claude.beta.messages.create({
-      model: CLAUDE_MODEL,
-      max_tokens: 2000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "low" },
-      system: INSTRUCTIONS,
+    const completion = await openai.chat.completions.create({
+      ...modelOptions("low", 1500),
       messages: [
-        {
-          role: "user",
-          content: JSON.stringify({ student: context.student, diagnostics: context.diagnostics }, null, 2),
-        },
+        { role: "system", content: INSTRUCTIONS },
+        { role: "user", content: JSON.stringify({ student: context.student, diagnostics: context.diagnostics }) },
       ],
     });
-    if (response.stop_reason === "refusal") return Response.json({ narrative: null, source: "rules" });
-    const narrative = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
-    return Response.json({ narrative: narrative || null, source: "ai" });
+    const narrative = completion.choices[0]?.message.content?.trim() || null;
+    return Response.json({ narrative, source: narrative ? "ai" : "rules" });
   } catch {
     return Response.json({ narrative: null, source: "rules" });
   }

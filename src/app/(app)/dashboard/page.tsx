@@ -14,6 +14,7 @@ import { TierBadge } from "@/components/university/tier";
 import { getUniversity } from "@/lib/data/universities";
 import { formatDate, upcomingDeadlines } from "@/lib/engine/deadlines";
 import { useApp } from "@/lib/store/app-store";
+import { useTaskCompletion } from "@/lib/store/use-task-completion";
 import { useDiagnostics, useNotifications, useRecommendations, useRoadmap } from "@/lib/store/derived";
 import type { Tier } from "@/lib/types";
 import styles from "./dashboard.module.css";
@@ -26,7 +27,8 @@ function greeting() {
 }
 
 export default function Dashboard() {
-  const { profile, applications, toggleTask } = useApp();
+  const { profile, applications } = useApp();
+  const completeTask = useTaskCompletion();
   const diagnostics = useDiagnostics();
   const { tiers } = useRecommendations();
   const { roadmap, next } = useRoadmap();
@@ -58,7 +60,7 @@ export default function Dashboard() {
               <p className={styles.nextReason}>{next.reason}</p>
               {next.task.dueDate && <p className={styles.nextDue}>Suggested by {formatDate(next.task.dueDate)}</p>}
               <div className={styles.nextActions}>
-                <Button onClick={() => toggleTask(next.task.id)}>
+                <Button onClick={() => completeTask(next.task, true)}>
                   <Icon name="check" size={16} />
                   Mark as done
                 </Button>

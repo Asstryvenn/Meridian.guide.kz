@@ -40,13 +40,18 @@ export default function Landing() {
             <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
           {user ? (
-            <Button href={primaryHref} variant="secondary" size="sm">
+            <Button href={primaryHref} size="sm">
               Open app
             </Button>
           ) : (
-            <Button href="/login" variant="quiet" size="sm">
-              Log in
-            </Button>
+            <>
+              <Button href="/login" variant="ghost" size="sm" className={styles.navLogin}>
+                Log in
+              </Button>
+              <Button href="/signup" size="sm">
+                Register
+              </Button>
+            </>
           )}
         </div>
       </header>
@@ -63,12 +68,26 @@ export default function Landing() {
             LOCUS reads your whole profile — grades, tests, activities, budget and goals — and turns it into a personal shortlist, transparent admission estimates, matched scholarships and a clear next step.
           </motion.p>
           <motion.div variants={rise} className={styles.ctaRow}>
-            <Button href={primaryHref} size="lg">
-              {user ? "Continue your plan" : "Build my plan"}
-              <Icon name="arrow" size={18} />
-            </Button>
-            <span className={styles.ctaNote}>Free · about 6 minutes</span>
+            {user ? (
+              <Button href={primaryHref} size="lg" className={styles.ctaPrimary}>
+                Continue your plan
+                <Icon name="arrow" size={18} />
+              </Button>
+            ) : (
+              <>
+                <Button href="/signup" size="lg" className={styles.ctaPrimary}>
+                  Create free account
+                  <Icon name="arrow" size={18} />
+                </Button>
+                <Button href="/login" variant="secondary" size="lg" className={styles.ctaSecondary}>
+                  Log in
+                </Button>
+              </>
+            )}
           </motion.div>
+          <motion.p variants={rise} className={styles.ctaNote}>
+            Free · about 6 minutes · Sign in with Google or email
+          </motion.p>
         </div>
 
         <motion.div variants={rise} className={styles.preview} aria-hidden>

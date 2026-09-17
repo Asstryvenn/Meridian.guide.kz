@@ -136,7 +136,6 @@ export async function saveRemoteState(userId: string, state: PersistedState): Pr
     }),
     supabase.from("activities").delete().eq("user_id", userId),
     supabase.from("applications").delete().eq("user_id", userId),
-    supabase.from("tasks").delete().eq("user_id", userId),
   ]);
 
   const inserts = await Promise.all([
@@ -171,10 +170,22 @@ export async function saveRemoteState(userId: string, state: PersistedState): Pr
         )
       : null,
     state.completedTasks.length
-      ? supabase.from("tasks").insert(state.completedTasks.map((task_id) => ({ user_id: userId, task_id })))
+      ? supabase.from("tasks").upsert(
+          state.completedTasks.map((task_id) => ({ user_id: userId, task_id })),
+          { onConflict: "user_id,task_id", ignoreDuplicates: true },
+        )
       : null,
   ]);
 
   const failure = [...results, ...inserts].find((r) => r && r.error);
   return failure?.error?.message ?? null;
+}
+
+export async function persistTask(userId: string, taskId: string, done: boolean): Promise<string | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { error } = done
+    ? await supabase.from("tasks").upsert({ user_id: userId, task_id: taskId }, { onConflict: "user_id,task_id", ignoreDuplicates: true })
+    : await supabase.from("tasks").delete().eq("user_id", userId).eq("task_id", taskId);
+  return error?.message ?? null;
 }

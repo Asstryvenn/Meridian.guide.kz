@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 import styles from "./page.module.css";
 
 export const rise: Variants = {
-  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 140, damping: 22 } },
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } },
 };
 
 export const stagger: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
+  show: { transition: { staggerChildren: 0.045, delayChildren: 0.02 } },
 };
 
 export function Page({ children }: { children: ReactNode }) {

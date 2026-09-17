@@ -52,6 +52,18 @@ const fieldAliases: [RegExp, FieldOfStudy][] = [
   [/\b(physics)\b/i, "Physics"],
   [/\b(math|mathematics)\b/i, "Mathematics"],
   [/\b(design)\b/i, "Design"],
+  [/(информатик|программирован|компьютерн)/i, "Computer Science"],
+  [/(искусственн\S* интеллект|(^|[^а-яё])ии([^а-яё]|$)|машинн\S* обучен)/i, "Artificial Intelligence"],
+  [/(анализ данных|наук\S* о данных)/i, "Data Science"],
+  [/(электротех|электроник)/i, "Electrical Engineering"],
+  [/(машиностро|механик|робототех)/i, "Mechanical Engineering"],
+  [/(бизнес|менеджмент|предприниматель)/i, "Business"],
+  [/(экономик|финанс)/i, "Economics"],
+  [/(медицин|врач)/i, "Medicine"],
+  [/(биолог)/i, "Biology"],
+  [/(физик)/i, "Physics"],
+  [/(математ)/i, "Mathematics"],
+  [/(дизайн)/i, "Design"],
 ];
 
 const countryAliases: [RegExp, string][] = [
@@ -65,6 +77,15 @@ const countryAliases: [RegExp, string][] = [
   [/\bsingapore\b/i, "Singapore"],
   [/\b(korea|south korea)\b/i, "South Korea"],
   [/\bkazakhstan\b/i, "Kazakhstan"],
+  [/(сша|америк)/i, "United States"],
+  [/(великобритан|британи|англия|англии|англию)/i, "United Kingdom"],
+  [/(канад)/i, "Canada"],
+  [/(германи)/i, "Germany"],
+  [/(швейцари)/i, "Switzerland"],
+  [/(нидерланд|голланд)/i, "Netherlands"],
+  [/(сингапур)/i, "Singapore"],
+  [/(корея|корее|кореи|корею)/i, "South Korea"],
+  [/(казахстан)/i, "Kazakhstan"],
 ];
 
 const regionAliases: [RegExp, string][] = [
@@ -72,6 +93,10 @@ const regionAliases: [RegExp, string][] = [
   [/\basia\b/i, "Asia"],
   [/\bnorth america\b/i, "North America"],
   [/\bcentral asia\b/i, "Central Asia"],
+  [/(европ)/i, "Europe"],
+  [/(ази[иья])/i, "Asia"],
+  [/(северн\S* америк)/i, "North America"],
+  [/(центральн\S* ази)/i, "Central Asia"],
 ];
 
 export function parseQueryLocally(query: string): SearchFilters {
@@ -81,18 +106,18 @@ export function parseQueryLocally(query: string): SearchFilters {
   for (const [pattern, region] of regionAliases) if (pattern.test(query)) filters.regions.push(region);
   if (filters.regions.includes("Central Asia")) filters.regions = filters.regions.filter((r) => r !== "Asia");
 
-  const money = query.match(/(?:under|below|less than|max|up to|<)\s*\$?\s*(\d+(?:[.,]\d+)?)\s*(k|000)?/i);
+  const money = query.match(/(?:under|below|less than|max|up to|до|меньше|дешевле|<)\s*\$?\s*(\d+(?:[.,]\d+)?)\s*(k|к|000|тыс)?/i);
   if (money) {
     const amount = parseFloat(money[1].replace(",", "."));
     filters.maxTuitionUsd = money[2] || amount < 1000 ? amount * 1000 : amount;
-  } else if (/\b(cheap|affordable|low[- ]cost|low tuition|budget)\b/i.test(query)) {
+  } else if (/\b(cheap|affordable|low[- ]cost|low tuition|budget)\b/i.test(query) || /(недорог|дешев|бюджетн)/i.test(query)) {
     filters.maxTuitionUsd = 25000;
   }
 
-  if (/\b(scholarship|funding|funded|financial aid|grant)s?\b/i.test(query)) filters.scholarshipsOnly = true;
+  if (/\b(scholarship|funding|funded|financial aid|grant)s?\b/i.test(query) || /(стипенди|грант|финансов\S* помощ)/i.test(query)) filters.scholarshipsOnly = true;
 
-  if (/\b(easy|safety|safe|less competitive|high acceptance|accessible)\b/i.test(query)) filters.difficulty = "accessible";
-  else if (/\b(top|elite|ivy|best|most selective|prestigious|world[- ]class)\b/i.test(query)) filters.difficulty = "highly_selective";
+  if (/\b(easy|safety|safe|less competitive|high acceptance|accessible)\b/i.test(query) || /(легк|простой поступ|доступн)/i.test(query)) filters.difficulty = "accessible";
+  else if (/\b(top|elite|ivy|best|most selective|prestigious|world[- ]class)\b/i.test(query) || /(топ|элитн|лучши|престижн)/i.test(query)) filters.difficulty = "highly_selective";
   else if (/\b(moderate|mid|target)\b/i.test(query)) filters.difficulty = "moderate";
 
   return filters;
