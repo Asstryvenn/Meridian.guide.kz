@@ -39,6 +39,24 @@
   flex-wrap: wrap;
 }
 
+.headerCentered {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.headerCentered .headerText {
+  align-items: center;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.headerCentered .actions {
+  justify-content: center;
+  width: 100%;
+}
+
 .empty {
   display: flex;
   flex-direction: column;

@@ -49,6 +49,9 @@
   font-weight: 640;
   letter-spacing: -0.045em;
   line-height: 0.98;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .headline :global(.display) {
@@ -286,6 +289,36 @@
   }
 }
 
+@media (max-width: 720px) {
+  .hero {
+    gap: 32px;
+    padding: 16px 0 40px;
+  }
+
+  .headline {
+    font-size: clamp(30px, 8vw, 56px);
+  }
+
+  .preview {
+    position: static;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+  }
+
+  .previewCard {
+    position: static;
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+  }
+}
+
 @media (max-width: 520px) {
   .wrap {
     padding: 0 16px;
@@ -300,16 +333,17 @@
   }
 
   .hero {
-    gap: 28px;
-    padding: 12px 0 40px;
+    gap: 24px;
+    padding: 8px 0 32px;
   }
 
   .headline {
-    font-size: clamp(40px, 12vw, 52px);
+    font-size: clamp(28px, 9vw, 44px);
+    line-height: 1.05;
   }
 
   .lede {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .ctaRow {
@@ -323,50 +357,32 @@
     width: 100%;
   }
 
-  .preview {
-    height: 380px;
-    margin-inline: -4px;
-  }
-
   .previewAction {
-    font-size: 21px;
+    font-size: 18px;
   }
 
   .previewRange {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .metrics {
-    gap: 20px 16px;
-    padding: 24px 0;
+    gap: 16px;
+    padding: 20px 0;
   }
 
   .metricValue {
-    font-size: 44px;
+    font-size: 36px;
   }
 
   .steps {
-    padding: 56px 0 24px;
+    padding: 40px 0 20px;
   }
 
   .step {
-    padding: 22px;
+    padding: 18px;
   }
 
   .honesty {
-    padding: 40px 0 56px;
-  }
-
-  .previewMain {
-    right: 0;
-  }
-
-  .previewMatch {
-    width: auto;
-    left: 120px;
-  }
-
-  .previewRing {
-    left: 0;
+    padding: 32px 0 44px;
   }
 }

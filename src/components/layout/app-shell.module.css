@@ -294,7 +294,7 @@
   .shell {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-    padding: env(safe-area-inset-top) 12px calc(92px + env(safe-area-inset-bottom));
+    padding: env(safe-area-inset-top) 16px calc(92px + env(safe-area-inset-bottom));
   }
 
   .sidebar,
@@ -307,10 +307,10 @@
     top: 0;
     z-index: 30;
     height: 60px;
-    margin: 0 -12px;
-    padding: 0 12px;
+    margin: 0 -16px;
+    padding: 0 16px;
     background: var(--bg);
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
   }
 
   .mobileBrand {
@@ -325,7 +325,7 @@
 
   .content {
     min-width: 0;
-    padding: 8px 0 24px;
+    padding: 12px 0 24px;
   }
 
   .tabbar {
@@ -450,5 +450,34 @@
     color: var(--text);
     font: inherit;
     font-weight: 600;
+  }
+}
+
+@media (max-width: 520px) {
+  .shell {
+    padding: env(safe-area-inset-top) 12px calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    margin: 0 -12px;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  .content {
+    padding: 8px 0 20px;
+  }
+
+  .tabbar {
+    left: 6px;
+    right: 6px;
+    bottom: calc(6px + env(safe-area-inset-bottom));
+    padding: 4px;
+    border-radius: 20px;
+  }
+
+  .tab {
+    min-height: 48px;
+    font-size: 10px;
   }
 }

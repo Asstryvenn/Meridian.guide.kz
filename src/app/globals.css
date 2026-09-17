@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-:root {
+:root,
+:root[data-theme="light"] {
   --amber: #ebae29;
   --amber-strong: #d99a12;
   --amber-soft: rgba(235, 174, 41, 0.16);
@@ -80,6 +81,13 @@
 }
 
 @layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -90,7 +98,6 @@
 
   body {
     min-height: 100dvh;
-    overflow-x: clip;
     background-color: var(--bg);
     color: var(--text);
     font-family: var(--font-body);

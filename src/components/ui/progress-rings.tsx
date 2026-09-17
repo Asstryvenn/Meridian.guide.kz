@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Target } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
 import { useT } from "@/lib/i18n/use-t";
@@ -50,7 +51,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
     <div className={`p-6 rounded-2xl bg-panel/90 border border-[#589C80]/30 backdrop-blur-xl text-ink flex flex-col md:flex-row items-center gap-6 justify-between ${className}`}>
       <div className="flex flex-col items-center md:items-start space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-xl">⭕</span>
+          <Target size={20} className="text-[#589C80]" />
           <h3 className="text-lg font-bold text-ink">{t("Activity & Focus Rings")}</h3>
         </div>
         <p className="text-xs text-ink/70 text-center md:text-left max-w-xs">
@@ -90,7 +91,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
         <svg viewBox="0 0 180 180" className="w-full h-full transform -rotate-90">
           <circle cx="90" cy="90" r={r1.radius} stroke="#EBAE29" strokeWidth="12" fill="none" opacity="0.15" />
           <circle cx="90" cy="90" r={r2.radius} stroke="#589C80" strokeWidth="12" fill="none" opacity="0.15" />
-          <circle cx="90" cy="90" r={r3.radius} stroke="var(--text)" strokeWidth="12" fill="none" opacity="0.15" />
+          <circle cx="90" cy="90" r={r3.radius} stroke="#9CD0A8" strokeWidth="12" fill="none" opacity="0.2" />
 
           <motion.circle
             cx="90"
@@ -124,7 +125,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
             cx="90"
             cy="90"
             r={r3.radius}
-            stroke="var(--text)"
+            stroke="#9CD0A8"
             strokeWidth="12"
             fill="none"
             strokeLinecap="round"
@@ -164,9 +165,9 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
           </span>
         </div>
 
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-panel border border-ink/30">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-panel border border-[#9CD0A8]/30">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-ink inline-block" />
+            <span className="w-3 h-3 rounded-full bg-[#9CD0A8] inline-block" />
             <span className="text-xs font-semibold text-ink">{t("Milestones")}</span>
           </div>
           <span className="text-xs font-mono font-bold text-ink">

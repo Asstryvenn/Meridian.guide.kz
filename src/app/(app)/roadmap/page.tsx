@@ -78,8 +78,9 @@ export default function RoadmapPage() {
       )}
 
       <PageHeader
+        centered
         eyebrow={tx("Application roadmap")}
-        title={tx("Your path, level by level")}
+        title={tx("Roadmap")}
         description={tx("Finish at least half of a level to unlock the next. Dates are suggestions counted back from your earliest deadline.")}
         actions={
           <div className="flex flex-wrap items-center gap-2">

@@ -60,7 +60,7 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
     { id: "food", label: t("Food & Dining Plan"), amount: foodCost, color: "#9CD0A8", detail: t("Standard campus dining hall or meal budget") },
     { id: "insurance", label: t("Health & Medical Insurance"), amount: insuranceCost, color: "#E2C37A", detail: t("Mandatory university student health coverage") },
     { id: "visa", label: t("Visa & SEVIS Fees"), amount: visaFees, color: "#7FA393", detail: t("Student visa processing, SEVIS I-90 / Embassy fee") },
-    { id: "flight", label: t("Roundtrip Travel & Flights"), amount: flightCost, color: "var(--text)", detail: t("Estimated flight from {userCountry} to {city}", { userCountry: userCountry, city: university.city }) },
+    { id: "flight", label: t("Roundtrip Travel & Flights"), amount: flightCost, color: "#5d8f79", detail: t("Estimated flight from {userCountry} to {city}", { userCountry: userCountry, city: university.city }) },
   ];
 
   const grossTotal = baseTuition + housingCost + foodCost + insuranceCost + visaFees + flightCost;

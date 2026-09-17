@@ -312,27 +312,29 @@ export function DocumentVault() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                {getStatusBadge(doc.status)}
+              <div className="w-full md:w-auto flex flex-wrap items-center justify-between md:justify-end gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-[var(--border)]">
+                <div className="flex items-center gap-2">
+                  {getStatusBadge(doc.status)}
 
-                <select
-                  value={doc.status}
-                  onChange={(e) =>
-                    updateVaultDocument(doc.id, {
-                      status: e.target.value as DocumentStatus,
-                    })
-                  }
-                  className="text-xs px-2.5 py-1.5 rounded-xl bg-panel border border-[#589C80]/30 text-ink font-mono focus:outline-none focus:border-[#EBAE29] cursor-pointer"
-                >
-                  <option value="verified">{t.common.verified}</option>
-                  <option value="missing">{t.common.missing}</option>
-                  <option value="needs_translation">{t.common.needsTranslation}</option>
-                </select>
+                  <select
+                    value={doc.status}
+                    onChange={(e) =>
+                      updateVaultDocument(doc.id, {
+                        status: e.target.value as DocumentStatus,
+                      })
+                    }
+                    className="text-xs px-2.5 py-1.5 rounded-xl bg-panel border border-[#589C80]/30 text-ink font-mono focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                  >
+                    <option value="verified">{t.common.verified}</option>
+                    <option value="missing">{t.common.missing}</option>
+                    <option value="needs_translation">{t.common.needsTranslation}</option>
+                  </select>
+                </div>
 
                 <button
                   type="button"
                   onClick={() => removeVaultDocument(doc.id)}
-                  className="p-2 text-xs text-ink/50 hover:text-red-400 transition-colors cursor-pointer"
+                  className="p-2 rounded-lg text-xs text-ink/50 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer ml-auto md:ml-0"
                   title={tx("Remove document")}
                 >
                   <Trash2 size={15} />

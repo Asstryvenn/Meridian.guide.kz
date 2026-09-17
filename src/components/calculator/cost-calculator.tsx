@@ -56,7 +56,7 @@ export function CostCalculator() {
   const items = [
     { label: t.calculator.tuitionFees, value: breakdown.tuition, color: "#EBAE29", bgClass: "bg-[#EBAE29]" },
     { label: t.calculator.housing, value: breakdown.housing, color: "#589C80", bgClass: "bg-[#589C80]" },
-    { label: t.calculator.livingExpenses, value: breakdown.living, color: "var(--text)", bgClass: "bg-ink" },
+    { label: t.calculator.livingExpenses, value: breakdown.living, color: "#4a7c6a", bgClass: "bg-[#4a7c6a]" },
     { label: t.calculator.insurance, value: breakdown.insurance, color: "#3f7f64", bgClass: "bg-[#3f7f64]" },
     { label: t.calculator.flights, value: breakdown.flights, color: "#d99a12", bgClass: "bg-[#d99a12]" },
     { label: t.calculator.visaFees, value: breakdown.visa, color: "#a8d5ba", bgClass: "bg-[#a8d5ba]" },

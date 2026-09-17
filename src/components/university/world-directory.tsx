@@ -24,7 +24,7 @@ function useDebounced<T>(value: T, delay: number): T {
 }
 
 function flag(code: string | null) {
-  if (!code || code.length !== 2) return "🎓";
+  if (!code || code.length !== 2) return "";
   return String.fromCodePoint(...code.toUpperCase().split("").map((c) => 127397 + c.charCodeAt(0)));
 }
 

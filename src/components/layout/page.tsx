@@ -22,9 +22,21 @@ export function Page({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  actions,
+  centered,
+}: {
+  eyebrow?: string;
+  title: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+  centered?: boolean;
+}) {
   return (
-    <motion.header className={styles.header} variants={rise}>
+    <motion.header className={`${styles.header} ${centered ? styles.headerCentered : ""}`} variants={rise}>
       <div className={styles.headerText}>
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1 className={styles.title}>{title}</h1>
