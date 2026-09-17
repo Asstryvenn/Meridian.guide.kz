@@ -10,30 +10,32 @@ import { ACCEPTED_IMPORT_TYPES, MAX_IMPORT_BYTES, type ImportResult } from "@/li
 import { applyImport, type ImportChange } from "@/lib/engine/import";
 import type { StudentProfile } from "@/lib/types";
 import styles from "./document-import.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 type Phase = { kind: "idle" } | { kind: "reading"; name: string } | { kind: "review"; result: ImportResult; changes: ImportChange[]; next: StudentProfile } | { kind: "error"; message: string };
 
 export function DocumentImport({ profile, onApply }: { profile: StudentProfile; onApply: (profile: StudentProfile) => void }) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [dragging, setDragging] = useState(false);
   const { notify } = useToast();
 
   async function upload(file: File) {
-    if (!ACCEPTED_IMPORT_TYPES.includes(file.type)) return setPhase({ kind: "error", message: "Use a PDF, photo (PNG, JPG, WEBP) or TXT file." });
-    if (file.size > MAX_IMPORT_BYTES) return setPhase({ kind: "error", message: "That file is larger than 8 MB." });
+    if (!ACCEPTED_IMPORT_TYPES.includes(file.type)) return setPhase({ kind: "error", message: t("Use a PDF, photo (PNG, JPG, WEBP) or TXT file.") });
+    if (file.size > MAX_IMPORT_BYTES) return setPhase({ kind: "error", message: t("That file is larger than 8 MB.") });
     setPhase({ kind: "reading", name: file.name });
     const body = new FormData();
     body.append("file", file);
     try {
       const response = await fetch("/api/ai/import", { method: "POST", body });
       const data = (await response.json()) as { result?: ImportResult; error?: string };
-      if (!response.ok || !data.result) return setPhase({ kind: "error", message: data.error ?? "The document could not be read." });
+      if (!response.ok || !data.result) return setPhase({ kind: "error", message: data.error ?? t("The document could not be read.") });
       const { profile: next, changes } = applyImport(profile, data.result);
-      if (!changes.length) return setPhase({ kind: "error", message: "We couldn't find grades, scores or activities in this document." });
+      if (!changes.length) return setPhase({ kind: "error", message: t("We couldn't find grades, scores or activities in this document.") });
       setPhase({ kind: "review", result: data.result, changes, next });
     } catch {
-      setPhase({ kind: "error", message: "Upload failed. Check your connection and try again." });
+      setPhase({ kind: "error", message: t("Upload failed. Check your connection and try again.") });
     }
   }
 
@@ -42,7 +44,7 @@ export function DocumentImport({ profile, onApply }: { profile: StudentProfile; 
       <AnimatePresence mode="wait" initial={false}>
         {phase.kind === "review" ? (
           <motion.div key="review" className={styles.review} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-            <p className={styles.title}>Found in your document</p>
+            <p className={styles.title}>{t("Found in your document")}</p>
             <p className={styles.summary}>{phase.result.summary}</p>
             <ul className={styles.changes}>
               {phase.changes.map((c) => (
@@ -64,14 +66,16 @@ export function DocumentImport({ profile, onApply }: { profile: StudentProfile; 
                 size="sm"
                 onClick={() => {
                   onApply(phase.next);
-                  notify({ tone: "success", title: "Profile updated", body: `${phase.changes.length} fields filled from your document` });
+                  notify({ tone: "success", title: t("Profile updated"), body: t("{count} fields filled from your document", { count: phase.changes.length }) });
                   setPhase({ kind: "idle" });
                 }}
               >
-                Apply to profile
+                
+                {t("Apply to profile")}
               </Button>
               <Button size="sm" variant="quiet" onClick={() => setPhase({ kind: "idle" })}>
-                Discard
+                
+                {t("Discard")}
               </Button>
             </div>
           </motion.div>
@@ -99,8 +103,8 @@ export function DocumentImport({ profile, onApply }: { profile: StudentProfile; 
           >
             <span className={styles.icon}>{phase.kind === "reading" ? <span className={styles.spinner} /> : <Icon name="plus" size={18} />}</span>
             <span className={styles.text}>
-              <span className={styles.title}>{phase.kind === "reading" ? `Reading ${phase.name}…` : "Import from a document"}</span>
-              <span className={phase.kind === "error" ? styles.error : styles.hint}>{phase.kind === "error" ? phase.message : "Transcript, test report, certificate or CV — AI fills the fields for you to review."}</span>
+              <span className={styles.title}>{phase.kind === "reading" ? t("Reading {name}…", { name: phase.name }) : t("Import from a document")}</span>
+              <span className={phase.kind === "error" ? styles.error : styles.hint}>{phase.kind === "error" ? phase.message : t("Transcript, test report, certificate or CV — AI fills the fields for you to review.")}</span>
             </span>
           </motion.button>
         )}

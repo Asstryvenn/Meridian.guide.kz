@@ -1,6 +1,7 @@
 import { professors } from "@/lib/data/professors";
 import { scholarships } from "@/lib/data/scholarships";
 import type { FieldOfStudy, Professor, Scholarship, StudentProfile } from "@/lib/types";
+import { tr } from "@/lib/i18n/catalog";
 import { gpaOnFourScale } from "./profile-metrics";
 
 export interface ScholarshipMatch {
@@ -15,34 +16,40 @@ export function matchScholarship(profile: StudentProfile, scholarship: Scholarsh
   const met: string[] = [];
   const unmet: string[] = [];
   const unknown: string[] = [];
+  let hardFail = false;
 
-  if (scholarship.eligibleCountries === "any") met.push("Open to all nationalities");
-  else if (profile.country && scholarship.eligibleCountries.includes(profile.country)) met.push(`Open to citizens of ${profile.country}`);
-  else if (!profile.country) unknown.push("Nationality not provided");
-  else unmet.push("Not open to your nationality");
+  if (scholarship.eligibleCountries === "any") met.push(tr("Open to all nationalities"));
+  else if (profile.country && scholarship.eligibleCountries.includes(profile.country)) met.push(tr("Open to citizens of {country}", { country: tr(profile.country) }));
+  else if (!profile.country) unknown.push(tr("Nationality not provided"));
+  else {
+    unmet.push(tr("Not open to your nationality"));
+    hardFail = true;
+  }
 
-  if (scholarship.level === "graduate") unmet.push("Graduate-level only — plan for later");
-  else met.push("Available for undergraduate study");
+  if (scholarship.level === "graduate") {
+    unmet.push(tr("Graduate-level only — plan for later"));
+    hardFail = true;
+  }
+  else met.push(tr("Available for undergraduate study"));
 
   const gpa4 = gpaOnFourScale(profile);
   if (scholarship.minGpa4 !== null) {
-    if (gpa4 === null) unknown.push("Grades not provided");
-    else if (gpa4 >= scholarship.minGpa4) met.push(`Academic record meets the typical bar (≈${scholarship.minGpa4.toFixed(1)}/4)`);
-    else unmet.push(`Academic record below the typical bar (≈${scholarship.minGpa4.toFixed(1)}/4)`);
+    if (gpa4 === null) unknown.push(tr("Grades not provided"));
+    else if (gpa4 >= scholarship.minGpa4) met.push(tr("Academic record meets the typical bar (≈{gpa}/4)", { gpa: scholarship.minGpa4.toFixed(1) }));
+    else unmet.push(tr("Academic record below the typical bar (≈{gpa}/4)", { gpa: scholarship.minGpa4.toFixed(1) }));
   }
 
   if (scholarship.requiresNeed) {
-    if (profile.needsAid) met.push("You indicated financial need");
-    else unmet.push("Requires demonstrated financial need");
+    if (profile.needsAid) met.push(tr("You indicated financial need"));
+    else unmet.push(tr("Requires demonstrated financial need"));
   }
 
   if (scholarship.universities !== "any") {
     const overlap = scholarship.universities.some((slug) => shortlist.includes(slug));
-    if (overlap) met.push("Linked to a university on your list");
-    else unknown.push("Requires applying to a specific university");
+    if (overlap) met.push(tr("Linked to a university on your list"));
+    else unknown.push(tr("Requires applying to a specific university"));
   }
 
-  const hardFail = unmet.some((u) => u.startsWith("Not open") || u.startsWith("Graduate"));
   const total = met.length + unmet.length + unknown.length * 0.5;
   const raw = total ? (met.length + unknown.length * 0.25) / total : 0;
   const eligibility = hardFail ? Math.min(15, Math.round(raw * 30)) : Math.round(raw * 100);

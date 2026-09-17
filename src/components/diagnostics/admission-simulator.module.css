@@ -1,0 +1,151 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.percent {
+  font-family: var(--font-heading);
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.caption {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.explainer {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.factors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+}
+
+.factors li {
+  display: grid;
+  grid-template-columns: minmax(0, 140px) minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.factorLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factorBar {
+  width: 100%;
+  height: 10px;
+}
+
+.axis {
+  fill: var(--track);
+}
+
+.positive {
+  fill: var(--green);
+}
+
+.negative {
+  fill: var(--danger);
+}
+
+.factorValue {
+  text-align: right;
+  font-weight: 700;
+}
+
+.up {
+  color: var(--green-ink);
+}
+
+.down {
+  color: var(--danger);
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.inputsTitle {
+  font-weight: 700;
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sliderMissing {
+  opacity: 0.7;
+}
+
+.clear {
+  align-self: flex-end;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fairness {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.footnote {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .percent {
+    font-size: 46px;
+  }
+
+  .factors li {
+    grid-template-columns: minmax(0, 110px) minmax(0, 1fr) 48px;
+  }
+}

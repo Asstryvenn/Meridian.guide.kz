@@ -5,12 +5,13 @@ export const runtime = "nodejs";
 
 const INSTRUCTIONS = `You write a short, honest portfolio review for a high school student applying to universities.
 
-Use only the computed diagnostics and profile data provided. Write 3–4 sentences in second person: what stands out, what is holding the profile back, and the single most valuable improvement over the next three months. Do not invent achievements, scores or statistics. No headings, no lists.`;
+Use only the computed diagnostics and profile data provided. Write 3–4 sentences in second person: what stands out, what is holding the profile back, and the single most valuable improvement over the next three months. Do not invent achievements, scores or statistics. No headings, no lists. Write in the language code given as "language" (en = English, ru = Russian, kk = Kazakh).`;
 
 export async function POST(request: Request) {
   const parsed = studentStateSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
 
+  const locale = parsed.data.locale ?? "en";
   const context = buildStudentContext(parsed.data);
   const openai = getOpenAI();
   if (!openai) return Response.json({ narrative: null, source: "rules" });
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       ...modelOptions("low", 1500),
       messages: [
         { role: "system", content: INSTRUCTIONS },
-        { role: "user", content: JSON.stringify({ student: context.student, diagnostics: context.diagnostics }) },
+        { role: "user", content: JSON.stringify({ language: locale, student: context.student, diagnostics: context.diagnostics }) },
       ],
     });
     const narrative = completion.choices[0]?.message.content?.trim() || null;

@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useId, type ReactNode } from "react";
+import { useT } from "@/lib/i18n/use-t";
 import styles from "./fields.module.css";
 
 interface FieldShellProps {
@@ -14,13 +15,14 @@ interface FieldShellProps {
 
 function FieldShell({ label, hint, children, className }: FieldShellProps) {
   const id = useId();
+  const t = useT();
   return (
     <div className={clsx(styles.field, className)}>
       <label htmlFor={id} className={styles.label}>
-        {label}
+        {t(label)}
       </label>
       {children(id)}
-      {hint && <p className={styles.hint}>{hint}</p>}
+      {hint && <p className={styles.hint}>{t(hint)}</p>}
     </div>
   );
 }
@@ -44,6 +46,7 @@ export function TextField({
   autoComplete?: string;
   className?: string;
 }) {
+  const t = useT();
   return (
     <FieldShell label={label} hint={hint} className={className}>
       {(id) => (
@@ -52,7 +55,7 @@ export function TextField({
           type={type}
           className={styles.input}
           value={value}
-          placeholder={placeholder}
+          placeholder={placeholder ? t(placeholder) : undefined}
           autoComplete={autoComplete}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -62,9 +65,10 @@ export function TextField({
 }
 
 export function TextArea({ label, hint, value, onChange, placeholder, className }: { label: string; hint?: string; value: string; onChange: (value: string) => void; placeholder?: string; className?: string }) {
+  const t = useT();
   return (
     <FieldShell label={label} hint={hint} className={className}>
-      {(id) => <textarea id={id} className={clsx(styles.input, styles.textarea)} value={value} placeholder={placeholder} rows={3} onChange={(e) => onChange(e.target.value)} />}
+      {(id) => <textarea id={id} className={clsx(styles.input, styles.textarea)} value={value} placeholder={placeholder ? t(placeholder) : undefined} rows={3} onChange={(e) => onChange(e.target.value)} />}
     </FieldShell>
   );
 }
@@ -90,6 +94,7 @@ export function NumberField({
   placeholder?: string;
   className?: string;
 }) {
+  const t = useT();
   return (
     <FieldShell label={label} hint={hint} className={className}>
       {(id) => (
@@ -102,7 +107,7 @@ export function NumberField({
           min={min}
           max={max}
           step={step}
-          placeholder={placeholder ?? "—"}
+          placeholder={placeholder ? t(placeholder) : "—"}
           onChange={(e) => {
             if (e.target.value === "") return onChange(null);
             const parsed = Number(e.target.value);
@@ -130,13 +135,14 @@ export function SelectField<T extends string>({
   options: { value: T; label: string }[];
   className?: string;
 }) {
+  const t = useT();
   return (
     <FieldShell label={label} hint={hint} className={className}>
       {(id) => (
         <select id={id} className={clsx(styles.input, styles.select)} value={value} onChange={(e) => onChange(e.target.value as T)}>
           {options.map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {t(o.label)}
             </option>
           ))}
         </select>
@@ -160,10 +166,11 @@ export function ChipGroup<T extends string>({
   onChange: (value: T[]) => void;
   single?: boolean;
 }) {
+  const t = useT();
   const normalized = (options as (T | { value: T; label: string })[]).map((o) => (typeof o === "string" ? { value: o, label: o } : o));
   return (
     <fieldset className={styles.field}>
-      <legend className={styles.label}>{label}</legend>
+      <legend className={styles.label}>{t(label)}</legend>
       <div className={styles.chips}>
         {normalized.map((option) => {
           const active = selected.includes(option.value);
@@ -178,12 +185,12 @@ export function ChipGroup<T extends string>({
                 onChange(active ? selected.filter((s) => s !== option.value) : [...selected, option.value]);
               }}
             >
-              {option.label}
+              {t(option.label)}
             </button>
           );
         })}
       </div>
-      {hint && <p className={styles.hint}>{hint}</p>}
+      {hint && <p className={styles.hint}>{t(hint)}</p>}
     </fieldset>
   );
 }
@@ -199,17 +206,18 @@ export function Segmented<T extends string>({
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
 }) {
+  const t = useT();
   const groupId = useId();
   return (
     <div className={styles.field}>
-      <span className={styles.label}>{label}</span>
-      <div className={styles.segmented} role="radiogroup" aria-label={label}>
+      <span className={styles.label}>{t(label)}</span>
+      <div className={styles.segmented} role="radiogroup" aria-label={t(label)}>
         {options.map((option) => {
           const active = option.value === value;
           return (
             <button key={option.value} type="button" role="radio" aria-checked={active} className={clsx(styles.segment, active && styles.segmentActive)} onClick={() => onChange(option.value)}>
               {active && <motion.span layoutId={`seg-${groupId}`} className={styles.segmentThumb} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-              <span className={styles.segmentLabel}>{option.label}</span>
+              <span className={styles.segmentLabel}>{t(option.label)}</span>
             </button>
           );
         })}
@@ -219,11 +227,12 @@ export function Segmented<T extends string>({
 }
 
 export function Toggle({ label, hint, checked, onChange }: { label: string; hint?: string; checked: boolean; onChange: (value: boolean) => void }) {
+  const t = useT();
   return (
     <button type="button" role="switch" aria-checked={checked} className={styles.toggleRow} onClick={() => onChange(!checked)}>
       <span className={styles.toggleText}>
-        <span className={styles.toggleLabel}>{label}</span>
-        {hint && <span className={styles.hint}>{hint}</span>}
+        <span className={styles.toggleLabel}>{t(label)}</span>
+        {hint && <span className={styles.hint}>{t(hint)}</span>}
       </span>
       <span className={clsx(styles.switch, checked && styles.switchOn)}>
         <motion.span layout className={styles.knob} transition={{ type: "spring", stiffness: 520, damping: 32 }} />
@@ -249,12 +258,13 @@ export function RangeField({
   onChange: (value: number) => void;
   format: (value: number) => string;
 }) {
+  const t = useT();
   const id = useId();
   return (
     <div className={styles.field}>
       <div className={styles.rangeHeader}>
         <label htmlFor={id} className={styles.label}>
-          {label}
+          {t(label)}
         </label>
         <span className={clsx(styles.rangeValue, "tabular")}>{format(value)}</span>
       </div>

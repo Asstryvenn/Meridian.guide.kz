@@ -14,13 +14,17 @@ import { matchScholarships } from "@/lib/engine/discovery";
 import { useApp } from "@/lib/store/app-store";
 import type { Scholarship } from "@/lib/types";
 import styles from "./scholarships.module.css";
+import { useLocale, useT } from "@/lib/i18n/use-t";
+import { inLocale } from "@/lib/i18n/catalog";
 
 type KindFilter = "all" | Scholarship["kind"];
 
 export default function ScholarshipsPage() {
+  const t = useT();
   const { profile, applications, updateApplication, addApplication } = useApp();
   const [kind, setKind] = useState<KindFilter>("all");
-  const matches = useMemo(() => matchScholarships(profile, applications.map((a) => a.universitySlug)), [profile, applications]);
+  const locale = useLocale();
+  const matches = useMemo(() => inLocale(locale, () => matchScholarships(profile, applications.map((a) => a.universitySlug))), [profile, applications, locale]);
   const shown = matches.filter((m) => kind === "all" || m.scholarship.kind === kind);
 
   function track(scholarship: Scholarship) {
@@ -39,18 +43,18 @@ export default function ScholarshipsPage() {
 
   return (
     <Page>
-      <PageHeader eyebrow="Scholarship discovery" title="Funding you could qualify for" description="Eligibility shows the share of published criteria your profile meets. It is not a probability of winning." />
+      <PageHeader eyebrow={t("Scholarship discovery")} title={t("Funding you could qualify for")} description={t("Eligibility shows the share of published criteria your profile meets. It is not a probability of winning.")} />
 
       <Reveal className={styles.controls}>
         <Segmented
-          label="Provider"
+          label={t("Provider")}
           value={kind}
           onChange={setKind}
           options={[
-            { value: "all", label: "All" },
-            { value: "university", label: "University" },
-            { value: "government", label: "Government" },
-            { value: "private", label: "Private" },
+            { value: "all", label: t("All") },
+            { value: "university", label: t("University") },
+            { value: "government", label: t("Government") },
+            { value: "private", label: t("Private") },
           ]}
         />
       </Reveal>
@@ -62,14 +66,14 @@ export default function ScholarshipsPage() {
             <Reveal key={s.id}>
               <article className={clsx("glass", styles.card, eligibility < 30 && styles.dim)}>
                 <div className={styles.ring}>
-                  <ProgressRing value={eligibility / 100} size={84} stroke={8} tone={eligibility >= 70 ? "green" : "amber"} label={`${eligibility}% of criteria met`}>
+                  <ProgressRing value={eligibility / 100} size={84} stroke={8} tone={eligibility >= 70 ? "green" : "amber"} label={t("{eligibility}% of criteria met", { eligibility: eligibility })}>
                     <span className={styles.pct}>{eligibility}%</span>
                   </ProgressRing>
-                  <span className="faint">eligible</span>
+                  <span className="faint">{t("eligible")}</span>
                 </div>
                 <div className={styles.body}>
                   <div className={styles.titleRow}>
-                    <h2 className={styles.name}>{s.name}</h2>
+                    <h2 className={styles.name}>{t(s.name)}</h2>
                     <div className={styles.badges}>
                       <Badge tone="outline">{s.kind}</Badge>
                       <Badge tone="neutral">{s.basis.replace(/_/g, " ")}</Badge>
@@ -77,16 +81,16 @@ export default function ScholarshipsPage() {
                     </div>
                   </div>
                   <p className="muted">
-                    {s.provider} · {s.coverage}
+                    {t(s.provider)} · {t(s.coverage)}
                   </p>
                   <div className={styles.meta}>
                     <span>
-                      Amount: <SourcedValue data={s.amountUsd} format={(v) => `≈ $${v.toLocaleString("en-US")}`} />
+                      {t("Amount:")} <SourcedValue data={s.amountUsd} format={(v) => `≈ $${v.toLocaleString("en-US")}`} />
                     </span>
                     <span>
-                      Deadline: {s.deadline ? `${formatDate(nextOccurrence(s.deadline))}${s.deadline.status === "needs_verification" ? " (needs verification)" : ""}` : "Varies — see source"}
+                      {t("Deadline:")} {s.deadline ? `${formatDate(nextOccurrence(s.deadline))}${s.deadline.status === "needs_verification" ? t(" (needs verification)") : ""}` : t("Varies — see source")}
                     </span>
-                    {s.universities !== "any" && <span>For: {s.universities.map((slug) => getUniversity(slug)?.shortName ?? slug).join(", ")}</span>}
+                    {s.universities !== "any" && <span>{t("For:")} {s.universities.map((slug) => getUniversity(slug)?.shortName ?? slug).join(", ")}</span>}
                   </div>
                   <ul className={styles.criteria}>
                     {met.map((c) => (
@@ -105,13 +109,13 @@ export default function ScholarshipsPage() {
                       </li>
                     ))}
                   </ul>
-                  <p className={styles.notes}>{s.notes}</p>
+                  <p className={styles.notes}>{t(s.notes)}</p>
                   <div className={styles.footer}>
                     <SourceNote data={s.source} />
                     <div className={styles.actions}>
                       <DataTag kind="institutional" />
                       <Button size="sm" variant={isTracked ? "secondary" : "primary"} disabled={isTracked || s.level === "graduate"} onClick={() => track(s)}>
-                        {isTracked ? "In your roadmap" : s.level === "graduate" ? "Plan for later" : "Add to roadmap"}
+                        {isTracked ? t("In your roadmap") : s.level === "graduate" ? t("Plan for later") : t("Add to roadmap")}
                       </Button>
                     </div>
                   </div>

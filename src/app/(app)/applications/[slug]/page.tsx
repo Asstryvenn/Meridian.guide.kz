@@ -24,8 +24,10 @@ import { useRoadmap } from "@/lib/store/derived";
 import { useTaskCompletion } from "@/lib/store/use-task-completion";
 import type { Application, ApplicationDocument } from "@/lib/types";
 import styles from "./workspace.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 export default function WorkspacePage() {
+  const tx = useT();
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const university = getUniversity(slug);
@@ -40,7 +42,7 @@ export default function WorkspacePage() {
   if (!application) {
     return (
       <Page>
-        <PageHeader eyebrow="Application workspace" title={university.name} description="This university is not in your applications yet." actions={<Button onClick={() => addApplication(slug)}>Start tracking</Button>} />
+        <PageHeader eyebrow={tx("Application workspace")} title={university.name} description={tx("This university is not in your applications yet.")} actions={<Button onClick={() => addApplication(slug)}>{tx("Start tracking")}</Button>} />
       </Page>
     );
   }
@@ -58,13 +60,14 @@ export default function WorkspacePage() {
   return (
     <Page>
       <PageHeader
-        eyebrow="Application workspace"
+        eyebrow={tx("Application workspace")}
         title={university.name}
-        description={`${university.city} · ${university.country}`}
+        description={`${tx(university.city)} · ${tx(university.country)}`}
         actions={
           <>
             <Button variant="ghost" href={`/universities/${slug}`}>
-              University profile
+              
+              {tx("University profile")}
             </Button>
             <Button
               variant="quiet"
@@ -73,7 +76,8 @@ export default function WorkspacePage() {
                 router.push("/applications");
               }}
             >
-              Stop tracking
+              
+              {tx("Stop tracking")}
             </Button>
           </>
         }
@@ -82,12 +86,12 @@ export default function WorkspacePage() {
       <div className={styles.top}>
         <Reveal>
           <Card className={styles.status}>
-            <ProgressRing value={progress} size={104} stroke={9} tone="green" label={`${Math.round(progress * 100)}% of checklist complete`}>
+            <ProgressRing value={progress} size={104} stroke={9} tone="green" label={tx("{round}% of checklist complete", { round: Math.round(progress * 100) })}>
               <span className={styles.ringValue}>{Math.round(progress * 100)}%</span>
             </ProgressRing>
             <div className={styles.statusBody}>
               <Segmented
-                label="Status"
+                label={tx("Status")}
                 value={application.status}
                 onChange={(status) => updateApplication(slug, { status })}
                 options={(Object.keys(statusLabel) as Application["status"][]).map((s) => ({ value: s, label: statusLabel[s] }))}
@@ -97,13 +101,13 @@ export default function WorkspacePage() {
         </Reveal>
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Deadlines" title={deadlines[0] ? `${deadlines[0].days} days left` : "No deadline on file"} action={<DataTag kind="institutional" />} />
+            <CardHeader eyebrow={tx("Deadlines")} title={deadlines[0] ? tx("{days} days left", { days: deadlines[0].days }) : tx("No deadline on file")} action={<DataTag kind="institutional" />} />
             <ul className={styles.deadlines}>
               {deadlines.map((d) => (
                 <li key={d.deadline.label}>
-                  <span>{d.deadline.label}</span>
+                  <span>{tx(d.deadline.label)}</span>
                   <span className="tabular">{formatDate(d.date)}</span>
-                  {d.deadline.status === "needs_verification" && <Badge tone="amber">Verify</Badge>}
+                  {d.deadline.status === "needs_verification" && <Badge tone="amber">{tx("Verify")}</Badge>}
                 </li>
               ))}
             </ul>
@@ -115,17 +119,17 @@ export default function WorkspacePage() {
       <div className={styles.grid}>
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Requirements" title="What they ask for" />
+            <CardHeader eyebrow={tx("Requirements")} title={tx("What they ask for")} />
             <ul className={styles.requirements}>
-              {university.requirements.tests.map((t) => (
-                <li key={t}>{t}</li>
+              {university.requirements.tests.map((test) => (
+                <li key={test}>{tx(test)}</li>
               ))}
             </ul>
             <div className={styles.english}>
-              <span>English minimum</span>
+              <span>{tx("English minimum")}</span>
               <SourcedValue data={university.requirements.minIelts} format={(v) => `IELTS ${v.toFixed(1)}`} />
               {minIelts !== null && (
-                <Badge tone={ielts !== null && ielts >= minIelts ? "green" : "danger"}>{ielts === null ? "No test yet" : ielts >= minIelts ? `You: ${ielts.toFixed(1)} (Met)` : `You: ${ielts.toFixed(1)}`}</Badge>
+                <Badge tone={ielts !== null && ielts >= minIelts ? "green" : "danger"}>{ielts === null ? tx("No test yet") : ielts >= minIelts ? tx("You: {ielts} (Met)", { ielts: ielts.toFixed(1) }) : `You: ${ielts.toFixed(1)}`}</Badge>
               )}
             </div>
           </Card>
@@ -133,7 +137,7 @@ export default function WorkspacePage() {
 
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Documents" title={`${application.documents.filter((d) => d.done).length} of ${application.documents.length} ready`} />
+            <CardHeader eyebrow={tx("Documents")} title={tx("{count} of {count2} ready", { count: application.documents.filter((d) => d.done).length, count2: application.documents.length })} />
             <Checklist items={application.documents} onToggle={(id) => toggleItem("documents", id)} />
           </Card>
         </Reveal>
@@ -141,11 +145,12 @@ export default function WorkspacePage() {
         <Reveal>
           <Card>
             <CardHeader
-              eyebrow="Essays"
-              title={`${application.essays.filter((d) => d.done).length} of ${application.essays.length} drafted`}
+              eyebrow={tx("Essays")}
+              title={tx("{count} of {count2} drafted", { count: application.essays.filter((d) => d.done).length, count2: application.essays.length })}
               action={
                 <Button variant="quiet" size="sm" href={`/mentor?ask=${encodeURIComponent(`Help me brainstorm my ${university.shortName} supplemental essay.`)}`}>
-                  Brainstorm
+                  
+                  {tx("Brainstorm")}
                 </Button>
               }
             />
@@ -155,7 +160,7 @@ export default function WorkspacePage() {
 
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Scholarships" title="Funding for this application" />
+            <CardHeader eyebrow={tx("Scholarships")} title={tx("Funding for this application")} />
             {application.scholarshipIds.length ? (
               <ul className={styles.scholarships}>
                 {application.scholarshipIds.map((id) => {
@@ -164,15 +169,15 @@ export default function WorkspacePage() {
                   const m = matchScholarship(profile, s, applications.map((a) => a.universitySlug));
                   return (
                     <li key={id}>
-                      <span>{s.name}</span>
-                      <Badge tone={m.eligibility >= 70 ? "green" : "amber"}>{m.eligibility}% eligible</Badge>
+                      <span>{tx(s.name)}</span>
+                      <Badge tone={m.eligibility >= 70 ? "green" : "amber"}>{tx("{percent}% eligible", { percent: m.eligibility })}</Badge>
                     </li>
                   );
                 })}
               </ul>
             ) : (
               <p className="muted">
-                None linked yet. <Link href="/scholarships">Browse scholarships</Link>
+                {tx("None linked yet.")} <Link href="/scholarships">{tx("Browse scholarships")}</Link>
               </p>
             )}
           </Card>
@@ -182,7 +187,7 @@ export default function WorkspacePage() {
       {tasks.length > 0 && (
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Roadmap" title="Steps for this university" />
+            <CardHeader eyebrow={tx("Roadmap")} title={tx("Steps for this university")} />
             <ul className={styles.tasks}>
               {tasks.map((t) => (
                 <li key={t.id} className={clsx(t.done && styles.taskDone)}>
@@ -206,8 +211,8 @@ export default function WorkspacePage() {
         </Reveal>
         <Reveal>
           <Card>
-            <CardHeader eyebrow="Notes" title="Your notes" />
-            <TextArea label="Private notes" value={application.notes} onChange={(notes) => updateApplication(slug, { notes })} placeholder="Interview tips, contacts, program-specific ideas…" />
+            <CardHeader eyebrow={tx("Notes")} title={tx("Your notes")} />
+            <TextArea label={tx("Private notes")} value={application.notes} onChange={(notes) => updateApplication(slug, { notes })} placeholder={tx("Interview tips, contacts, program-specific ideas…")} />
           </Card>
         </Reveal>
       </div>

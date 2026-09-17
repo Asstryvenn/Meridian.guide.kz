@@ -21,16 +21,20 @@ import { recommend } from "@/lib/engine/matching";
 import { matchProfessors, matchScholarship } from "@/lib/engine/discovery";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./profile.module.css";
+import { useLocale, useT } from "@/lib/i18n/use-t";
+import { inLocale, msg } from "@/lib/i18n/catalog";
 
 const usd = (v: number) => `$${v.toLocaleString("en-US")}`;
-const aidCopy = { full_need: "Meets full demonstrated need", limited: "Limited aid or merit awards", none: "No need-based aid for international students" };
+const aidCopy = { full_need: msg("Meets full demonstrated need"), limited: msg("Limited aid or merit awards"), none: msg("No need-based aid for international students") };
 
 export default function UniversityProfile() {
+  const tx = useT();
   const { slug } = useParams<{ slug: string }>();
   const university = getUniversity(slug);
   const { profile, applications, addApplication, compare, toggleCompare } = useApp();
 
-  const recommendation = useMemo(() => (university ? recommend(profile, [university], true)[0] : undefined), [profile, university]);
+  const locale = useLocale();
+  const recommendation = useMemo(() => (university ? inLocale(locale, () => recommend(profile, [university], true)[0]) : undefined), [profile, university, locale]);
   const faculty = useMemo(() => (university ? matchProfessors(profile, "", professors.filter((p) => p.universitySlug === university.slug)) : []), [profile, university]);
 
   if (!university) notFound();
@@ -42,23 +46,23 @@ export default function UniversityProfile() {
   return (
     <Page>
       <PageHeader
-        eyebrow={`${university.city} · ${university.country}`}
+        eyebrow={`${tx(university.city)} · ${tx(university.country)}`}
         title={university.name}
-        description={university.summary}
+        description={tx(university.summary)}
         actions={
           <>
             <Button variant="ghost" onClick={() => toggleCompare(university.slug)}>
-              {compare.includes(university.slug) ? "In comparison" : "Compare"}
+              {compare.includes(university.slug) ? tx("In comparison") : tx("Compare")}
             </Button>
             <Button onClick={() => addApplication(university.slug)} disabled={tracked}>
-              {tracked ? "Tracking application" : "Add to applications"}
+              {tracked ? tx("Tracking application") : tx("Add to applications")}
             </Button>
           </>
         }
       />
 
-      <nav className={styles.anchors} aria-label="Sections">
-        {["Fit", "Programs", "Admissions", "Costs", "Campus", "Careers", "Faculty"].map((s) => (
+      <nav className={styles.anchors} aria-label={tx("Sections")}>
+        {[tx("Fit"), tx("Programs"), tx("Admissions"), tx("Costs"), tx("Campus"), tx("Careers"), tx("Faculty")].map((s) => (
           <a key={s} href={`#${s.toLowerCase()}`}>
             {s}
           </a>
@@ -72,20 +76,20 @@ export default function UniversityProfile() {
               <>
                 <div className={styles.fitHead}>
                   <TierBadge tier={recommendation.tier} />
-                  <DataTag kind="rules" label="Match score" />
+                  <DataTag kind="rules" label={tx("Match score")} />
                 </div>
                 <div className={styles.fitScore}>
-                  <ProgressRing value={recommendation.matchScore / 100} size={112} stroke={10} tone="green" label={`Match score ${recommendation.matchScore}`}>
+                  <ProgressRing value={recommendation.matchScore / 100} size={112} stroke={10} tone="green" label={tx("Match score {matchScore}", { matchScore: recommendation.matchScore })}>
                     <span className={styles.fitValue}>{recommendation.matchScore}</span>
                   </ProgressRing>
                   <div>
-                    <p className={styles.fitLabel}>Why it fits</p>
+                    <p className={styles.fitLabel}>{tx("Why it fits")}</p>
                     <ul className={styles.fitReasons}>
                       {recommendation.reasons.map((r) => (
                         <li key={r}>{r}</li>
                       ))}
                     </ul>
-                    <p className={styles.fitLabel}>Main gap</p>
+                    <p className={styles.fitLabel}>{tx("Main gap")}</p>
                     <p className="muted">{recommendation.mainGap}</p>
                   </div>
                 </div>
@@ -95,24 +99,24 @@ export default function UniversityProfile() {
                 </p>
               </>
             ) : (
-              <p className="muted">This university has no programs in or near your selected fields, so no personal fit is calculated.</p>
+              <p className="muted">{tx("This university has no programs in or near your selected fields, so no personal fit is calculated.")}</p>
             )}
           </Card>
         </Reveal>
         <Reveal>
-          <Card>{recommendation ? <PredictionPanel prediction={recommendation.prediction} /> : <p className="muted">Select a matching field of study to see an admission estimate.</p>}</Card>
+          <Card>{recommendation ? <PredictionPanel prediction={recommendation.prediction} /> : <p className="muted">{tx("Select a matching field of study to see an admission estimate.")}</p>}</Card>
         </Reveal>
       </section>
 
       <Reveal>
         <Card id="programs" className={styles.section}>
-          <CardHeader eyebrow="Programs" title="Undergraduate programs" />
+          <CardHeader eyebrow={tx("Programs")} title={tx("Undergraduate programs")} />
           <ul className={styles.programs}>
             {university.programs.map((p) => (
               <li key={p.name} className={profile.fields.includes(p.field) ? styles.programMatch : undefined}>
-                <span className={styles.programName}>{p.name}</span>
+                <span className={styles.programName}>{tx(p.name)}</span>
                 <span className="faint">
-                  {p.degree} · {p.field}
+                  {tx(p.degree)} · {tx(p.field)}
                 </span>
                 {p.selectiveNote && <span className={styles.programNote}>{p.selectiveNote}</span>}
               </li>
@@ -123,41 +127,41 @@ export default function UniversityProfile() {
 
       <Reveal>
         <Card id="admissions" className={styles.section}>
-          <CardHeader eyebrow="Admissions" title="Requirements and deadlines" action={<DataTag kind="institutional" />} />
+          <CardHeader eyebrow={tx("Admissions")} title={tx("Requirements and deadlines")} action={<DataTag kind="institutional" />} />
           <div className={styles.factGrid}>
-            <Fact label="Acceptance rate" source={university.acceptanceRate}>
+            <Fact label={tx("Acceptance rate")} source={university.acceptanceRate}>
               <SourcedValue data={university.acceptanceRate} format={(v) => `${Math.round(v * 1000) / 10}%`} />
             </Fact>
-            <Fact label="Minimum IELTS" source={university.requirements.minIelts}>
+            <Fact label={tx("Minimum IELTS")} source={university.requirements.minIelts}>
               <SourcedValue data={university.requirements.minIelts} format={(v) => v.toFixed(1)} />
             </Fact>
-            <Fact label="Minimum TOEFL iBT" source={university.requirements.minToefl}>
+            <Fact label={tx("Minimum TOEFL iBT")} source={university.requirements.minToefl}>
               <SourcedValue data={university.requirements.minToefl} format={String} />
             </Fact>
-            <Fact label="Typical SAT of admits" source={university.requirements.typicalSat}>
+            <Fact label={tx("Typical SAT of admits")} source={university.requirements.typicalSat}>
               <SourcedValue data={university.requirements.typicalSat} format={String} />
             </Fact>
-            <Fact label="Typical IB score" source={university.requirements.typicalIb}>
+            <Fact label={tx("Typical IB score")} source={university.requirements.typicalIb}>
               <SourcedValue data={university.requirements.typicalIb} format={String} />
             </Fact>
           </div>
           <div className={styles.split}>
             <div>
-              <p className={styles.subhead}>Application components</p>
+              <p className={styles.subhead}>{tx("Application components")}</p>
               <ul className={styles.bullets}>
-                {university.requirements.tests.map((t) => (
-                  <li key={t}>{t}</li>
+                {university.requirements.tests.map((test) => (
+                  <li key={test}>{tx(test)}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <p className={styles.subhead}>Next deadlines</p>
+              <p className={styles.subhead}>{tx("Next deadlines")}</p>
               <ul className={styles.deadlines}>
                 {deadlines.map((d) => (
                   <li key={d.deadline.label}>
-                    <span className={styles.deadlineLabel}>{d.deadline.label}</span>
+                    <span className={styles.deadlineLabel}>{tx(d.deadline.label)}</span>
                     <span className="tabular">{formatDate(d.date)}</span>
-                    <span className={d.deadline.status === "needs_verification" ? styles.verify : "faint"}>{d.deadline.status === "needs_verification" ? "Needs verification" : `in ${d.days} days`}</span>
+                    <span className={d.deadline.status === "needs_verification" ? styles.verify : "faint"}>{d.deadline.status === "needs_verification" ? tx("Needs verification") : tx("in {days} days", { days: d.days })}</span>
                   </li>
                 ))}
               </ul>
@@ -169,22 +173,22 @@ export default function UniversityProfile() {
 
       <Reveal>
         <Card id="costs" className={styles.section}>
-          <CardHeader eyebrow="Costs and funding" title="Tuition, living costs and scholarships" action={<DataTag kind="institutional" />} />
+          <CardHeader eyebrow={tx("Costs and funding")} title={tx("Tuition, living costs and scholarships")} action={<DataTag kind="institutional" />} />
           <div className={styles.factGrid}>
-            <Fact label="International tuition / year" source={university.intlTuitionUsd}>
+            <Fact label={tx("International tuition / year")} source={university.intlTuitionUsd}>
               <SourcedValue data={university.intlTuitionUsd} format={([a, b]) => (a === b ? usd(a) : `${usd(a)} – ${usd(b)}`)} />
             </Fact>
-            <Fact label="Estimated living cost / year" source={university.livingCostUsd}>
+            <Fact label={tx("Estimated living cost / year")} source={university.livingCostUsd}>
               <SourcedValue data={university.livingCostUsd} format={usd} />
             </Fact>
-            <Fact label="Need-based aid" source={university.needBasedAidIntl}>
+            <Fact label={tx("Need-based aid")} source={university.needBasedAidIntl}>
               <SourcedValue data={university.needBasedAidIntl} format={(v) => aidCopy[v]} />
             </Fact>
           </div>
           <div className="pt-4">
             <TrueCostCalculator
               university={university}
-              userCountry={profile.country || "Kazakhstan"}
+              userCountry={profile.country || tx("Kazakhstan")}
               userBudgetUsd={profile.annualBudgetUsd || 30000}
             />
           </div>
@@ -197,16 +201,16 @@ export default function UniversityProfile() {
                 return (
                   <li key={id}>
                     <div>
-                      <p className={styles.programName}>{s.name}</p>
-                      <p className="faint">{s.coverage}</p>
+                      <p className={styles.programName}>{tx(s.name)}</p>
+                      <p className="faint">{tx(s.coverage)}</p>
                     </div>
-                    <Badge tone={match.eligibility >= 70 ? "green" : match.eligibility >= 40 ? "amber" : "neutral"}>{match.eligibility}% eligible</Badge>
+                    <Badge tone={match.eligibility >= 70 ? "green" : match.eligibility >= 40 ? "amber" : "neutral"}>{tx("{percent}% eligible", { percent: match.eligibility })}</Badge>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="muted">No university-specific scholarships in our catalog yet. Check the official financial aid page.</p>
+            <p className="muted">{tx("No university-specific scholarships in our catalog yet. Check the official financial aid page.")}</p>
           )}
         </Card>
       </Reveal>
@@ -214,14 +218,14 @@ export default function UniversityProfile() {
       <div className={styles.twoCol}>
         <Reveal>
           <Card id="campus" className={styles.section}>
-            <CardHeader eyebrow="Campus life" title={`${university.campus} · ${university.size}`} />
-            <p className="muted">{university.campusLife}</p>
+            <CardHeader eyebrow={tx("Campus life")} title={`${tx(university.campus)} · ${tx(university.size)}`} />
+            <p className="muted">{tx(university.campusLife)}</p>
           </Card>
         </Reveal>
         <Reveal>
           <Card id="careers" className={styles.section}>
-            <CardHeader eyebrow="Career outcomes" title="After graduation" />
-            <p className="muted">{university.careerOutcomes.value ?? "Information unavailable"}</p>
+            <CardHeader eyebrow={tx("Career outcomes")} title={tx("After graduation")} />
+            <p className="muted">{university.careerOutcomes.value ? tx(university.careerOutcomes.value) : tx("Information unavailable")}</p>
             <div className={styles.sourceRow}>
               <SourceNote data={university.careerOutcomes} compact />
             </div>
@@ -232,11 +236,11 @@ export default function UniversityProfile() {
       <Reveal>
         <Card id="faculty" className={styles.section}>
           <CardHeader
-            eyebrow="Professor discovery"
-            title="Faculty aligned with your interests"
+            eyebrow={tx("Professor discovery")}
+            title={tx("Faculty aligned with your interests")}
             action={
               <Button variant="quiet" size="sm" href="/professors">
-                All professors <Icon name="arrow" size={14} />
+                {tx("All professors")} <Icon name="arrow" size={14} />
               </Button>
             }
           />
@@ -246,24 +250,24 @@ export default function UniversityProfile() {
                 <li key={professor.id}>
                   <div>
                     <p className={styles.programName}>{professor.name}</p>
-                    <p className="faint">{professor.department}</p>
-                    <p className={styles.areas}>{professor.areas.join(" · ")}</p>
+                    <p className="faint">{tx(professor.department)}</p>
+                    <p className={styles.areas}>{professor.areas.map((area) => tx(area)).join(" · ")}</p>
                   </div>
                   <div className={styles.facultyFit}>
                     <span className="tabular">{fit}%</span>
-                    <span className="faint">{matchedAreas.length ? "research fit" : "no overlap yet"}</span>
+                    <span className="faint">{matchedAreas.length ? tx("research fit") : tx("no overlap yet")}</span>
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="muted">No faculty profiles for this university in our catalog yet.</p>
+            <p className="muted">{tx("No faculty profiles for this university in our catalog yet.")}</p>
           )}
         </Card>
       </Reveal>
 
       <p className={styles.back}>
-        <Link href="/universities">← Back to catalog</Link>
+        <Link href="/universities">{tx("← Back to catalog")}</Link>
       </p>
     </Page>
   );

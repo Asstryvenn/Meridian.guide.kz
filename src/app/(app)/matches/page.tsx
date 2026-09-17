@@ -11,16 +11,19 @@ import { RecommendationCard } from "@/components/university/recommendation-card"
 import { useRecommendations } from "@/lib/store/derived";
 import type { Tier } from "@/lib/types";
 import styles from "./matches.module.css";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 type Filter = "All" | Tier;
 
 const tierCopy: Record<Tier, string> = {
-  Dream: "Admission is a reach even with a strong application.",
-  Target: "Your profile is within the typical admitted range.",
-  Safety: "You are likely to be admitted if you apply carefully.",
+  Dream: msg("Admission is a reach even with a strong application."),
+  Target: msg("Your profile is within the typical admitted range."),
+  Safety: msg("You are likely to be admitted if you apply carefully."),
 };
 
 export default function MatchesPage() {
+  const t = useT();
   const { list, tiers } = useRecommendations();
   const [filter, setFilter] = useState<Filter>("All");
   const shown = filter === "All" ? list : tiers[filter];
@@ -28,46 +31,47 @@ export default function MatchesPage() {
   return (
     <Page>
       <PageHeader
-        eyebrow="Recommendation engine"
-        title="Dream, Target, Safety"
-        description="Ranked by how well each university fits your field, budget, preferences and goals. Tiers come from the admission estimate range."
+        eyebrow={t("Recommendation engine")}
+        title={t("Dream, Target, Safety")}
+        description={t("Ranked by how well each university fits your field, budget, preferences and goals. Tiers come from the admission estimate range.")}
         actions={
           <Button variant="secondary" href="/universities">
-            Search the catalog
+            
+            {t("Search the catalog")}
           </Button>
         }
       />
 
       <Reveal className={styles.controls}>
         <Segmented
-          label="Show"
+          label={t("Show")}
           value={filter}
           onChange={setFilter}
           options={[
-            { value: "All", label: `All ${list.length}` },
-            { value: "Dream", label: `Dream ${tiers.Dream.length}` },
-            { value: "Target", label: `Target ${tiers.Target.length}` },
-            { value: "Safety", label: `Safety ${tiers.Safety.length}` },
+            { value: "All", label: t("All {count}", { count: list.length }) },
+            { value: "Dream", label: t("Dream {count}", { count: tiers.Dream.length }) },
+            { value: "Target", label: t("Target {count}", { count: tiers.Target.length }) },
+            { value: "Safety", label: t("Safety {count}", { count: tiers.Safety.length }) },
           ]}
         />
         <div className={styles.legend}>
           <DataTag kind="prediction" />
-          <DataTag kind="rules" label="Match score" />
+          <DataTag kind="rules" label={t("Match score")} />
           <DataTag kind="institutional" />
         </div>
       </Reveal>
 
       {filter !== "All" && (
         <Reveal>
-          <p className={styles.tierNote}>{tierCopy[filter]}</p>
+          <p className={styles.tierNote}>{t(tierCopy[filter])}</p>
         </Reveal>
       )}
 
       {list.length < 3 && (
         <EmptyState
-          title="Too few matches"
-          body="Pick at least one field of study and widen your country preferences so we can build a balanced list."
-          action={<Button href="/onboarding?edit=1">Update preferences</Button>}
+          title={t("Too few matches")}
+          body={t("Pick at least one field of study and widen your country preferences so we can build a balanced list.")}
+          action={<Button href="/onboarding?edit=1">{t("Update preferences")}</Button>}
         />
       )}
 

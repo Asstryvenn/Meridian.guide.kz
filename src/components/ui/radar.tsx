@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import styles from "./radar.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 interface RadarProps {
   axes: { label: string; value: number | null }[];
@@ -9,6 +10,7 @@ interface RadarProps {
 }
 
 export function Radar({ axes, size = 320 }: RadarProps) {
+  const t = useT();
   const center = size / 2;
   const radius = size / 2 - 48;
   const angle = (i: number) => (Math.PI * 2 * i) / axes.length - Math.PI / 2;
@@ -17,7 +19,7 @@ export function Radar({ axes, size = 320 }: RadarProps) {
   const collapsed = axes.map(() => `${center},${center}`).join(" ");
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className={styles.radar} role="img" aria-label={axes.map((a) => `${a.label} ${a.value ?? "no data"}`).join(", ")}>
+    <svg viewBox={`0 0 ${size} ${size}`} className={styles.radar} role="img" aria-label={axes.map((a) => `${a.label} ${a.value ?? t("no data")}`).join(", ")}>
       {[0.25, 0.5, 0.75, 1].map((scale) => (
         <polygon key={scale} className={styles.ring} points={axes.map((_, i) => point(i, radius * scale).join(",")).join(" ")} />
       ))}

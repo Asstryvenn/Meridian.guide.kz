@@ -19,7 +19,7 @@
 }
 
 .points li::marker {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .tableWrap {

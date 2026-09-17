@@ -24,19 +24,22 @@ import {
 } from "./steps";
 import { DocumentImport } from "./document-import";
 import styles from "./onboarding-flow.module.css";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 const steps: { title: string; description: string; Component: ComponentType<StepProps> }[] = [
-  { title: "About you", description: "The basics that shape which systems and deadlines apply to you.", Component: BasicInfoStep },
-  { title: "Academic profile", description: "Grades and tests are the foundation of every admission estimate.", Component: AcademicStep },
-  { title: "English proficiency", description: "Most universities abroad set a minimum score.", Component: EnglishStep },
-  { title: "Interests", description: "What you want to study decides which programs we consider.", Component: InterestsStep },
-  { title: "Extracurriculars", description: "Depth, reach and evidence matter more than a long list.", Component: ActivitiesStep },
-  { title: "Finances", description: "We only recommend options you can realistically pay for — or get funded for.", Component: FinancialStep },
-  { title: "Preferences", description: "Where and how you want to live for the next four years.", Component: PreferencesStep },
-  { title: "Career goals", description: "Your long-term plans shift how much research environment matters.", Component: CareerStep },
+  { title: msg("About you"), description: msg("The basics that shape which systems and deadlines apply to you."), Component: BasicInfoStep },
+  { title: msg("Academic profile"), description: msg("Grades and tests are the foundation of every admission estimate."), Component: AcademicStep },
+  { title: msg("English proficiency"), description: msg("Most universities abroad set a minimum score."), Component: EnglishStep },
+  { title: msg("Interests"), description: msg("What you want to study decides which programs we consider."), Component: InterestsStep },
+  { title: msg("Extracurriculars"), description: msg("Depth, reach and evidence matter more than a long list."), Component: ActivitiesStep },
+  { title: msg("Finances"), description: msg("We only recommend options you can realistically pay for — or get funded for."), Component: FinancialStep },
+  { title: msg("Preferences"), description: msg("Where and how you want to live for the next four years."), Component: PreferencesStep },
+  { title: msg("Career goals"), description: msg("Your long-term plans shift how much research environment matters."), Component: CareerStep },
 ];
 
 export function OnboardingFlow() {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
   const editing = params.get("edit") === "1";
@@ -68,11 +71,11 @@ export function OnboardingFlow() {
     const error = await completeOnboarding();
     if (error) {
       setSaving(false);
-      setSaveError(`We couldn't save your profile: ${error}. Your answers are kept on this device — try again.`);
+      setSaveError(t("We couldn't save your profile: {error}. Your answers are kept on this device — try again.", { error: error }));
       return;
     }
     markTask("foundation-profile");
-    notify({ tone: "success", title: editing ? "Profile saved" : "Profile complete", body: editing ? undefined : "+20 XP · Your diagnostics are ready" });
+    notify({ tone: "success", title: editing ? t("Profile saved") : t("Profile complete"), body: editing ? undefined : t("+20 XP · Your diagnostics are ready") });
     router.push(editing ? "/dashboard" : "/diagnostics");
   }
 
@@ -95,12 +98,13 @@ export function OnboardingFlow() {
                 setIndex(steps.length - 1);
               }}
             >
-              Fill with sample profile
+              
+              {t("Fill with sample profile")}
             </Button>
           )}
           {editing && (
             <Button variant="secondary" size="sm" onClick={finish} disabled={saving}>
-              {saving ? "Saving…" : "Save and close"}
+              {saving ? t("Saving…") : t("Save and close")}
             </Button>
           )}
         </div>
@@ -109,15 +113,15 @@ export function OnboardingFlow() {
       <div className={styles.progress}>
         <div className={styles.progressMeta}>
           <span className="tabular">
-            Step {index + 1} of {steps.length}
+            {t("Step {index} of {count}", { index: index + 1, count: steps.length })}
           </span>
-          <span>{step.title}</span>
+          <span>{t(step.title)}</span>
         </div>
-        <Meter value={((index + 1) / steps.length) * 100} tone="amber" label={`Onboarding progress: step ${index + 1} of ${steps.length}`} />
+        <Meter value={((index + 1) / steps.length) * 100} tone="amber" label={t("Onboarding progress: step {index} of {count}", { index: index + 1, count: steps.length })} />
         <ol className={styles.dots}>
           {steps.map((s, i) => (
             <li key={s.title}>
-              <button type="button" className={styles.dotButton} aria-label={`Go to ${s.title}`} aria-current={i === index ? "step" : undefined} data-state={i < index ? "done" : i === index ? "current" : "todo"} onClick={() => go(i - index)} />
+              <button type="button" className={styles.dotButton} aria-label={t("Go to {title}", { title: t(s.title) })} aria-current={i === index ? "step" : undefined} data-state={i < index ? "done" : i === index ? "current" : "todo"} onClick={() => go(i - index)} />
             </li>
           ))}
         </ol>
@@ -135,8 +139,8 @@ export function OnboardingFlow() {
             className={styles.step}
           >
             <header className={styles.stepHeader}>
-              <h1 className={styles.title}>{step.title}</h1>
-              <p className="muted">{step.description}</p>
+              <h1 className={styles.title}>{t(step.title)}</h1>
+              <p className="muted">{t(step.description)}</p>
             </header>
             {index === 1 && <DocumentImport profile={profile} onApply={replaceProfile} />}
             <step.Component profile={profile} update={updateProfile} />
@@ -152,16 +156,18 @@ export function OnboardingFlow() {
 
       <footer className={styles.footer}>
         <Button variant="quiet" className={styles.back} onClick={() => go(-1)} disabled={index === 0 || saving}>
-          Back
+          
+          {t("Back")}
         </Button>
         <div className={styles.footerRight}>
           {!last && (
             <Button variant="quiet" className={styles.skip} onClick={() => go(1)}>
-              Skip
+              
+              {t("Skip")}
             </Button>
           )}
           <Button className={styles.primary} onClick={last ? finish : () => go(1)} size="lg" disabled={saving}>
-            {last ? (saving ? "Saving…" : editing ? "Save changes" : "Finish") : "Continue"}
+            {last ? (saving ? t("Saving…") : editing ? t("Save changes") : t("Finish")) : t("Continue")}
             {!saving && <Icon name={last ? "check" : "arrow"} size={18} />}
           </Button>
         </div>

@@ -9,6 +9,7 @@ import { getUniversity } from "@/lib/data/universities";
 import type { Application, StudentProfile } from "@/lib/types";
 
 export const studentStateSchema = z.object({
+  locale: z.enum(["en", "ru", "kk"]).optional(),
   profile: z.custom<StudentProfile>((value) => typeof value === "object" && value !== null && "fields" in value),
   applications: z.array(z.custom<Application>((value) => typeof value === "object" && value !== null && "universitySlug" in value)).max(40),
   completedTasks: z.array(z.string()).max(400),

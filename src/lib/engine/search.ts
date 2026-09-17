@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { msg, tr } from "@/lib/i18n/catalog";
 import { countries, regions, universities } from "@/lib/data/universities";
 import type { FieldOfStudy, University } from "@/lib/types";
 
@@ -152,16 +153,39 @@ export function applyFilters(filters: SearchFilters, pool: University[] = univer
   });
 }
 
-export function describeFilters(filters: SearchFilters): string[] {
-  const chips: string[] = [];
-  chips.push(...filters.fields);
-  chips.push(...filters.countries);
-  chips.push(...filters.regions);
-  if (filters.maxTuitionUsd !== null) chips.push(`Tuition ≤ $${Math.round(filters.maxTuitionUsd / 1000)}k`);
-  if (filters.scholarshipsOnly) chips.push("Scholarships or full-need aid");
-  if (filters.difficulty === "accessible") chips.push("Accessible admission");
-  if (filters.difficulty === "moderate") chips.push("Moderately selective");
-  if (filters.difficulty === "highly_selective") chips.push("Highly selective");
-  chips.push(...filters.keywords.map((k) => `“${k}”`));
+export type FilterChip =
+  | { kind: "field" | "country" | "region" | "keyword"; value: string; label: string }
+  | { kind: "tuition" | "scholarships" | "difficulty"; value: null; label: string };
+
+export function describeFilters(filters: SearchFilters): FilterChip[] {
+  const chips: FilterChip[] = [
+    ...filters.fields.map((value) => ({ kind: "field" as const, value, label: tr(value) })),
+    ...filters.countries.map((value) => ({ kind: "country" as const, value, label: tr(value) })),
+    ...filters.regions.map((value) => ({ kind: "region" as const, value, label: tr(value) })),
+  ];
+  if (filters.maxTuitionUsd !== null) chips.push({ kind: "tuition", value: null, label: tr("Tuition ≤ ${amount}k", { amount: Math.round(filters.maxTuitionUsd / 1000) }) });
+  if (filters.scholarshipsOnly) chips.push({ kind: "scholarships", value: null, label: tr("Scholarships or full-need aid") });
+  const difficulty = { any: null, accessible: msg("Accessible admission"), moderate: msg("Moderately selective"), highly_selective: msg("Highly selective") }[filters.difficulty];
+  if (difficulty) chips.push({ kind: "difficulty", value: null, label: tr(difficulty) });
+  chips.push(...filters.keywords.map((value) => ({ kind: "keyword" as const, value, label: `“${value}”` })));
   return chips;
+}
+
+export function removeFilter(filters: SearchFilters, chip: FilterChip): SearchFilters {
+  switch (chip.kind) {
+    case "field":
+      return { ...filters, fields: filters.fields.filter((x) => x !== chip.value) };
+    case "country":
+      return { ...filters, countries: filters.countries.filter((x) => x !== chip.value) };
+    case "region":
+      return { ...filters, regions: filters.regions.filter((x) => x !== chip.value) };
+    case "keyword":
+      return { ...filters, keywords: filters.keywords.filter((x) => x !== chip.value) };
+    case "tuition":
+      return { ...filters, maxTuitionUsd: null };
+    case "scholarships":
+      return { ...filters, scholarshipsOnly: false };
+    case "difficulty":
+      return { ...filters, difficulty: "any" };
+  }
 }

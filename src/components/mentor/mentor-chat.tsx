@@ -13,6 +13,8 @@ import { Icon } from "@/components/ui/icon";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
 import styles from "./mentor-chat.module.css";
+import { useLocale, useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 interface Message {
   id: string;
@@ -22,24 +24,25 @@ interface Message {
 }
 
 const suggestions = [
-  "What are my real chances at my top matches?",
-  "What should I focus on this month?",
-  "Which scholarships should I apply for?",
-  "Which deadlines are coming up?",
-  "How can I strengthen my weakest area?",
+  msg("What are my real chances at my top matches?"),
+  msg("What should I focus on this month?"),
+  msg("Which scholarships should I apply for?"),
+  msg("Which deadlines are coming up?"),
+  msg("How can I strengthen my weakest area?"),
 ];
 
 function MessageBody({ content }: { content: string }) {
+  const t = useT();
   const blocks = content.split(/\n{2,}/);
   return (
     <>
       {blocks.map((block, i) => {
         const lines = block.split("\n");
-        if (/^next action:/i.test(block.trim())) {
+        if (/^(next action|следующий шаг|келесі қадам):/i.test(block.trim())) {
           return (
             <p key={i} className={styles.nextAction}>
-              <span>Next action</span>
-              {block.trim().replace(/^next action:\s*/i, "")}
+              <span>{t("Next action")}</span>
+              {block.trim().replace(/^(next action|следующий шаг|келесі қадам):\s*/i, "")}
             </p>
           );
         }
@@ -63,6 +66,8 @@ function MessageBody({ content }: { content: string }) {
 }
 
 export function MentorChat() {
+  const t = useT();
+  const locale = useLocale();
   const { profile, applications, completedTasks } = useApp();
   const { next } = useRoadmap();
   const params = useSearchParams();
@@ -81,7 +86,7 @@ export function MentorChat() {
   }, [messages]);
 
   const checkStressKeywords = (text: string) => {
-    const keywords = ["tired", "burned out", "scared", "overwhelmed", "anxious", "stressed", "exhausted", "panic", "depressed"];
+    const keywords = ["tired", t("burned out"), "scared", "overwhelmed", "anxious", "stressed", "exhausted", "panic", "depressed"];
     const lower = text.toLowerCase();
     return keywords.some((k) => lower.includes(k));
   };
@@ -113,6 +118,7 @@ export function MentorChat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            locale,
             profile,
             applications,
             completedTasks,
@@ -135,12 +141,12 @@ export function MentorChat() {
           setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content, source } : m)));
         }
       } catch {
-        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: "I couldn't reach the mentor service. Please try again in a moment.", source: "rules" } : m)));
+        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: t("I couldn't reach the mentor service. Please try again in a moment."), source: "rules" } : m)));
       } finally {
         setStreaming(false);
       }
     },
-    [messages, streaming, profile, applications, completedTasks, supportMode],
+    [messages, streaming, profile, applications, completedTasks, supportMode, locale],
   );
 
   useEffect(() => {
@@ -164,12 +170,12 @@ export function MentorChat() {
   return (
     <Page>
       <PageHeader
-        eyebrow="AI mentor"
-        title={supportMode ? "AI Mental Health Counselor (Support / Vent Mode)" : "Ask anything about your applications"}
+        eyebrow={t("AI mentor")}
+        title={supportMode ? t("AI Mental Health Counselor (Support / Vent Mode)") : t("Ask anything about your applications")}
         description={
           supportMode
-            ? "Empathetic, judgment-free psychological support mode focused on emotional grounding and stress validation."
-            : "The mentor sees your profile, diagnostics, matches, deadlines and roadmap. It will not invent statistics."
+            ? t("Empathetic, judgment-free psychological support mode focused on emotional grounding and stress validation.")
+            : t("The mentor sees your profile, diagnostics, matches, deadlines and roadmap. It will not invent statistics.")
         }
         actions={
           <Button
@@ -179,11 +185,11 @@ export function MentorChat() {
           >
             {supportMode ? (
               <span className="inline-flex items-center gap-1.5">
-                <HeartHandshake size={15} /> Support Mode Active
+                <HeartHandshake size={15} /> {t("Support Mode Active")}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5">
-                <MessageSquare size={15} /> Switch to Support / Vent Mode
+                <MessageSquare size={15} /> {t("Switch to Support / Vent Mode")}
               </span>
             )}
           </Button>
@@ -215,25 +221,26 @@ export function MentorChat() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 320, damping: 28 }}
                   >
-                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? "AI mentor" : "Rule-based guidance"} />}
-                    {m.content ? <MessageBody content={m.content} /> : <span className={styles.typing} aria-label="Mentor is typing"><i /><i /><i /></span>}
+                    {m.role === "assistant" && m.source && <DataTag kind={m.source} label={m.source === "ai" ? t("AI mentor") : t("Rule-based guidance")} />}
+                    {m.content ? <MessageBody content={m.content} /> : <span className={styles.typing} aria-label={t("Mentor is typing")}><i /><i /><i /></span>}
                   </motion.div>
                 ))}
               </AnimatePresence>
               <div ref={endRef} />
             </div>
             {showStressBanner && !supportMode && (
-              <div className="p-3 mx-4 my-2 rounded-xl bg-[#589C80]/20 border border-[#589C80] flex items-center justify-between gap-3 text-xs text-[#F5EED2]">
+              <div className="p-3 mx-4 my-2 rounded-xl bg-[#589C80]/20 border border-[#589C80] flex items-center justify-between gap-3 text-xs text-ink">
                 <span className="inline-flex items-center gap-2">
-                  <Leaf size={14} className="text-[#589C80] shrink-0" />
-                  You sound a bit overwhelmed. Would you like to switch to Support / Vent Mode for empathetic CBT guidance?
+                  <Leaf size={14} className="text-green-ink shrink-0" />
+                  {t("You sound a bit overwhelmed. Would you like to switch to Support / Vent Mode for empathetic CBT guidance?")}
                 </span>
                 <button
                   type="button"
                   onClick={enableSupportMode}
-                  className="px-3 py-1 rounded-lg bg-[#589C80] text-[#132228] font-bold hover:bg-[#589C80]/90 transition-all cursor-pointer flex-shrink-0"
+                  className="px-3 py-1 rounded-lg bg-[#589C80] text-on-accent font-bold hover:bg-[#589C80]/90 transition-all cursor-pointer flex-shrink-0"
                 >
-                  Switch to Support Mode
+                  
+                  {t("Switch to Support Mode")}
                 </button>
               </div>
             )}
@@ -243,11 +250,11 @@ export function MentorChat() {
                 className={styles.input}
                 value={input}
                 onChange={handleInputChange}
-                placeholder={supportMode ? "Express what's on your mind... we're here to listen." : "Ask about chances, essays, scholarships, deadlines…"}
-                aria-label="Message the mentor"
+                placeholder={supportMode ? t("Express what's on your mind... we're here to listen.") : t("Ask about chances, essays, scholarships, deadlines…")}
+                aria-label={t("Message the mentor")}
                 disabled={streaming}
               />
-              <Button type="submit" size="md" disabled={streaming || !input.trim()} aria-label="Send">
+              <Button type="submit" size="md" disabled={streaming || !input.trim()} aria-label={t("Send")}>
                 <Icon name="send" size={16} />
               </Button>
             </form>
@@ -256,17 +263,18 @@ export function MentorChat() {
 
         <Reveal>
           <Card className={styles.side}>
-            <p className="eyebrow">Your next action</p>
+            <p className="eyebrow">{t("Your next action")}</p>
             {next ? (
               <>
                 <p className={styles.sideTitle}>{next.task.title}</p>
                 <p className="muted">{next.reason}</p>
-                <Button variant="secondary" size="sm" onClick={() => send(`Help me with my next action: ${next.task.title}`)} disabled={streaming}>
-                  Get help with this
+                <Button variant="secondary" size="sm" onClick={() => send(t("Help me with my next action: {title}", { title: next.task.title }))} disabled={streaming}>
+                  
+                  {t("Get help with this")}
                 </Button>
               </>
             ) : (
-              <p className="muted">You&apos;re up to date. Add universities to generate new steps.</p>
+              <p className="muted">{t("You're up to date. Add universities to generate new steps.")}</p>
             )}
           </Card>
         </Reveal>

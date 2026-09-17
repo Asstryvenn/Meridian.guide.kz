@@ -25,15 +25,18 @@ import { useTaskCompletion } from "@/lib/store/use-task-completion";
 import { useDiagnostics, useNotifications, useRecommendations, useRoadmap } from "@/lib/store/derived";
 import type { Tier } from "@/lib/types";
 import styles from "./dashboard.module.css";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 function greeting() {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return msg("Good morning");
+  if (hour < 18) return msg("Good afternoon");
+  return msg("Good evening");
 }
 
 export default function Dashboard() {
+  const t = useT();
   const { profile, applications, ecoMode } = useApp();
   const completeTask = useTaskCompletion();
   const diagnostics = useDiagnostics();
@@ -58,22 +61,25 @@ export default function Dashboard() {
     <Page>
       {ecoMode && (
         <Reveal>
-          <div className="p-6 mb-6 rounded-3xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-[#F5EED2] space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#589C80]">
-              <Leaf size={14} className="text-[#589C80]" /> Eco-Mode Active — Breathing Room Mode
+          <div className="p-6 mb-6 rounded-3xl bg-[#589C80]/15 border border-[#589C80]/40 backdrop-blur-xl text-ink space-y-4">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-green-ink">
+              <Leaf size={14} className="text-green-ink" /> {t("Eco-Mode Active — Breathing Room Mode")}
             </div>
-            <h2 className="text-xl font-bold text-[#F5EED2]">
-              &ldquo;Take a deep breath. Success is a marathon, not a sprint.&rdquo;
+            <h2 className="text-xl font-bold text-ink">
+              
+              &ldquo;{t("Take a deep breath. Success is a marathon, not a sprint.")}&rdquo;
             </h2>
-            <p className="text-xs text-[#F5EED2]/70 leading-relaxed">
-              Heavy metrics and dense roadmaps are muted. Non-urgent deadlines have been cushioned to give you space. Focus on today&apos;s single most important step.
+            <p className="text-xs text-ink/70 leading-relaxed">
+              
+              {t("Heavy metrics and dense roadmaps are muted. Non-urgent deadlines have been cushioned to give you space. Focus on today's single most important step.")}
             </p>
 
-            <div className="p-4 rounded-2xl bg-[#132228]/80 border border-[#589C80]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-panel/80 border border-[#589C80]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="w-4 h-4 rounded-full bg-[#589C80] animate-ping shrink-0" />
-                <span className="text-xs font-mono text-[#F5EED2]">
-                  Box Breathing: Inhale (4s) • Hold (4s) • Exhale (4s) • Rest (4s)
+                <span className="text-xs font-mono text-ink">
+                  
+                  {t("Box Breathing: Inhale (4s) • Hold (4s) • Exhale (4s) • Rest (4s)")}
                 </span>
               </div>
               <Button
@@ -81,7 +87,8 @@ export default function Dashboard() {
                 size="sm"
                 href="/mentor"
               >
-                Open Vent / Support Mode
+                
+                {t("Open Vent / Support Mode")}
               </Button>
             </div>
           </div>
@@ -91,7 +98,7 @@ export default function Dashboard() {
       <PageHeader
         eyebrow={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
         title={`${greeting()}${firstName ? `, ${firstName}` : ""}.`}
-        description={ecoMode ? "Pace yourself today. You are making steady progress." : diagnostics.summary}
+        description={ecoMode ? t("Pace yourself today. You are making steady progress.") : diagnostics.summary}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -100,7 +107,7 @@ export default function Dashboard() {
               className="cursor-pointer"
             >
               <Sparkles size={14} className="mr-1.5 inline" />
-              <span>Upload Achievement</span>
+              <span>{t("Upload Achievement")}</span>
             </Button>
           </div>
         }
@@ -117,23 +124,24 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="mb-6 p-5 rounded-3xl bg-[#132228]/80 border border-[#589C80]/30 flex flex-col md:flex-row items-center justify-between gap-4 text-[#F5EED2]">
+      <div className="mb-6 p-5 rounded-3xl bg-panel/80 border border-[#589C80]/30 flex flex-col md:flex-row items-center justify-between gap-4 text-ink">
         <div className="space-y-1 text-center md:text-left">
-          <div className="text-xs font-mono font-bold text-[#EBAE29] uppercase tracking-wider">
-            Student Psychographic Archetype
+          <div className="text-xs font-mono font-bold text-amber-ink uppercase tracking-wider">
+            
+            {t("Student Psychographic Archetype")}
           </div>
           {userArchetype ? (
             <div>
-              <h3 className="text-lg font-extrabold text-[#F5EED2] flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="text-lg font-extrabold text-ink flex items-center gap-2 justify-center md:justify-start">
                 <span>{userArchetype.badge}</span>
                 <span>{userArchetype.title}</span>
               </h3>
-              <p className="text-xs text-[#589C80]">{userArchetype.tagline}</p>
+              <p className="text-xs text-green-ink">{userArchetype.tagline}</p>
             </div>
           ) : (
             <div>
-              <h3 className="text-base font-bold text-[#F5EED2]">Discover Your Student Archetype</h3>
-              <p className="text-xs text-[#F5EED2]/70">Take a 2-minute quiz to personalize your university match scoring.</p>
+              <h3 className="text-base font-bold text-ink">{t("Discover Your Student Archetype")}</h3>
+              <p className="text-xs text-ink/70">{t("Take a 2-minute quiz to personalize your university match scoring.")}</p>
             </div>
           )}
         </div>
@@ -141,9 +149,9 @@ export default function Dashboard() {
         <button
           type="button"
           onClick={() => setShowArchetypeQuiz(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-xs font-bold text-[#132228] shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-xs font-bold text-on-accent shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
         >
-          {userArchetype ? "Retake Archetype Quiz" : "Take Archetype Quiz"}
+          {userArchetype ? t("Retake Archetype Quiz") : t("Take Archetype Quiz")}
         </button>
       </div>
 
@@ -154,27 +162,28 @@ export default function Dashboard() {
           {next ? (
             <section className={styles.next}>
               <div className={styles.nextHead}>
-                <span className={styles.nextEyebrow}>Your next action</span>
-                <DataTag kind="rules" label="Mentor priority" />
+                <span className={styles.nextEyebrow}>{t("Your next action")}</span>
+                <DataTag kind="rules" label={t("Mentor priority")} />
               </div>
               <h2 className={styles.nextTitle}>{next.task.title}</h2>
               <p className={styles.nextReason}>{next.reason}</p>
-              {next.task.dueDate && <p className={styles.nextDue}>Suggested by {formatDate(next.task.dueDate)}</p>}
+              {next.task.dueDate && <p className={styles.nextDue}>{t("Suggested by {date}", { date: formatDate(next.task.dueDate) })}</p>}
               <div className={styles.nextActions}>
                 <Button onClick={() => completeTask(next.task, true)}>
                   <Icon name="check" size={16} />
-                  Mark as done
+                  {t("Mark as done")}
                 </Button>
                 <Button variant="secondary" href={`/mentor?ask=${encodeURIComponent(`How do I approach: ${next.task.title}?`)}`}>
-                  Ask the mentor
+                  
+                  {t("Ask the mentor")}
                 </Button>
               </div>
             </section>
           ) : (
             <section className={styles.next}>
-              <span className={styles.nextEyebrow}>Your next action</span>
-              <h2 className={styles.nextTitle}>Everything unlocked is complete.</h2>
-              <p className={styles.nextReason}>Add universities to your applications to generate new steps.</p>
+              <span className={styles.nextEyebrow}>{t("Your next action")}</span>
+              <h2 className={styles.nextTitle}>{t("Everything unlocked is complete.")}</h2>
+              <p className={styles.nextReason}>{t("Add universities to your applications to generate new steps.")}</p>
             </section>
           )}
         </Reveal>
@@ -182,18 +191,18 @@ export default function Dashboard() {
         {!ecoMode && (
           <Reveal>
             <Card className={styles.progressCard}>
-              <ProgressRing value={roadmap.progress} size={132} stroke={11} label={`Roadmap ${Math.round(roadmap.progress * 100)}% complete`}>
+              <ProgressRing value={roadmap.progress} size={132} stroke={11} label={t("Roadmap {round}% complete", { round: Math.round(roadmap.progress * 100) })}>
                 <span className={styles.ringValue}>{Math.round(roadmap.progress * 100)}%</span>
-                <span className={styles.ringCaption}>roadmap</span>
+                <span className={styles.ringCaption}>{t("roadmap")}</span>
               </ProgressRing>
               <div className={styles.progressText}>
-                <p className="eyebrow">Level {roadmap.currentLevel}</p>
+                <p className="eyebrow">{t("Level {level}", { level: roadmap.currentLevel })}</p>
                 <p className={styles.levelTitle}>{level?.title}</p>
                 <p className="muted tabular">
-                  {roadmap.earnedXp} / {roadmap.totalXp} XP
+                  {t("{earned} / {total} XP", { earned: roadmap.earnedXp, total: roadmap.totalXp })}
                 </p>
                 <Button variant="quiet" size="sm" href="/roadmap">
-                  Open roadmap <Icon name="arrow" size={14} />
+                  {t("Open roadmap")} <Icon name="arrow" size={14} />
                 </Button>
               </div>
             </Card>
@@ -212,16 +221,16 @@ export default function Dashboard() {
           <Reveal className={styles.span2}>
             <Card>
               <CardHeader
-                eyebrow="Recommendations"
-                title="Your balanced list"
+                eyebrow={t("Recommendations")}
+                title={t("Your balanced list")}
                 action={
                   <Button variant="quiet" size="sm" href="/matches">
-                    All matches <Icon name="arrow" size={14} />
+                    {t("All matches")} <Icon name="arrow" size={14} />
                   </Button>
                 }
               />
               <div className={styles.tiers}>
-                {(["Dream", "Target", "Safety"] as Tier[]).map((tier) => {
+                {([t("Dream"), t("Target"), t("Safety")] as Tier[]).map((tier) => {
                   const top = tiers[tier][0];
                   return (
                     <div key={tier} className={styles.tierCol}>
@@ -230,10 +239,10 @@ export default function Dashboard() {
                         <Link href={`/universities/${top.university.slug}`} className={styles.tierItem}>
                           <span className={styles.tierName}>{top.university.shortName}</span>
                           <PredictionRange prediction={top.prediction} />
-                          <span className={styles.tierMeta}>Match {top.matchScore} · {top.financial.label}</span>
+                          <span className={styles.tierMeta}>{t("Match {score}", { score: top.matchScore })} · {t(top.financial.label)}</span>
                         </Link>
                       ) : (
-                        <p className={styles.tierEmpty}>No {tier.toLowerCase()} options match your current filters.</p>
+                        <p className={styles.tierEmpty}>{t("No {tier} options match your current filters.", { tier: t(tier).toLowerCase() })}</p>
                       )}
                     </div>
                   );
@@ -245,11 +254,12 @@ export default function Dashboard() {
           <Reveal>
             <Card>
               <CardHeader
-                eyebrow="Diagnostics"
-                title={`Profile strength ${diagnostics.overall}`}
+                eyebrow={t("Diagnostics")}
+                title={t("Profile strength {overall}", { overall: diagnostics.overall })}
                 action={
                   <Button variant="quiet" size="sm" href="/diagnostics">
-                    Details
+                    
+                    {t("Details")}
                   </Button>
                 }
               />
@@ -260,7 +270,7 @@ export default function Dashboard() {
                       <span>{d.label}</span>
                       <span className="tabular faint">{d.score ?? "—"}</span>
                     </div>
-                    <Meter value={d.score} tone={d.score !== null && d.score >= 70 ? "green" : "amber"} label={`${d.label} ${d.score ?? "no data"}`} />
+                    <Meter value={d.score} tone={d.score !== null && d.score >= 70 ? "green" : "amber"} label={`${d.label} ${d.score ?? t("no data")}`} />
                   </li>
                 ))}
               </ul>
@@ -269,7 +279,7 @@ export default function Dashboard() {
 
           <Reveal>
             <Card>
-              <CardHeader eyebrow="Deadlines" title="Coming up" />
+              <CardHeader eyebrow={t("Deadlines")} title={t("Coming up")} />
               {deadlines.length ? (
                 <ul className={styles.deadlines}>
                   {deadlines.map((d) => (
@@ -277,28 +287,28 @@ export default function Dashboard() {
                       <Link href={`/applications/${d.university.slug}`} className={styles.deadline}>
                         <span className={clsx(styles.days, d.days <= 30 && styles.daysUrgent)}>
                           <strong className="tabular">{d.days}</strong>
-                          <span>days</span>
+                          <span>{t("days")}</span>
                         </span>
                         <span className={styles.deadlineText}>
                           <span className={styles.deadlineUni}>{d.university.shortName}</span>
                           <span className="faint">
-                            {d.deadline.label} · {formatDate(d.date)}
+                            {t(d.deadline.label)} · {formatDate(d.date)}
                           </span>
-                          {d.deadline.status === "needs_verification" && <span className={styles.verify}>Needs verification</span>}
+                          {d.deadline.status === "needs_verification" && <span className={styles.verify}>{t("Needs verification")}</span>}
                         </span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="muted">Add universities to your applications to track their deadlines.</p>
+                <p className="muted">{t("Add universities to your applications to track their deadlines.")}</p>
               )}
             </Card>
           </Reveal>
 
           <Reveal className={styles.span2}>
             <Card>
-              <CardHeader eyebrow="Alerts" title={notifications.length === 0 ? "Nothing urgent" : notifications.length === 1 ? "1 thing needs attention" : `${notifications.length} things need attention`} />
+              <CardHeader eyebrow={t("Alerts")} title={notifications.length === 0 ? t("Nothing urgent") : notifications.length === 1 ? t("1 thing needs attention") : t("{count} things need attention", { count: notifications.length })} />
               {notifications.length ? (
                 <ul className={styles.alerts}>
                   {notifications.map((n) => (
@@ -314,7 +324,7 @@ export default function Dashboard() {
                   ))}
                 </ul>
               ) : (
-                <p className="muted">We&apos;ll only alert you about approaching deadlines, test score gaps and strong scholarship matches.</p>
+                <p className="muted">{t("We'll only alert you about approaching deadlines, test score gaps and strong scholarship matches.")}</p>
               )}
             </Card>
           </Reveal>
@@ -323,9 +333,9 @@ export default function Dashboard() {
 
       {applications.length === 0 && (
         <EmptyState
-          title="Start your application list"
-          body="Add at least three universities — one Dream, one Target and one Safety — to unlock deadlines, essays and document tracking."
-          action={<Button href="/matches">Browse your matches</Button>}
+          title={t("Start your application list")}
+          body={t("Add at least three universities — one Dream, one Target and one Safety — to unlock deadlines, essays and document tracking.")}
+          action={<Button href="/matches">{t("Browse your matches")}</Button>}
         />
       )}
     </Page>

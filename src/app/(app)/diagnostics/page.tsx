@@ -10,21 +10,26 @@ import { Meter, ProgressRing } from "@/components/ui/progress";
 import { Radar } from "@/components/ui/radar";
 import { useApp } from "@/lib/store/app-store";
 import { useDiagnostics } from "@/lib/store/derived";
+import { AdmissionSimulator } from "@/components/diagnostics/admission-simulator";
 import styles from "./diagnostics.module.css";
+import { useLocale, useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 const bandTone = { Exceptional: "green", Strong: "green", Competitive: "amber", Developing: "danger", "Not enough data": "neutral" } as const;
 
 const shortLabels: Record<string, string> = {
-  academic: "Academics",
-  tests: "Tests",
-  english: "English",
-  extracurriculars: "Activities",
-  research: "Research",
-  leadership: "Leadership",
-  international: "International",
+  academic: msg("Academics"),
+  tests: msg("Tests"),
+  english: msg("English"),
+  extracurriculars: msg("Activities"),
+  research: msg("Research"),
+  leadership: msg("Leadership"),
+  international: msg("International"),
 };
 
 export default function DiagnosticsPage() {
+  const t = useT();
+  const locale = useLocale();
   const { profile, applications, markTask } = useApp();
   const diagnostics = useDiagnostics();
   const [narrative, setNarrative] = useState<{ text: string | null; loading: boolean }>({ text: null, loading: true });
@@ -38,24 +43,25 @@ export default function DiagnosticsPage() {
     fetch("/api/diagnostics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile, applications, completedTasks: [] }),
+      body: JSON.stringify({ profile, applications, completedTasks: [], locale }),
       signal: controller.signal,
     })
       .then((r) => r.json())
       .then((data: { narrative: string | null }) => setNarrative({ text: data.narrative, loading: false }))
       .catch(() => setNarrative((prev) => (controller.signal.aborted ? prev : { text: null, loading: false })));
     return () => controller.abort();
-  }, [profile, applications]);
+  }, [profile, applications, locale]);
 
   return (
     <Page>
       <PageHeader
-        eyebrow="Portfolio diagnostics"
-        title="Where you stand today"
-        description="Seven signals admissions officers read, scored from the profile you entered. Scores are relative guides, not official ratings."
+        eyebrow={t("Portfolio diagnostics")}
+        title={t("Where you stand today")}
+        description={t("Seven signals admissions officers read, scored from the profile you entered. Scores are relative guides, not official ratings.")}
         actions={
           <Button variant="secondary" href="/onboarding?edit=1">
-            Update profile
+            
+            {t("Update profile")}
           </Button>
         }
       />
@@ -63,16 +69,16 @@ export default function DiagnosticsPage() {
       <div className={styles.overview}>
         <Reveal>
           <Card className={styles.overall}>
-            <ProgressRing value={diagnostics.overall / 100} size={148} stroke={12} tone="green" label={`Overall profile strength ${diagnostics.overall}`}>
+            <ProgressRing value={diagnostics.overall / 100} size={148} stroke={12} tone="green" label={t("Overall profile strength {overall}", { overall: diagnostics.overall })}>
               <span className={styles.overallValue}>{diagnostics.overall}</span>
-              <span className={styles.overallCaption}>of 100</span>
+              <span className={styles.overallCaption}>{t("of 100")}</span>
             </ProgressRing>
             <div className={styles.overallText}>
-              <p className="eyebrow">Overall strength</p>
+              <p className="eyebrow">{t("Overall strength")}</p>
               <p className={styles.summary}>{diagnostics.summary}</p>
               <div className={styles.completeness}>
-                <span className="faint">Profile completeness {Math.round(diagnostics.completeness * 100)}%</span>
-                <Meter value={diagnostics.completeness * 100} tone="amber" label="Profile completeness" />
+                <span className="faint">{t("Profile completeness {percent}%", { percent: Math.round(diagnostics.completeness * 100) })}</span>
+                <Meter value={diagnostics.completeness * 100} tone="amber" label={t("Profile completeness")} />
               </div>
             </div>
           </Card>
@@ -86,15 +92,19 @@ export default function DiagnosticsPage() {
 
       <Reveal>
         <Card className={styles.narrative}>
-          <DataTag kind={narrative.text ? "ai" : "rules"} label={narrative.text ? "AI explanation · Claude" : "Rule-based summary"} />
+          <DataTag kind={narrative.text ? "ai" : "rules"} label={narrative.text ? t("AI explanation") : t("Rule-based summary")} />
           {narrative.loading ? (
-            <div className={styles.shimmer} aria-label="Generating explanation" />
+            <div className={styles.shimmer} aria-label={t("Generating explanation")} />
           ) : (
             <p className={styles.narrativeText}>
-              {narrative.text ?? `${diagnostics.summary}${diagnostics.weakest ? ` Best next move: ${diagnostics.weakest.improvement}` : ""}`}
+              {narrative.text ?? `${diagnostics.summary}${diagnostics.weakest ? t(" Best next move: {improvement}", { improvement: diagnostics.weakest.improvement }) : ""}`}
             </p>
           )}
         </Card>
+      </Reveal>
+
+      <Reveal>
+        <AdmissionSimulator />
       </Reveal>
 
       <div className={styles.dimensions}>
@@ -111,10 +121,10 @@ export default function DiagnosticsPage() {
               </div>
               <p className={styles.explanation}>{d.explanation}</p>
               <p className={styles.improve}>
-                <span>Improve</span>
+                <span>{t("Improve")}</span>
                 {d.improvement}
               </p>
-              {diagnostics.weakest?.key === d.key && <span className={styles.focusTag}>Biggest opportunity</span>}
+              {diagnostics.weakest?.key === d.key && <span className={styles.focusTag}>{t("Biggest opportunity")}</span>}
             </Card>
           </Reveal>
         ))}

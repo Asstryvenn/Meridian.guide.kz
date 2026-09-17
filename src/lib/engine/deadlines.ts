@@ -1,4 +1,5 @@
 import type { Deadline } from "@/lib/types";
+import { getActiveLocale, intlLocale } from "@/lib/i18n/catalog";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -29,7 +30,7 @@ export function toIsoDate(date: Date): string {
 
 export function formatDate(value: Date | string): string {
   const date = typeof value === "string" ? new Date(`${value}T00:00:00`) : value;
-  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString(intlLocale[getActiveLocale()], { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function upcomingDeadlines(deadlines: Deadline[], now = new Date()) {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { BarChart3, Check, Sparkles } from "lucide-react";
 import type { University } from "@/lib/types";
+import { useT } from "@/lib/i18n/use-t";
 
 interface TrueCostCalculatorProps {
   university: University;
@@ -20,6 +21,7 @@ interface CostItem {
 }
 
 export function TrueCostCalculator({ university, userCountry = "Kazakhstan", userBudgetUsd = 30000 }: TrueCostCalculatorProps) {
+  const t = useT();
   const [applyScholarships, setApplyScholarships] = useState(false);
   const [activeSegment, setActiveSegment] = useState<string | null>(null);
 
@@ -53,12 +55,12 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
   const effectiveTuition = Math.max(0, baseTuition - scholarshipDiscount);
 
   const items: CostItem[] = [
-    { id: "tuition", label: "Tuition & Academic Fees", amount: effectiveTuition, color: "#EBAE29", detail: applyScholarships ? `$${baseTuition.toLocaleString()} less $${scholarshipDiscount.toLocaleString()} scholarship aid` : "Annual published international tuition rate" },
-    { id: "housing", label: "Housing & Residence", amount: housingCost, color: "#589C80", detail: "On-campus or nearby off-campus student accommodation" },
-    { id: "food", label: "Food & Dining Plan", amount: foodCost, color: "#9CD0A8", detail: "Standard campus dining hall or meal budget" },
-    { id: "insurance", label: "Health & Medical Insurance", amount: insuranceCost, color: "#E2C37A", detail: "Mandatory university student health coverage" },
-    { id: "visa", label: "Visa & SEVIS Fees", amount: visaFees, color: "#7FA393", detail: "Student visa processing, SEVIS I-90 / Embassy fee" },
-    { id: "flight", label: "Roundtrip Travel & Flights", amount: flightCost, color: "#F5EED2", detail: `Estimated flight from ${userCountry} to ${university.city}` },
+    { id: "tuition", label: t("Tuition & Academic Fees"), amount: effectiveTuition, color: "#EBAE29", detail: applyScholarships ? t("${baseTuition} less ${scholarshipDiscount} scholarship aid", { baseTuition: baseTuition.toLocaleString(), scholarshipDiscount: scholarshipDiscount.toLocaleString() }) : t("Annual published international tuition rate") },
+    { id: "housing", label: t("Housing & Residence"), amount: housingCost, color: "#589C80", detail: t("On-campus or nearby off-campus student accommodation") },
+    { id: "food", label: t("Food & Dining Plan"), amount: foodCost, color: "#9CD0A8", detail: t("Standard campus dining hall or meal budget") },
+    { id: "insurance", label: t("Health & Medical Insurance"), amount: insuranceCost, color: "#E2C37A", detail: t("Mandatory university student health coverage") },
+    { id: "visa", label: t("Visa & SEVIS Fees"), amount: visaFees, color: "#7FA393", detail: t("Student visa processing, SEVIS I-90 / Embassy fee") },
+    { id: "flight", label: t("Roundtrip Travel & Flights"), amount: flightCost, color: "var(--text)", detail: t("Estimated flight from {userCountry} to {city}", { userCountry: userCountry, city: university.city }) },
   ];
 
   const grossTotal = baseTuition + housingCost + foodCost + insuranceCost + visaFees + flightCost;
@@ -88,14 +90,14 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
   };
 
   return (
-    <div className="w-full p-6 rounded-2xl bg-[#132228]/90 border border-[#589C80]/30 backdrop-blur-xl text-[#F5EED2] space-y-6">
+    <div className="w-full p-6 rounded-2xl bg-panel/90 border border-[#589C80]/30 backdrop-blur-xl text-ink space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#589C80]/20 pb-4">
         <div>
-          <h3 className="text-xl font-bold text-[#F5EED2] flex items-center gap-2">
-            <BarChart3 size={20} className="text-[#589C80]" /> True Cost of Attendance Calculator
+          <h3 className="text-xl font-bold text-ink flex items-center gap-2">
+            <BarChart3 size={20} className="text-green-ink" /> {t("True Cost of Attendance Calculator")}
           </h3>
-          <p className="text-xs text-[#F5EED2]/70">
-            Complete annual cost estimation tailored for applicants from {userCountry}.
+          <p className="text-xs text-ink/70">
+            {t("Complete annual cost estimation tailored for applicants from {country}.", { country: t(userCountry) })}
           </p>
         </div>
 
@@ -103,12 +105,12 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
           onClick={() => setApplyScholarships((prev) => !prev)}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
             applyScholarships
-              ? "bg-[#EBAE29]/20 border-[#EBAE29] text-[#EBAE29] shadow-lg shadow-[#EBAE29]/10"
-              : "bg-[#132228] border-[#589C80]/40 text-[#F5EED2]/70 hover:border-[#589C80]"
+              ? "bg-[#EBAE29]/20 border-[#EBAE29] text-amber-ink shadow-lg shadow-[#EBAE29]/10"
+              : "bg-panel border-[#589C80]/40 text-ink/70 hover:border-[#589C80]"
           }`}
         >
           {applyScholarships ? <Check size={14} /> : <Sparkles size={14} />}
-          <span>Apply Estimated Scholarships</span>
+          <span>{t("Apply Estimated Scholarships")}</span>
         </button>
       </div>
 
@@ -147,10 +149,10 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-4">
-              <span className="text-xs uppercase font-mono tracking-widest text-[#F5EED2]/60">Annual Total</span>
-              <span className="text-2xl font-extrabold text-[#EBAE29]">${netTotal.toLocaleString()}</span>
+              <span className="text-xs uppercase font-mono tracking-widest text-ink/60">{t("Annual Total")}</span>
+              <span className="text-2xl font-extrabold text-amber-ink">${netTotal.toLocaleString()}</span>
               {applyScholarships && scholarshipDiscount > 0 && (
-                <span className="text-xs text-[#589C80] font-semibold">Saved ${scholarshipDiscount.toLocaleString()}</span>
+                <span className="text-xs text-green-ink font-semibold">{t("Saved ${amount}", { amount: scholarshipDiscount.toLocaleString() })}</span>
               )}
             </div>
           </div>
@@ -169,7 +171,7 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
                   className={`p-3 rounded-xl border transition-all duration-200 ${
                     isHovered
                       ? "bg-[#589C80]/20 border-[#EBAE29] scale-[1.02]"
-                      : "bg-[#132228]/80 border-[#589C80]/20 hover:border-[#589C80]/40"
+                      : "bg-panel/80 border-[#589C80]/20 hover:border-[#589C80]/40"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
@@ -177,11 +179,11 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
                       <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 12 12">
                         <circle cx="6" cy="6" r="5" fill={item.color} />
                       </svg>
-                      <span className="text-xs font-semibold text-[#F5EED2]">{item.label}</span>
+                      <span className="text-xs font-semibold text-ink">{item.label}</span>
                     </div>
-                    <span className="text-xs font-mono font-bold text-[#EBAE29]">${item.amount.toLocaleString()}</span>
+                    <span className="text-xs font-mono font-bold text-amber-ink">${item.amount.toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#F5EED2]/60">
+                  <div className="flex items-center justify-between text-[11px] text-ink/60">
                     <span className="truncate max-w-[160px]">{item.detail}</span>
                     <span className="font-mono">{pct}%</span>
                   </div>
@@ -190,22 +192,22 @@ export function TrueCostCalculator({ university, userCountry = "Kazakhstan", use
             })}
           </div>
 
-          <div className="p-4 rounded-xl bg-[#132228] border border-[#589C80]/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="p-4 rounded-xl bg-panel border border-[#589C80]/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="space-y-0.5 text-center sm:text-left">
-              <div className="text-[#F5EED2]/70">Stated Annual Budget: <span className="font-mono text-[#F5EED2] font-semibold">${userBudgetUsd.toLocaleString()}</span></div>
-              <div className="text-[#F5EED2]/70">
-                Gross Cost (Before Aid): <span className="font-mono text-[#F5EED2]">${grossTotal.toLocaleString()}</span>
+              <div className="text-ink/70">{t("Stated Annual Budget:")} <span className="font-mono text-ink font-semibold">${userBudgetUsd.toLocaleString()}</span></div>
+              <div className="text-ink/70">
+                {t("Gross Cost (Before Aid):")} <span className="font-mono text-ink">${grossTotal.toLocaleString()}</span>
               </div>
             </div>
 
             <div className={`px-4 py-2 rounded-lg font-mono font-bold text-xs ${
               budgetGap <= 0
-                ? "bg-[#589C80]/20 border border-[#589C80] text-[#589C80]"
-                : "bg-[#EBAE29]/20 border border-[#EBAE29] text-[#EBAE29]"
+                ? "bg-[#589C80]/20 border border-[#589C80] text-green-ink"
+                : "bg-[#EBAE29]/20 border border-[#EBAE29] text-amber-ink"
             }`}>
               {budgetGap <= 0
-                ? `Fully Funded ($${Math.abs(budgetGap).toLocaleString()} surplus)`
-                : `Budget Gap: +$${budgetGap.toLocaleString()}/yr`}
+                ? t("Fully Funded (${abs} surplus)", { abs: Math.abs(budgetGap).toLocaleString() })
+                : t("Budget Gap: +${budgetGap}/yr", { budgetGap: budgetGap.toLocaleString() })}
             </div>
           </div>
         </div>

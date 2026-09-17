@@ -113,7 +113,7 @@
 
 .programNote {
   margin-top: 4px;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
   font-size: 12px;
 }
 
@@ -183,7 +183,7 @@
   grid-column: span 2;
   font-size: 12px;
   font-weight: 600;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 .scholarships,

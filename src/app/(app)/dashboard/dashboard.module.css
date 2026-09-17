@@ -228,7 +228,7 @@
 .verify {
   font-size: 11px;
   font-weight: 600;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 .alerts {

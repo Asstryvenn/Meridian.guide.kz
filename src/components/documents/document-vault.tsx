@@ -19,33 +19,36 @@ import {
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import type { DocumentCategory, DocumentStatus, VaultDocument } from "@/lib/types";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 const folderCategories: { key: DocumentCategory; label: string }[] = [
-  { key: "passport", label: "Passports & Identity" },
-  { key: "bank_statement", label: "Bank Statements" },
-  { key: "family_income", label: "Family Income" },
-  { key: "tax", label: "Tax Payers Documents" },
-  { key: "insurance", label: "Health Insurance" },
+  { key: "passport", label: msg("Passports & Identity") },
+  { key: "bank_statement", label: msg("Bank Statements") },
+  { key: "family_income", label: msg("Family Income") },
+  { key: "tax", label: msg("Tax Payers Documents") },
+  { key: "insurance", label: msg("Health Insurance") },
 ];
 
 function getCategoryIcon(key: DocumentCategory) {
   switch (key) {
     case "passport":
-      return <Shield size={16} className="text-[#589C80]" />;
+      return <Shield size={16} className="text-green-ink" />;
     case "bank_statement":
-      return <Landmark size={16} className="text-[#589C80]" />;
+      return <Landmark size={16} className="text-green-ink" />;
     case "family_income":
-      return <Briefcase size={16} className="text-[#589C80]" />;
+      return <Briefcase size={16} className="text-green-ink" />;
     case "tax":
-      return <FileCheck size={16} className="text-[#589C80]" />;
+      return <FileCheck size={16} className="text-green-ink" />;
     case "insurance":
-      return <Shield size={16} className="text-[#589C80]" />;
+      return <Shield size={16} className="text-green-ink" />;
     default:
-      return <FileText size={16} className="text-[#589C80]" />;
+      return <FileText size={16} className="text-green-ink" />;
   }
 }
 
 export function DocumentVault() {
+  const tx = useT();
   const { documents, addVaultDocument, updateVaultDocument, removeVaultDocument } = useApp();
   const { t } = useI18n();
 
@@ -118,7 +121,7 @@ export function DocumentVault() {
     switch (status) {
       case "verified":
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#589C80]/20 text-[#589C80] border border-[#589C80]/40 flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#589C80]/20 text-green-ink border border-[#589C80]/40 flex items-center gap-1.5">
             <Check size={12} />
             <span>{t.common.verified}</span>
           </span>
@@ -132,7 +135,7 @@ export function DocumentVault() {
         );
       case "needs_translation":
         return (
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#EBAE29]/20 text-[#EBAE29] border border-[#EBAE29]/40 flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#EBAE29]/20 text-amber-ink border border-[#EBAE29]/40 flex items-center gap-1.5">
             <Globe size={12} />
             <span>{t.common.needsTranslation}</span>
           </span>
@@ -142,15 +145,15 @@ export function DocumentVault() {
 
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <Folder size={22} className="text-[#589C80]" />
-            <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
+            <Folder size={22} className="text-green-ink" />
+            <h2 className="text-xl font-bold tracking-tight text-ink">
               {t.documents.title}
             </h2>
           </div>
-          <p className="text-xs text-[#F5EED2]/70 max-w-xl">
+          <p className="text-xs text-ink/70 max-w-xl">
             {t.documents.subtitle}
           </p>
         </div>
@@ -158,33 +161,34 @@ export function DocumentVault() {
         <button
           type="button"
           onClick={() => setShowUploadModal(true)}
-          className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-[#132228] hover:brightness-110 shadow-lg cursor-pointer flex items-center gap-2 shrink-0"
+          className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer flex items-center gap-2 shrink-0"
         >
           <Plus size={14} />
           <span>{t.common.upload}</span>
         </button>
       </div>
 
-      <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center md:text-left">
-          <span className="text-xs font-mono uppercase tracking-wider text-[#589C80] font-bold">
+          <span className="text-xs font-mono uppercase tracking-wider text-green-ink font-bold">
             {t.documents.complianceScore}
           </span>
-          <h3 className="text-2xl font-bold text-[#F5EED2]">
-            {compliancePercentage}% Visa & Compliance Clearance
+          <h3 className="text-2xl font-bold text-ink">
+            {tx("{percent}% Visa & Compliance Clearance", { percent: compliancePercentage })}
           </h3>
-          <p className="text-xs text-[#F5EED2]/70 max-w-lg leading-relaxed">
+          <p className="text-xs text-ink/70 max-w-lg leading-relaxed">
             {t.documents.readyForVisa}
           </p>
         </div>
 
         <div className="flex items-center gap-4 shrink-0">
-          <div className="w-20 h-20 rounded-full border-4 border-[#589C80] bg-[#132228] flex flex-col items-center justify-center text-center shadow-inner">
-            <span className="text-xl font-extrabold font-mono text-[#EBAE29]">
+          <div className="w-20 h-20 rounded-full border-4 border-[#589C80] bg-panel flex flex-col items-center justify-center text-center shadow-inner">
+            <span className="text-xl font-extrabold font-mono text-amber-ink">
               {verifiedCount}/{documents.length}
             </span>
-            <span className="text-[9px] font-mono text-[#F5EED2]/60 uppercase">
-              Verified
+            <span className="text-[9px] font-mono text-ink/60 uppercase">
+              
+              {tx("Verified")}
             </span>
           </div>
         </div>
@@ -201,7 +205,7 @@ export function DocumentVault() {
         className={`p-8 rounded-3xl border-2 border-dashed transition-all cursor-pointer text-center space-y-2 ${
           dragOver
             ? "border-[#EBAE29] bg-[#EBAE29]/10"
-            : "border-[#589C80]/30 bg-[#132228]/50 hover:border-[#589C80]"
+            : "border-[#589C80]/30 bg-panel/50 hover:border-[#589C80]"
         }`}
       >
         <input
@@ -225,13 +229,14 @@ export function DocumentVault() {
           }}
         />
         <div className="flex justify-center">
-          <Upload size={32} className="text-[#589C80]" />
+          <Upload size={32} className="text-green-ink" />
         </div>
-        <p className="text-sm font-semibold text-[#F5EED2]">
+        <p className="text-sm font-semibold text-ink">
           {t.documents.dropPrompt}
         </p>
-        <p className="text-xs font-mono text-[#589C80]">
-          Auto-categorization into structural compliance folders (PDF, JPG, PNG up to 25MB)
+        <p className="text-xs font-mono text-green-ink">
+          
+          {tx("Auto-categorization into structural compliance folders (PDF, JPG, PNG up to 25MB)")}
         </p>
       </div>
 
@@ -241,8 +246,8 @@ export function DocumentVault() {
           onClick={() => setActiveCategory("all")}
           className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer ${
             activeCategory === "all"
-              ? "bg-[#589C80] text-[#132228] shadow-md"
-              : "bg-[#132228]/60 text-[#F5EED2]/70 hover:text-[#F5EED2] border border-[#589C80]/20"
+              ? "bg-[#589C80] text-on-accent shadow-md"
+              : "bg-panel/60 text-ink/70 hover:text-ink border border-[#589C80]/20"
           }`}
         >
           {t.documents.allFiles} ({documents.length})
@@ -258,8 +263,8 @@ export function DocumentVault() {
               onClick={() => setActiveCategory(cat.key)}
               className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 active
-                  ? "bg-[#589C80] text-[#132228] shadow-md"
-                  : "bg-[#132228]/60 text-[#F5EED2]/70 hover:text-[#F5EED2] border border-[#589C80]/20"
+                  ? "bg-[#589C80] text-on-accent shadow-md"
+                  : "bg-panel/60 text-ink/70 hover:text-ink border border-[#589C80]/20"
               }`}
             >
               {getCategoryIcon(cat.key)}
@@ -278,31 +283,31 @@ export function DocumentVault() {
               key={doc.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl bg-[#132228]/85 border border-[#589C80]/30 hover:border-[#EBAE29] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl"
+              className="p-5 rounded-2xl bg-panel/85 border border-[#589C80]/30 hover:border-[#EBAE29] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl"
             >
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 shrink-0">
+                <div className="p-2.5 rounded-xl bg-panel border border-[#589C80]/30 shrink-0">
                   {getCategoryIcon(doc.category)}
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-[#589C80]">
+                    <span className="text-xs font-mono text-green-ink">
                       {catMeta?.label}
                     </span>
                     {doc.uploadedAt && (
-                      <span className="text-[10px] font-mono text-[#F5EED2]/50">
-                        • Uploaded {doc.uploadedAt}
+                      <span className="text-[10px] font-mono text-ink/50">
+                        • {tx("Uploaded {date}", { date: doc.uploadedAt ?? "" })}
                       </span>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-[#F5EED2]">{doc.name}</h4>
+                  <h4 className="text-sm font-bold text-ink">{doc.name}</h4>
                   {doc.fileName && (
-                    <p className="text-xs font-mono text-[#F5EED2]/60">
+                    <p className="text-xs font-mono text-ink/60">
                       {doc.fileName} ({doc.fileSize})
                     </p>
                   )}
                   {doc.notes && (
-                    <p className="text-xs text-[#EBAE29] font-medium">{doc.notes}</p>
+                    <p className="text-xs text-amber-ink font-medium">{tx(doc.notes ?? "")}</p>
                   )}
                 </div>
               </div>
@@ -317,7 +322,7 @@ export function DocumentVault() {
                       status: e.target.value as DocumentStatus,
                     })
                   }
-                  className="text-xs px-2.5 py-1.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-[#F5EED2] font-mono focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                  className="text-xs px-2.5 py-1.5 rounded-xl bg-panel border border-[#589C80]/30 text-ink font-mono focus:outline-none focus:border-[#EBAE29] cursor-pointer"
                 >
                   <option value="verified">{t.common.verified}</option>
                   <option value="missing">{t.common.missing}</option>
@@ -327,8 +332,8 @@ export function DocumentVault() {
                 <button
                   type="button"
                   onClick={() => removeVaultDocument(doc.id)}
-                  className="p-2 text-xs text-[#F5EED2]/50 hover:text-red-400 transition-colors cursor-pointer"
-                  title="Remove document"
+                  className="p-2 text-xs text-ink/50 hover:text-red-400 transition-colors cursor-pointer"
+                  title={tx("Remove document")}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -340,15 +345,16 @@ export function DocumentVault() {
 
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-[#132228] border border-[#589C80]/40 shadow-2xl space-y-4">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-panel border border-[#589C80]/40 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#589C80]/20">
-              <h3 className="text-base font-bold text-[#F5EED2]">
-                Add Document to Vault
+              <h3 className="text-base font-bold text-ink">
+                
+                {tx("Add Document to Vault")}
               </h3>
               <button
                 type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="p-1 rounded-lg text-[#F5EED2]/60 hover:text-[#F5EED2] cursor-pointer"
+                className="p-1 rounded-lg text-ink/60 hover:text-ink cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -356,27 +362,29 @@ export function DocumentVault() {
 
             <form onSubmit={handleAddDocument} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-mono text-[#F5EED2]/70 uppercase">
-                  Document Title
+                <label className="text-xs font-mono text-ink/70 uppercase">
+                  
+                  {tx("Document Title")}
                 </label>
                 <input
                   type="text"
                   required
                   value={newDocName}
                   onChange={(e) => setNewDocName(e.target.value)}
-                  placeholder="e.g. Certified Family Income Declaration"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-xs text-[#F5EED2] focus:outline-none focus:border-[#EBAE29]"
+                  placeholder={tx("e.g. Certified Family Income Declaration")}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/30 text-xs text-ink focus:outline-none focus:border-[#EBAE29]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono text-[#F5EED2]/70 uppercase">
-                  Category Folder
+                <label className="text-xs font-mono text-ink/70 uppercase">
+                  
+                  {tx("Category Folder")}
                 </label>
                 <select
                   value={newDocCategory}
                   onChange={(e) => setNewDocCategory(e.target.value as DocumentCategory)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-xs text-[#F5EED2] focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/30 text-xs text-ink focus:outline-none focus:border-[#EBAE29] cursor-pointer"
                 >
                   {folderCategories.map((c) => (
                     <option key={c.key} value={c.key}>
@@ -387,17 +395,18 @@ export function DocumentVault() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono text-[#F5EED2]/70 uppercase">
-                  Verification Status
+                <label className="text-xs font-mono text-ink/70 uppercase">
+                  
+                  {tx("Verification Status")}
                 </label>
                 <select
                   value={newDocStatus}
                   onChange={(e) => setNewDocStatus(e.target.value as DocumentStatus)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-xs text-[#F5EED2] focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/30 text-xs text-ink focus:outline-none focus:border-[#EBAE29] cursor-pointer"
                 >
-                  <option value="verified">Verified</option>
-                  <option value="missing">Missing</option>
-                  <option value="needs_translation">Needs Translation</option>
+                  <option value="verified">{tx("Verified")}</option>
+                  <option value="missing">{tx("Missing")}</option>
+                  <option value="needs_translation">{tx("Needs Translation")}</option>
                 </select>
               </div>
 
@@ -405,15 +414,17 @@ export function DocumentVault() {
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-mono border border-[#589C80]/30 text-[#F5EED2]/70 hover:text-[#F5EED2] cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-mono border border-[#589C80]/30 text-ink/70 hover:text-ink cursor-pointer"
                 >
-                  Cancel
+                  
+                  {tx("Cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-mono font-bold bg-[#EBAE29] text-[#132228] hover:bg-[#EBAE29]/90 shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-mono font-bold bg-[#EBAE29] text-on-accent hover:bg-[#EBAE29]/90 shadow-md cursor-pointer"
                 >
-                  Save Document
+                  
+                  {tx("Save Document")}
                 </button>
               </div>
             </form>

@@ -8,6 +8,8 @@ import { useI18n } from "@/components/i18n/i18n-context";
 import { universities } from "@/lib/data/universities";
 import { scholarships } from "@/lib/data/scholarships";
 import { daysUntil, formatDate } from "@/lib/engine/deadlines";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 export type EventKind = "deadline" | "exam" | "scholarship";
 
@@ -24,47 +26,48 @@ export interface CalendarEvent {
 const standardExams: CalendarEvent[] = [
   {
     id: "exam-sat-oct",
-    title: "SAT International Test Date",
+    title: msg("SAT International Test Date"),
     kind: "exam",
     date: "2026-10-03",
-    categoryLabel: "College Board Exam",
-    details: "Digital SAT testing window. Scores typically released in 13-14 days.",
+    categoryLabel: msg("College Board Exam"),
+    details: msg("Digital SAT testing window. Scores typically released in 13-14 days."),
   },
   {
     id: "exam-sat-nov",
-    title: "SAT International Test Date",
+    title: msg("SAT International Test Date"),
     kind: "exam",
     date: "2026-11-07",
-    categoryLabel: "College Board Exam",
-    details: "Registration deadline is October 23. Recommended for Regular Decision.",
+    categoryLabel: msg("College Board Exam"),
+    details: msg("Registration deadline is October 23. Recommended for Regular Decision."),
   },
   {
     id: "exam-sat-dec",
-    title: "SAT International Test Date",
+    title: msg("SAT International Test Date"),
     kind: "exam",
     date: "2026-12-05",
-    categoryLabel: "College Board Exam",
-    details: "Final testing date for most regular decision cycles.",
+    categoryLabel: msg("College Board Exam"),
+    details: msg("Final testing date for most regular decision cycles."),
   },
   {
     id: "exam-ielts-sep",
-    title: "IELTS Academic Official Test Session",
+    title: msg("IELTS Academic Official Test Session"),
     kind: "exam",
     date: "2026-09-26",
-    categoryLabel: "Language Proficiency",
-    details: "Computer-delivered results available in 3-5 calendar days.",
+    categoryLabel: msg("Language Proficiency"),
+    details: msg("Computer-delivered results available in 3-5 calendar days."),
   },
   {
     id: "exam-ielts-oct",
-    title: "IELTS Academic Official Test Session",
+    title: msg("IELTS Academic Official Test Session"),
     kind: "exam",
     date: "2026-10-24",
-    categoryLabel: "Language Proficiency",
-    details: "Required for UK, Canada, and European English proficiency waivers.",
+    categoryLabel: msg("Language Proficiency"),
+    details: msg("Required for UK, Canada, and European English proficiency waivers."),
   },
 ];
 
 export function DeadlineCalendar() {
+  const tx = useT();
   const { applications } = useApp();
   const { t } = useI18n();
 
@@ -96,7 +99,7 @@ export function DeadlineCalendar() {
           date: `${year}-${monthStr}-${dayStr}`,
           institution: uni.name,
           categoryLabel: dl.label,
-          details: `Application submission cutoff for ${uni.name}. Verification: ${dl.status}.`,
+          details: tx("Application submission cutoff for {name}. Verification: {status}.", { name: uni.name, status: dl.status }),
         });
       }
     }
@@ -113,7 +116,7 @@ export function DeadlineCalendar() {
           date: `${year}-${monthStr}-${dayStr}`,
           institution: sch.provider,
           categoryLabel: sch.kind,
-          details: `${sch.coverage}. Basis: ${sch.basis}. ${sch.notes}`,
+          details: tx("{coverage}. Basis: {basis}. {notes}", { coverage: sch.coverage, basis: sch.basis, notes: sch.notes }),
         });
       }
     }
@@ -140,11 +143,11 @@ export function DeadlineCalendar() {
   const getKindColor = (kind: EventKind) => {
     switch (kind) {
       case "deadline":
-        return "bg-[#EBAE29]/20 text-[#EBAE29] border-[#EBAE29]/40";
+        return "bg-[#EBAE29]/20 text-amber-ink border-[#EBAE29]/40";
       case "scholarship":
-        return "bg-[#589C80]/20 text-[#589C80] border-[#589C80]/40";
+        return "bg-[#589C80]/20 text-green-ink border-[#589C80]/40";
       case "exam":
-        return "bg-[#F5EED2]/20 text-[#F5EED2] border-[#F5EED2]/40";
+        return "bg-ink/20 text-ink border-ink/40";
     }
   };
 
@@ -174,28 +177,28 @@ export function DeadlineCalendar() {
   return (
     <div className="space-y-6">
       {urgentAlerts.length > 0 && (
-        <div className="p-5 rounded-3xl bg-gradient-to-r from-[#EBAE29]/15 via-[#132228]/80 to-[#589C80]/15 border border-[#EBAE29]/40 backdrop-blur-xl shadow-xl space-y-3">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#EBAE29]">
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-[#EBAE29]/15 via-panel/80 to-[#589C80]/15 border border-[#EBAE29]/40 backdrop-blur-xl shadow-xl space-y-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-ink">
             <span className="w-2 h-2 rounded-full bg-[#EBAE29] animate-ping" />
-            <span>Proactive Deadline Alert</span>
+            <span>{tx("Proactive Deadline Alert")}</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {urgentAlerts.map((alert) => (
               <div
                 key={alert.id}
-                className="p-3.5 rounded-2xl bg-[#132228]/90 border border-[#589C80]/30 flex items-center justify-between gap-3 shadow-md"
+                className="p-3.5 rounded-2xl bg-panel/90 border border-[#589C80]/30 flex items-center justify-between gap-3 shadow-md"
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-[#F5EED2] truncate">
+                  <p className="text-xs font-bold text-ink truncate">
                     {alert.title}
                   </p>
-                  <p className="text-[11px] font-mono text-[#589C80]">
+                  <p className="text-[11px] font-mono text-green-ink">
                     {formatDate(new Date(alert.date))}
                   </p>
                 </div>
-                <span className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#EBAE29]/20 text-[#EBAE29] border border-[#EBAE29]/40">
-                  {alert.days}d left
+                <span className="shrink-0 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#EBAE29]/20 text-amber-ink border border-[#EBAE29]/40">
+                  {tx("{days}d left", { days: alert.days })}
                 </span>
               </div>
             ))}
@@ -203,28 +206,28 @@ export function DeadlineCalendar() {
         </div>
       )}
 
-      <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <Calendar size={22} className="text-[#589C80]" />
-            <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
+            <Calendar size={22} className="text-green-ink" />
+            <h2 className="text-xl font-bold tracking-tight text-ink">
               {t.calendar.title}
             </h2>
           </div>
-          <p className="text-xs text-[#F5EED2]/70 max-w-xl">
+          <p className="text-xs text-ink/70 max-w-xl">
             {t.calendar.subtitle}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center bg-[#132228] p-1 rounded-2xl border border-[#589C80]/30">
+          <div className="flex items-center bg-panel p-1 rounded-2xl border border-[#589C80]/30">
             <button
               type="button"
               onClick={() => setActiveFilter("all")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeFilter === "all"
-                  ? "bg-[#589C80] text-[#132228] shadow-md"
-                  : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                  ? "bg-[#589C80] text-on-accent shadow-md"
+                  : "text-ink/70 hover:text-ink"
               }`}
             >
               {t.calendar.filterAll}
@@ -234,8 +237,8 @@ export function DeadlineCalendar() {
               onClick={() => setActiveFilter("deadline")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeFilter === "deadline"
-                  ? "bg-[#EBAE29] text-[#132228] shadow-md"
-                  : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                  ? "bg-[#EBAE29] text-on-accent shadow-md"
+                  : "text-ink/70 hover:text-ink"
               }`}
             >
               {t.calendar.filterDeadlines}
@@ -245,8 +248,8 @@ export function DeadlineCalendar() {
               onClick={() => setActiveFilter("exam")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeFilter === "exam"
-                  ? "bg-[#F5EED2] text-[#132228] shadow-md"
-                  : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                  ? "bg-ink text-panel shadow-md"
+                  : "text-ink/70 hover:text-ink"
               }`}
             >
               {t.calendar.filterExams}
@@ -256,36 +259,38 @@ export function DeadlineCalendar() {
               onClick={() => setActiveFilter("scholarship")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 activeFilter === "scholarship"
-                  ? "bg-[#589C80] text-[#132228] shadow-md"
-                  : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                  ? "bg-[#589C80] text-on-accent shadow-md"
+                  : "text-ink/70 hover:text-ink"
               }`}
             >
               {t.calendar.filterScholarships}
             </button>
           </div>
 
-          <div className="flex items-center bg-[#132228] p-1 rounded-2xl border border-[#589C80]/30">
+          <div className="flex items-center bg-panel p-1 rounded-2xl border border-[#589C80]/30">
             <button
               type="button"
               onClick={() => setViewMode("agenda")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 viewMode === "agenda"
-                  ? "bg-[#589C80]/20 text-[#589C80] border border-[#589C80]/40"
-                  : "text-[#F5EED2]/60 hover:text-[#F5EED2]"
+                  ? "bg-[#589C80]/20 text-green-ink border border-[#589C80]/40"
+                  : "text-ink/60 hover:text-ink"
               }`}
             >
-              List View
+              
+              {tx("List View")}
             </button>
             <button
               type="button"
               onClick={() => setViewMode("month")}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                 viewMode === "month"
-                  ? "bg-[#589C80]/20 text-[#589C80] border border-[#589C80]/40"
-                  : "text-[#F5EED2]/60 hover:text-[#F5EED2]"
+                  ? "bg-[#589C80]/20 text-green-ink border border-[#589C80]/40"
+                  : "text-ink/60 hover:text-ink"
               }`}
             >
-              Grid View
+              
+              {tx("Grid View")}
             </button>
           </div>
         </div>
@@ -294,7 +299,7 @@ export function DeadlineCalendar() {
       {viewMode === "agenda" ? (
         <div className="space-y-3">
           {filteredEvents.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-[#132228]/50 border border-[#589C80]/20 text-[#F5EED2]/60 font-mono text-sm">
+            <div className="p-12 text-center rounded-3xl bg-panel/50 border border-[#589C80]/20 text-ink/60 font-mono text-sm">
               {t.calendar.noEvents}
             </div>
           ) : (
@@ -306,16 +311,16 @@ export function DeadlineCalendar() {
                   key={event.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-5 rounded-2xl bg-[#132228]/85 border border-[#589C80]/30 hover:border-[#EBAE29] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl"
+                  className="p-5 rounded-2xl bg-panel/85 border border-[#589C80]/30 hover:border-[#EBAE29] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg backdrop-blur-xl"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-[#132228] border border-[#589C80]/40 flex flex-col items-center justify-center shrink-0 shadow-inner">
-                      <span className="text-[10px] font-mono uppercase font-bold text-[#EBAE29]">
+                    <div className="w-16 h-16 rounded-2xl bg-panel border border-[#589C80]/40 flex flex-col items-center justify-center shrink-0 shadow-inner">
+                      <span className="text-[10px] font-mono uppercase font-bold text-amber-ink">
                         {new Date(event.date).toLocaleDateString("en-US", {
                           month: "short",
                         })}
                       </span>
-                      <span className="text-xl font-extrabold text-[#F5EED2]">
+                      <span className="text-xl font-extrabold text-ink">
                         {new Date(event.date).getDate()}
                       </span>
                     </div>
@@ -330,24 +335,24 @@ export function DeadlineCalendar() {
                           {renderKindBadge(event.kind)}
                         </span>
                         {event.institution && (
-                          <span className="text-xs font-mono text-[#589C80]">
+                          <span className="text-xs font-mono text-green-ink">
                             {event.institution}
                           </span>
                         )}
                       </div>
 
-                      <h3 className="text-base font-bold text-[#F5EED2]">
+                      <h3 className="text-base font-bold text-ink">
                         {event.title}
                       </h3>
 
-                      <p className="text-xs text-[#F5EED2]/70 leading-relaxed max-w-2xl">
+                      <p className="text-xs text-ink/70 leading-relaxed max-w-2xl">
                         {event.details}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex md:flex-col items-center md:items-end justify-between shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#589C80]/20">
-                    <span className="text-xs font-mono text-[#F5EED2]/60">
+                    <span className="text-xs font-mono text-ink/60">
                       {formatDate(new Date(event.date))}
                     </span>
                     <span
@@ -355,11 +360,11 @@ export function DeadlineCalendar() {
                         days < 0
                           ? "bg-red-950/40 text-red-400 border-red-800/40"
                           : days <= 14
-                            ? "bg-[#EBAE29]/20 text-[#EBAE29] border-[#EBAE29]/40 animate-pulse"
-                            : "bg-[#589C80]/15 text-[#589C80] border-[#589C80]/30"
+                            ? "bg-[#EBAE29]/20 text-amber-ink border-[#EBAE29]/40 animate-pulse"
+                            : "bg-[#589C80]/15 text-green-ink border-[#589C80]/30"
                       }`}
                     >
-                      {days < 0 ? "Past" : `${days} days left`}
+                      {days < 0 ? tx("Past") : tx("{days} days left", { days: days })}
                     </span>
                   </div>
                 </motion.div>
@@ -368,15 +373,15 @@ export function DeadlineCalendar() {
           )}
         </div>
       ) : (
-        <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 shadow-2xl backdrop-blur-xl">
-          <div className="grid grid-cols-7 gap-2 mb-3 text-center text-xs font-mono font-bold text-[#589C80] uppercase">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
+        <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 shadow-2xl backdrop-blur-xl">
+          <div className="grid grid-cols-7 gap-2 mb-3 text-center text-xs font-mono font-bold text-green-ink uppercase">
+            <span>{tx("Sun")}</span>
+            <span>{tx("Mon")}</span>
+            <span>{tx("Tue")}</span>
+            <span>{tx("Wed")}</span>
+            <span>{tx("Thu")}</span>
+            <span>{tx("Fri")}</span>
+            <span>{tx("Sat")}</span>
           </div>
 
           <div className="grid grid-cols-7 gap-2">
@@ -388,9 +393,9 @@ export function DeadlineCalendar() {
               return (
                 <div
                   key={i}
-                  className="min-h-24 p-2 rounded-2xl bg-[#132228]/60 border border-[#589C80]/20 flex flex-col justify-between"
+                  className="min-h-24 p-2 rounded-2xl bg-panel/60 border border-[#589C80]/20 flex flex-col justify-between"
                 >
-                  <span className="text-xs font-mono font-bold text-[#F5EED2]/70">
+                  <span className="text-xs font-mono font-bold text-ink/70">
                     {dayNum}
                   </span>
                   <div className="space-y-1">
@@ -406,7 +411,7 @@ export function DeadlineCalendar() {
                       </div>
                     ))}
                     {matching.length > 2 && (
-                      <span className="text-[9px] font-mono text-[#EBAE29] block">
+                      <span className="text-[9px] font-mono text-amber-ink block">
                         +{matching.length - 2} more
                       </span>
                     )}
@@ -417,22 +422,23 @@ export function DeadlineCalendar() {
           </div>
 
           {selectedEvent && (
-            <div className="mt-4 p-4 rounded-2xl bg-[#132228] border border-[#EBAE29]/50 flex items-center justify-between">
+            <div className="mt-4 p-4 rounded-2xl bg-panel border border-[#EBAE29]/50 flex items-center justify-between">
               <div>
-                <p className="text-xs font-mono text-[#EBAE29]">
+                <p className="text-xs font-mono text-amber-ink">
                   {formatDate(new Date(selectedEvent.date))}
                 </p>
-                <p className="text-sm font-bold text-[#F5EED2]">
+                <p className="text-sm font-bold text-ink">
                   {selectedEvent.title}
                 </p>
-                <p className="text-xs text-[#F5EED2]/70">{selectedEvent.details}</p>
+                <p className="text-xs text-ink/70">{selectedEvent.details}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedEvent(null)}
-                className="px-3 py-1 text-xs font-mono bg-[#589C80]/20 text-[#589C80] rounded-lg border border-[#589C80]/40 cursor-pointer"
+                className="px-3 py-1 text-xs font-mono bg-[#589C80]/20 text-green-ink rounded-lg border border-[#589C80]/40 cursor-pointer"
               >
-                Close
+                
+                {tx("Close")}
               </button>
             </div>
           )}

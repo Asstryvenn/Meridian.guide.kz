@@ -4,12 +4,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
+import { useT } from "@/lib/i18n/use-t";
 
 interface ProgressRingsProps {
   className?: string;
 }
 
 export function ProgressRings({ className = "" }: ProgressRingsProps) {
+  const t = useT();
   const { completedTasks, pomodoroFocusMinutes = 0 } = useApp();
   const { roadmap } = useRoadmap();
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
@@ -45,38 +47,41 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
   const r3 = getRingProps(36, ring3Ratio);
 
   return (
-    <div className={`p-6 rounded-2xl bg-[#132228]/90 border border-[#589C80]/30 backdrop-blur-xl text-[#F5EED2] flex flex-col md:flex-row items-center gap-6 justify-between ${className}`}>
+    <div className={`p-6 rounded-2xl bg-panel/90 border border-[#589C80]/30 backdrop-blur-xl text-ink flex flex-col md:flex-row items-center gap-6 justify-between ${className}`}>
       <div className="flex flex-col items-center md:items-start space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-xl">⭕</span>
-          <h3 className="text-lg font-bold text-[#F5EED2]">Activity & Focus Rings</h3>
+          <h3 className="text-lg font-bold text-ink">{t("Activity & Focus Rings")}</h3>
         </div>
-        <p className="text-xs text-[#F5EED2]/70 text-center md:text-left max-w-xs">
-          Gamified tracking of completed roadmap tasks, pomodoro focus hours, and major milestones.
+        <p className="text-xs text-ink/70 text-center md:text-left max-w-xs">
+          
+          {t("Gamified tracking of completed roadmap tasks, pomodoro focus hours, and major milestones.")}
         </p>
 
-        <div className="pt-2 flex items-center bg-[#132228] p-1 rounded-xl border border-[#589C80]/30">
+        <div className="pt-2 flex items-center bg-panel p-1 rounded-xl border border-[#589C80]/30">
           <button
             type="button"
             onClick={() => setPeriod("weekly")}
             className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               period === "weekly"
-                ? "bg-[#589C80] text-[#132228] shadow-md"
-                : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                ? "bg-[#589C80] text-on-accent shadow-md"
+                : "text-ink/70 hover:text-ink"
             }`}
           >
-            Weekly Goal
+            
+            {t("Weekly Goal")}
           </button>
           <button
             type="button"
             onClick={() => setPeriod("monthly")}
             className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               period === "monthly"
-                ? "bg-[#589C80] text-[#132228] shadow-md"
-                : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                ? "bg-[#589C80] text-on-accent shadow-md"
+                : "text-ink/70 hover:text-ink"
             }`}
           >
-            Monthly Target
+            
+            {t("Monthly Target")}
           </button>
         </div>
       </div>
@@ -85,7 +90,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
         <svg viewBox="0 0 180 180" className="w-full h-full transform -rotate-90">
           <circle cx="90" cy="90" r={r1.radius} stroke="#EBAE29" strokeWidth="12" fill="none" opacity="0.15" />
           <circle cx="90" cy="90" r={r2.radius} stroke="#589C80" strokeWidth="12" fill="none" opacity="0.15" />
-          <circle cx="90" cy="90" r={r3.radius} stroke="#F5EED2" strokeWidth="12" fill="none" opacity="0.15" />
+          <circle cx="90" cy="90" r={r3.radius} stroke="var(--text)" strokeWidth="12" fill="none" opacity="0.15" />
 
           <motion.circle
             cx="90"
@@ -119,7 +124,7 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
             cx="90"
             cy="90"
             r={r3.radius}
-            stroke="#F5EED2"
+            stroke="var(--text)"
             strokeWidth="12"
             fill="none"
             strokeLinecap="round"
@@ -131,40 +136,40 @@ export function ProgressRings({ className = "" }: ProgressRingsProps) {
         </svg>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-          <span className="text-xl font-extrabold text-[#EBAE29]">
+          <span className="text-xl font-extrabold text-amber-ink">
             {Math.round(((ring1Ratio + ring2Ratio + ring3Ratio) / 3) * 100)}%
           </span>
-          <span className="text-[10px] font-mono text-[#F5EED2]/60 uppercase tracking-wider">Overall</span>
+          <span className="text-[10px] font-mono text-ink/60 uppercase tracking-wider">{t("Overall")}</span>
         </div>
       </div>
 
       <div className="space-y-3 w-full md:w-auto min-w-[200px]">
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#132228] border border-[#EBAE29]/30">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-panel border border-[#EBAE29]/30">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#EBAE29] inline-block" />
-            <span className="text-xs font-semibold text-[#F5EED2]">Tasks Done</span>
+            <span className="text-xs font-semibold text-ink">{t("Tasks Done")}</span>
           </div>
-          <span className="text-xs font-mono font-bold text-[#EBAE29]">
+          <span className="text-xs font-mono font-bold text-amber-ink">
             {completedCount}/{tasksGoal}
           </span>
         </div>
 
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-panel border border-[#589C80]/30">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#589C80] inline-block" />
-            <span className="text-xs font-semibold text-[#F5EED2]">Focus Time</span>
+            <span className="text-xs font-semibold text-ink">{t("Focus Time")}</span>
           </div>
-          <span className="text-xs font-mono font-bold text-[#589C80]">
+          <span className="text-xs font-mono font-bold text-green-ink">
             {currentFocusMinutes}m/{focusGoalMinutes}m
           </span>
         </div>
 
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#132228] border border-[#F5EED2]/30">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-panel border border-ink/30">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#F5EED2] inline-block" />
-            <span className="text-xs font-semibold text-[#F5EED2]">Milestones</span>
+            <span className="w-3 h-3 rounded-full bg-ink inline-block" />
+            <span className="text-xs font-semibold text-ink">{t("Milestones")}</span>
           </div>
-          <span className="text-xs font-mono font-bold text-[#F5EED2]">
+          <span className="text-xs font-mono font-bold text-ink">
             {milestonesCompleted}/{milestonesGoal}
           </span>
         </div>

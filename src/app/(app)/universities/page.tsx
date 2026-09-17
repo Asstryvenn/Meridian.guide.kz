@@ -15,22 +15,26 @@ import { TierBadge } from "@/components/university/tier";
 import { WorldDirectory } from "@/components/university/world-directory";
 import { universities } from "@/lib/data/universities";
 import { recommend } from "@/lib/engine/matching";
-import { applyFilters, describeFilters, emptyFilters, parseQueryLocally, type SearchFilters } from "@/lib/engine/search";
+import { applyFilters, describeFilters, emptyFilters, parseQueryLocally, removeFilter, type FilterChip, type SearchFilters } from "@/lib/engine/search";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./catalog.module.css";
+import { useLocale, useT } from "@/lib/i18n/use-t";
+import { inLocale, msg } from "@/lib/i18n/catalog";
 
-const examples = ["Affordable computer science in Europe", "Top AI programs in the US with full financial aid", "Engineering in Asia under $10k", "Accessible business schools with scholarships"];
+const examples = [msg("Affordable computer science in Europe"), msg("Top AI programs in the US with full financial aid"), msg("Engineering in Asia under $10k"), msg("Accessible business schools with scholarships")];
 
 const usdRange = ([min, max]: [number, number]) => (min === max ? `$${Math.round(min / 1000)}k` : `$${Math.round(min / 1000)}–${Math.round(max / 1000)}k`);
 
 function MatchedCatalog() {
+  const t = useT();
   const { profile, compare, toggleCompare } = useApp();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<SearchFilters>(emptyFilters);
   const [source, setSource] = useState<"ai" | "rules" | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const recommendations = useMemo(() => new Map(recommend(profile, universities).map((r) => [r.university.slug, r])), [profile]);
+  const locale = useLocale();
+  const recommendations = useMemo(() => inLocale(locale, () => new Map(recommend(profile, universities).map((r) => [r.university.slug, r]))), [profile, locale]);
   const results = useMemo(() => applyFilters(filters), [filters]);
   const chips = describeFilters(filters);
 
@@ -60,16 +64,8 @@ function MatchedCatalog() {
     search(query);
   }
 
-  function removeChip(chip: string) {
-    setFilters((f) => ({
-      fields: f.fields.filter((x) => x !== chip),
-      countries: f.countries.filter((x) => x !== chip),
-      regions: f.regions.filter((x) => x !== chip),
-      maxTuitionUsd: chip.startsWith("Tuition") ? null : f.maxTuitionUsd,
-      scholarshipsOnly: chip.startsWith("Scholarships") ? false : f.scholarshipsOnly,
-      difficulty: ["Accessible admission", "Moderately selective", "Highly selective"].includes(chip) ? "any" : f.difficulty,
-      keywords: f.keywords.filter((k) => `“${k}”` !== chip),
-    }));
+  function removeChip(chip: FilterChip) {
+    setFilters((f) => removeFilter(f, chip));
   }
 
   return (
@@ -77,9 +73,9 @@ function MatchedCatalog() {
       <Reveal>
         <form className={`glass ${styles.search}`} onSubmit={onSubmit} role="search">
           <Icon name="search" className={styles.searchIcon} />
-          <input className={styles.searchInput} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. affordable AI programs in Europe with scholarships" aria-label="Search universities" />
+          <input className={styles.searchInput} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("e.g. affordable AI programs in Europe with scholarships")} aria-label={t("Search universities")} />
           <Button type="submit" size="md" disabled={loading}>
-            {loading ? "Thinking…" : "Search"}
+            {loading ? t("Thinking…") : t("Search")}
           </Button>
         </form>
         <div className={styles.examples}>
@@ -93,19 +89,20 @@ function MatchedCatalog() {
 
       {chips.length > 0 && (
         <Reveal className={styles.filterBar}>
-          <DataTag kind={source === "ai" ? "ai" : "rules"} label={source === "ai" ? "Parsed by Claude" : "Parsed by rules"} />
+          <DataTag kind={source === "ai" ? "ai" : "rules"} label={source === "ai" ? t("Parsed by AI") : t("Parsed by rules")} />
           <div className={styles.chips}>
             <AnimatePresence>
               {chips.map((chip) => (
-                <motion.button key={chip} type="button" layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className={styles.chip} onClick={() => removeChip(chip)}>
-                  {chip}
+                <motion.button key={`${chip.kind}-${chip.value ?? ""}`} type="button" layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className={styles.chip} onClick={() => removeChip(chip)}>
+                  {chip.label}
                   <Icon name="close" size={12} />
                 </motion.button>
               ))}
             </AnimatePresence>
           </div>
           <Button variant="quiet" size="sm" onClick={() => search("")}>
-            Clear
+            
+            {t("Clear")}
           </Button>
         </Reveal>
       )}
@@ -126,38 +123,39 @@ function MatchedCatalog() {
                     {u.name}
                   </Link>
                   <p className={styles.rowPlace}>
-                    {u.city} · {u.country} · {u.type}
+                    {t(u.city)} · {t(u.country)} · {t(u.type)}
                   </p>
-                  <p className={styles.rowSummary}>{u.summary}</p>
+                  <p className={styles.rowSummary}>{t(u.summary)}</p>
                 </div>
                 <dl className={styles.facts}>
                   <div>
-                    <dt>International tuition</dt>
+                    <dt>{t("International tuition")}</dt>
                     <dd>
                       <SourcedValue data={u.intlTuitionUsd} format={usdRange} />
                     </dd>
                   </div>
                   <div>
-                    <dt>Acceptance rate</dt>
+                    <dt>{t("Acceptance rate")}</dt>
                     <dd>
                       <SourcedValue data={u.acceptanceRate} format={(v) => `${Math.round(v * 1000) / 10}%`} />
                     </dd>
                   </div>
                   <div>
-                    <dt>Your estimate</dt>
-                    <dd>{rec ? <PredictionRange prediction={rec.prediction} /> : <span className="faint">Outside your fields</span>}</dd>
+                    <dt>{t("Your estimate")}</dt>
+                    <dd>{rec ? <PredictionRange prediction={rec.prediction} /> : <span className="faint">{t("Outside your fields")}</span>}</dd>
                   </div>
                   <div>
-                    <dt>Tier</dt>
+                    <dt>{t("Tier")}</dt>
                     <dd>{rec ? <TierBadge tier={rec.tier} /> : <span className="faint">—</span>}</dd>
                   </div>
                 </dl>
                 <div className={styles.rowActions}>
                   <Button size="sm" variant="ghost" onClick={() => toggleCompare(u.slug)} aria-pressed={comparing}>
-                    {comparing ? "Comparing" : "Compare"}
+                    {comparing ? t("Comparing") : t("Compare")}
                   </Button>
                   <Button size="sm" variant="secondary" href={`/universities/${u.slug}`}>
-                    View profile
+                    
+                    {t("View profile")}
                   </Button>
                 </div>
               </motion.li>
@@ -166,30 +164,31 @@ function MatchedCatalog() {
         </AnimatePresence>
       </ul>
 
-      {results.length === 0 && <p className="muted">No universities in the catalog match every filter. Remove a filter to widen the search.</p>}
+      {results.length === 0 && <p className="muted">{t("No universities in the catalog match every filter. Remove a filter to widen the search.")}</p>}
       <CompareTray />
     </>
   );
 }
 
 export default function CatalogPage() {
+  const t = useT();
   const [view, setView] = useState<"world" | "matched">("world");
 
   return (
     <Page>
       <PageHeader
-        eyebrow="Universities"
-        title="Explore universities"
-        description={view === "world" ? "Search more than 10,000 universities worldwide." : "Profiles with admission estimates, costs and sources. Describe what you want in plain language."}
+        eyebrow={t("Universities")}
+        title={t("Explore universities")}
+        description={view === "world" ? t("Search more than 10,000 universities worldwide.") : t("Profiles with admission estimates, costs and sources. Describe what you want in plain language.")}
       />
       <Reveal>
         <Segmented
-          label="Browse"
+          label={t("Browse")}
           value={view}
           onChange={setView}
           options={[
-            { value: "world", label: "All universities" },
-            { value: "matched", label: `Detailed profiles · ${universities.length}` },
+            { value: "world", label: t("All universities") },
+            { value: "matched", label: t("Detailed profiles · {count}", { count: universities.length }) },
           ]}
         />
       </Reveal>

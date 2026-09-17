@@ -32,7 +32,7 @@
   font-family: var(--font-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--amber-ink);
   font-weight: 700;
   margin-top: 2px;
 }

@@ -8,17 +8,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { PomodoroTimer } from "@/components/ui/pomodoro-timer";
+import { PomodoroProvider, PomodoroToolbarButton } from "@/components/ui/pomodoro-timer";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { useApp } from "@/lib/store/app-store";
 import { useNotifications } from "@/lib/store/derived";
 import { Logo } from "./logo";
 import styles from "./app-shell.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 type NavItem = { href: string; label: string; icon: IconName; mobile?: boolean };
 
 function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open: boolean; onClose: () => void; pathname: string }) {
+  const t = useT();
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
@@ -36,11 +38,11 @@ function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open:
     <AnimatePresence>
       {open && (
         <>
-          <motion.button type="button" aria-label="Close menu" className={styles.scrim} onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.button type="button" aria-label={t("Close menu")} className={styles.scrim} onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="All sections"
+            aria-label={t("All sections")}
             className={styles.sheet}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -54,7 +56,7 @@ function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open:
             }}
           >
             <span className={styles.grabber} aria-hidden />
-            <nav className={styles.sheetGrid} aria-label="All sections">
+            <nav className={styles.sheetGrid} aria-label={t("All sections")}>
               {items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
@@ -67,7 +69,7 @@ function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open:
             </nav>
             <button type="button" className={styles.sheetRow} onClick={toggle}>
               <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
-              {theme === "dark" ? "Light mode" : "Dark mode"}
+              {theme === "dark" ? t("Light mode") : t("Dark mode")}
             </button>
           </motion.div>
         </>
@@ -77,6 +79,7 @@ function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open:
 }
 
 function Notifications() {
+  const t = useT();
   const notifications = useNotifications();
   const { dismissNotification } = useApp();
   const [open, setOpen] = useState(false);
@@ -93,7 +96,7 @@ function Notifications() {
 
   return (
     <div className={styles.popoverAnchor} ref={ref}>
-      <button type="button" className={styles.iconButton} aria-label={`Notifications (${notifications.length})`} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className={styles.iconButton} aria-label={t("Notifications ({count})", { count: notifications.length })} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         <Icon name="bell" />
         {notifications.length > 0 && <span className={styles.dot} />}
       </button>
@@ -106,9 +109,9 @@ function Notifications() {
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
           >
-            <p className="eyebrow">Notifications</p>
+            <p className="eyebrow">{t("Notifications")}</p>
             {notifications.length === 0 ? (
-              <p className={styles.popoverEmpty}>You&apos;re all caught up. We only notify you about deadlines, score gaps and strong scholarship matches.</p>
+              <p className={styles.popoverEmpty}>{t("You're all caught up. We only notify you about deadlines, score gaps and strong scholarship matches.")}</p>
             ) : (
               <ul className={styles.notificationList}>
                 {notifications.map((n) => (
@@ -118,7 +121,7 @@ function Notifications() {
                       <span className={styles.notificationTitle}>{n.title}</span>
                       <span className={styles.notificationText}>{n.body}</span>
                     </Link>
-                    <button type="button" className={styles.dismiss} aria-label="Dismiss" onClick={() => dismissNotification(n.id)}>
+                    <button type="button" className={styles.dismiss} aria-label={t("Dismiss")} onClick={() => dismissNotification(n.id)}>
                       <Icon name="close" size={14} />
                     </button>
                   </li>
@@ -133,6 +136,7 @@ function Notifications() {
 }
 
 function UserMenu() {
+  const t = useT();
   const { user, profile, signOut } = useApp();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -140,7 +144,7 @@ function UserMenu() {
 
   return (
     <div className={styles.popoverAnchor}>
-      <button type="button" className={styles.avatar} aria-label="Account" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className={styles.avatar} aria-label={t("Account")} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         {initial}
       </button>
       <AnimatePresence>
@@ -152,11 +156,12 @@ function UserMenu() {
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
           >
-            <p className={styles.menuName}>{profile.fullName || "Student"}</p>
+            <p className={styles.menuName}>{profile.fullName || t("Student")}</p>
             <p className={styles.menuEmail}>{user?.email}</p>
-            <p className={styles.menuMode}>{user?.mode === "supabase" ? "Synced to your account" : "Local demo mode — saved in this browser"}</p>
+            <p className={styles.menuMode}>{user?.mode === "supabase" ? t("Synced to your account") : t("Local demo mode — saved in this browser")}</p>
             <Link href="/onboarding?edit=1" className={styles.menuItem} onClick={() => setOpen(false)}>
-              Edit profile
+              
+              {t("Edit profile")}
             </Link>
             <button
               type="button"
@@ -166,7 +171,8 @@ function UserMenu() {
                 router.replace("/");
               }}
             >
-              Sign out
+              
+              {t("Sign out")}
             </button>
           </motion.div>
         )}
@@ -176,6 +182,7 @@ function UserMenu() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const tx = useT();
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const { ecoMode, toggleEcoMode } = useApp();
@@ -185,6 +192,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/dashboard", label: t.nav.home, icon: "home", mobile: true },
     { href: "/matches", label: t.nav.matches, icon: "target", mobile: true },
     { href: "/roadmap", label: t.nav.roadmap, icon: "path", mobile: true },
+    { href: "/diagnostics", label: t.nav.diagnostics, icon: "spark" },
     { href: "/calendar", label: t.nav.calendar, icon: "calendar" },
     { href: "/interview", label: t.nav.interview, icon: "spark" },
     { href: "/documents", label: t.nav.documents, icon: "folder" },
@@ -201,78 +209,77 @@ export function AppShell({ children }: { children: ReactNode }) {
   const moreActive = !nav.some((item) => item.mobile && (pathname === item.href || pathname.startsWith(`${item.href}/`)));
 
   return (
-    <div className={clsx(styles.shell, ecoMode && "eco-mode")}>
-      <aside className={clsx("glass", styles.sidebar)}>
-        <Link href="/dashboard" className={styles.brand}>
-          <Logo />
-        </Link>
-        <nav className={styles.nav} aria-label="Main">
-          {nav.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link key={item.href} href={item.href} className={clsx(styles.navItem, active && styles.navActive)} aria-current={active ? "page" : undefined}>
-                {active && <motion.span layoutId="nav-active" className={styles.navHighlight} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
-                <Icon name={item.icon} size={18} className={styles.navIcon} />
-                <span className={styles.navLabel}>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
-
-      <div className={styles.main}>
-        <header className={styles.topbar}>
-          <Link href="/dashboard" className={styles.mobileBrand}>
+    <PomodoroProvider>
+      <div className={clsx(styles.shell, ecoMode && "eco-mode")}>
+        <aside className={clsx("glass", styles.sidebar)}>
+          <Link href="/dashboard" className={styles.brand}>
             <Logo />
           </Link>
-          <div className={styles.topActions}>
-            <LanguageSelector />
-            <button
-              type="button"
-              onClick={toggleEcoMode}
-              className={clsx(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer",
-                ecoMode
-                  ? "bg-[#589C80]/30 border-[#589C80] text-[#F5EED2]"
-                  : "bg-[#132228]/40 border-[#589C80]/30 text-[#F5EED2]/70 hover:border-[#589C80] hover:text-[#F5EED2]"
-              )}
-              title="Toggle Calming Eco Mode"
-            >
-              <Leaf size={14} className={ecoMode ? "text-[#589C80]" : "text-[#F5EED2]/70"} />
-              <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
-            </button>
-            <button type="button" className={clsx(styles.iconButton, styles.themeToggle)} onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
-              <Icon name={theme === "dark" ? "sun" : "moon"} />
-            </button>
-            <Notifications />
-            <UserMenu />
-          </div>
-        </header>
-        <motion.main key={pathname} className={styles.content} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}>
-          {children}
-        </motion.main>
+          <nav className={styles.nav} aria-label={tx("Main")}>
+            {nav.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link key={item.href} href={item.href} className={clsx(styles.navItem, active && styles.navActive)} aria-current={active ? "page" : undefined}>
+                  {active && <motion.span layoutId="nav-active" className={styles.navHighlight} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+                  <Icon name={item.icon} size={18} className={styles.navIcon} />
+                  <span className={styles.navLabel}>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div className={styles.main}>
+          <header className={styles.topbar}>
+            <Link href="/dashboard" className={styles.mobileBrand}>
+              <Logo />
+            </Link>
+            <div className={styles.topActions}>
+              <LanguageSelector />
+              <button
+                type="button"
+                onClick={toggleEcoMode}
+                className={clsx(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer",
+                  ecoMode ? "bg-[#589C80]/30 border-[#589C80] text-ink" : "bg-panel/40 border-[#589C80]/30 text-ink/70 hover:border-[#589C80] hover:text-ink",
+                )}
+                title={tx("Toggle Calming Eco Mode")}
+              >
+                <Leaf size={14} className={ecoMode ? "text-green-ink" : "text-ink/70"} />
+                <span className="hidden sm:inline font-mono">{ecoMode ? t.nav.ecoModeOn : t.nav.ecoMode}</span>
+              </button>
+              <button type="button" className={clsx(styles.iconButton, styles.themeToggle)} onClick={toggle} aria-label={theme === "dark" ? tx("Switch to light mode") : tx("Switch to dark mode")}>
+                <Icon name={theme === "dark" ? "sun" : "moon"} />
+              </button>
+              <PomodoroToolbarButton />
+              <Notifications />
+              <UserMenu />
+            </div>
+          </header>
+          <motion.main key={pathname} className={styles.content} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}>
+            {children}
+          </motion.main>
+        </div>
+
+        <nav className={clsx("glass", styles.tabbar)} aria-label={tx("Primary")}>
+          {nav
+            .filter((item) => item.mobile)
+            .map((item) => {
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link key={item.href} href={item.href} className={clsx(styles.tab, active && styles.tabActive)} aria-current={active ? "page" : undefined}>
+                  <Icon name={item.icon} size={21} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          <button type="button" className={clsx(styles.tab, moreActive && !moreOpen && styles.tabActive, moreOpen && styles.tabActive)} onClick={() => setMoreOpen(true)} aria-expanded={moreOpen}>
+            <Icon name="grid" size={21} />
+            <span>{tx("More")}</span>
+          </button>
+        </nav>
+        <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
       </div>
-
-      <nav className={clsx("glass", styles.tabbar)} aria-label="Primary">
-        {nav
-          .filter((item) => item.mobile)
-          .map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link key={item.href} href={item.href} className={clsx(styles.tab, active && styles.tabActive)} aria-current={active ? "page" : undefined}>
-                <Icon name={item.icon} size={21} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        <button type="button" className={clsx(styles.tab, moreActive && !moreOpen && styles.tabActive, moreOpen && styles.tabActive)} onClick={() => setMoreOpen(true)} aria-expanded={moreOpen}>
-          <Icon name="grid" size={21} />
-          <span>More</span>
-        </button>
-      </nav>
-      <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
-
-      <PomodoroTimer />
-    </div>
+    </PomodoroProvider>
   );
 }

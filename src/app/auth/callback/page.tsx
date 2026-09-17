@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { completeAuthRedirect } from "@/lib/supabase/auth";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./callback.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 function safeNext(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
 }
 
 export default function AuthCallback() {
+  const t = useT();
   const router = useRouter();
   const { signIn } = useApp();
   const [error, setError] = useState<string | null>(null);
@@ -33,12 +35,12 @@ export default function AuthCallback() {
       {error ? (
         <>
           <p className={styles.error}>{error}</p>
-          <Button href="/login">Back to login</Button>
+          <Button href="/login">{t("Back to login")}</Button>
         </>
       ) : (
         <>
           <span className={styles.spinner} aria-hidden />
-          <p className={styles.message}>Signing you in…</p>
+          <p className={styles.message}>{t("Signing you in…")}</p>
         </>
       )}
     </div>

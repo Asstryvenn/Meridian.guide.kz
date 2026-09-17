@@ -10,8 +10,10 @@ import {
   formatCurrency,
   type Currency,
 } from "@/lib/engine/cost-calculator";
+import { useT } from "@/lib/i18n/use-t";
 
 export function CostCalculator() {
+  const tx = useT();
   const { profile } = useApp();
   const { t } = useI18n();
 
@@ -54,7 +56,7 @@ export function CostCalculator() {
   const items = [
     { label: t.calculator.tuitionFees, value: breakdown.tuition, color: "#EBAE29", bgClass: "bg-[#EBAE29]" },
     { label: t.calculator.housing, value: breakdown.housing, color: "#589C80", bgClass: "bg-[#589C80]" },
-    { label: t.calculator.livingExpenses, value: breakdown.living, color: "#F5EED2", bgClass: "bg-[#F5EED2]" },
+    { label: t.calculator.livingExpenses, value: breakdown.living, color: "var(--text)", bgClass: "bg-ink" },
     { label: t.calculator.insurance, value: breakdown.insurance, color: "#3f7f64", bgClass: "bg-[#3f7f64]" },
     { label: t.calculator.flights, value: breakdown.flights, color: "#d99a12", bgClass: "bg-[#d99a12]" },
     { label: t.calculator.visaFees, value: breakdown.visa, color: "#a8d5ba", bgClass: "bg-[#a8d5ba]" },
@@ -80,21 +82,21 @@ export function CostCalculator() {
 
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <DollarSign size={22} className="text-[#EBAE29]" />
-            <h2 className="text-xl font-bold tracking-tight text-[#F5EED2]">
+            <DollarSign size={22} className="text-amber-ink" />
+            <h2 className="text-xl font-bold tracking-tight text-ink">
               {t.calculator.title}
             </h2>
           </div>
-          <p className="text-xs text-[#F5EED2]/70 max-w-xl">
+          <p className="text-xs text-ink/70 max-w-xl">
             {t.calculator.subtitle}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-[#132228] p-1 rounded-2xl border border-[#589C80]/30">
+          <div className="flex items-center bg-panel p-1 rounded-2xl border border-[#589C80]/30">
             {(["USD", "KZT", "EUR", "GBP"] as Currency[]).map((cur) => (
               <button
                 key={cur}
@@ -102,8 +104,8 @@ export function CostCalculator() {
                 onClick={() => setCurrency(cur)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                   currency === cur
-                    ? "bg-[#589C80] text-[#132228] shadow-md"
-                    : "text-[#F5EED2]/70 hover:text-[#F5EED2]"
+                    ? "bg-[#589C80] text-on-accent shadow-md"
+                    : "text-ink/70 hover:text-ink"
                 }`}
               >
                 {cur}
@@ -115,15 +117,15 @@ export function CostCalculator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl space-y-4">
+          <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-mono font-bold text-[#EBAE29] uppercase">
+              <label className="text-xs font-mono font-bold text-amber-ink uppercase">
                 {t.calculator.selectUniversity}
               </label>
               <select
                 value={selectedUniSlug}
                 onChange={(e) => handleUniChange(e.target.value)}
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/40 text-[#F5EED2] font-semibold focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/40 text-ink font-semibold focus:outline-none focus:border-[#EBAE29] cursor-pointer"
               >
                 {universities.map((u) => (
                   <option key={u.slug} value={u.slug}>
@@ -136,8 +138,8 @@ export function CostCalculator() {
             <div className="space-y-3 pt-2">
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.tuitionFees}</span>
-                  <span className="text-[#EBAE29] font-bold">
+                  <span className="text-ink/70">{t.calculator.tuitionFees}</span>
+                  <span className="text-amber-ink font-bold">
                     {formatCurrency(tuition, currency)}
                   </span>
                 </div>
@@ -154,8 +156,8 @@ export function CostCalculator() {
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.housing}</span>
-                  <span className="text-[#589C80] font-bold">
+                  <span className="text-ink/70">{t.calculator.housing}</span>
+                  <span className="text-green-ink font-bold">
                     {formatCurrency(housing, currency)}
                   </span>
                 </div>
@@ -172,8 +174,8 @@ export function CostCalculator() {
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.livingExpenses}</span>
-                  <span className="text-[#F5EED2] font-bold">
+                  <span className="text-ink/70">{t.calculator.livingExpenses}</span>
+                  <span className="text-ink font-bold">
                     {formatCurrency(living, currency)}
                   </span>
                 </div>
@@ -184,14 +186,14 @@ export function CostCalculator() {
                   step="250"
                   value={living}
                   onChange={(e) => setLiving(Number(e.target.value))}
-                  className="w-full accent-[#F5EED2] cursor-pointer"
+                  className="w-full accent-[var(--text)] cursor-pointer"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.insurance}</span>
-                  <span className="text-[#3f7f64] font-bold">
+                  <span className="text-ink/70">{t.calculator.insurance}</span>
+                  <span className="text-green-ink font-bold">
                     {formatCurrency(insurance, currency)}
                   </span>
                 </div>
@@ -208,8 +210,8 @@ export function CostCalculator() {
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.flights}</span>
-                  <span className="text-[#d99a12] font-bold">
+                  <span className="text-ink/70">{t.calculator.flights}</span>
+                  <span className="text-amber-ink font-bold">
                     {formatCurrency(flights, currency)}
                   </span>
                 </div>
@@ -226,8 +228,8 @@ export function CostCalculator() {
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-[#F5EED2]/70">{t.calculator.visaFees}</span>
-                  <span className="text-[#a8d5ba] font-bold">
+                  <span className="text-ink/70">{t.calculator.visaFees}</span>
+                  <span className="text-green-ink font-bold">
                     {formatCurrency(visa, currency)}
                   </span>
                 </div>
@@ -245,8 +247,8 @@ export function CostCalculator() {
 
             <div className="pt-3 border-t border-[#589C80]/20 space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-[#EBAE29] font-bold">{t.calculator.familyBudget}</span>
-                <span className="text-[#F5EED2] font-extrabold">
+                <span className="text-amber-ink font-bold">{t.calculator.familyBudget}</span>
+                <span className="text-ink font-extrabold">
                   {formatCurrency(customBudget, currency)}
                 </span>
               </div>
@@ -264,7 +266,7 @@ export function CostCalculator() {
         </div>
 
         <div className="lg:col-span-7 space-y-6">
-          <div className="p-6 rounded-3xl bg-[#132228]/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="p-6 rounded-3xl bg-panel/85 border border-[#589C80]/30 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="relative w-48 h-48 shrink-0 flex items-center justify-center">
               <svg viewBox="0 0 160 160" className="w-full h-full transform -rotate-90">
                 {segments.map((seg, idx) => (
@@ -282,10 +284,11 @@ export function CostCalculator() {
                 ))}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                <span className="text-[10px] font-mono text-[#F5EED2]/60 uppercase">
-                  Annual Cost
+                <span className="text-[10px] font-mono text-ink/60 uppercase">
+                  
+                  {tx("Annual Cost")}
                 </span>
-                <span className="text-sm font-extrabold font-mono text-[#EBAE29]">
+                <span className="text-sm font-extrabold font-mono text-amber-ink">
                   {formatCurrency(breakdown.totalUsd, currency)}
                 </span>
               </div>
@@ -295,15 +298,15 @@ export function CostCalculator() {
               {items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between text-xs font-mono p-2 rounded-xl bg-[#132228] border border-[#589C80]/20"
+                  className="flex items-center justify-between text-xs font-mono p-2 rounded-xl bg-panel border border-[#589C80]/20"
                 >
                   <div className="flex items-center gap-2">
                     <span
                       className={`w-2.5 h-2.5 rounded-full ${item.bgClass}`}
                     />
-                    <span className="text-[#F5EED2]/80">{item.label}</span>
+                    <span className="text-ink/80">{item.label}</span>
                   </div>
-                  <span className="font-bold text-[#F5EED2]">
+                  <span className="font-bold text-ink">
                     {formatCurrency(item.value, currency)}
                   </span>
                 </div>
@@ -312,15 +315,16 @@ export function CostCalculator() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-3xl bg-[#132228]/90 border border-[#589C80]/30 backdrop-blur-xl shadow-xl space-y-1">
-              <span className="text-xs font-mono uppercase text-[#F5EED2]/60">
+            <div className="p-5 rounded-3xl bg-panel/90 border border-[#589C80]/30 backdrop-blur-xl shadow-xl space-y-1">
+              <span className="text-xs font-mono uppercase text-ink/60">
                 {t.calculator.totalAnnualCost}
               </span>
-              <p className="text-2xl font-extrabold font-mono text-[#EBAE29]">
+              <p className="text-2xl font-extrabold font-mono text-amber-ink">
                 {formatCurrency(breakdown.totalUsd, currency)}
               </p>
-              <p className="text-[11px] text-[#589C80] font-mono">
-                Full comprehensive estimate
+              <p className="text-[11px] text-green-ink font-mono">
+                
+                {tx("Full comprehensive estimate")}
               </p>
             </div>
 
@@ -328,7 +332,7 @@ export function CostCalculator() {
               className={`p-5 rounded-3xl border backdrop-blur-xl shadow-xl space-y-1 ${
                 breakdown.gapUsd > 0
                   ? "bg-red-950/20 border-red-800/40 text-red-300"
-                  : "bg-[#589C80]/20 border-[#589C80]/40 text-[#589C80]"
+                  : "bg-[#589C80]/20 border-[#589C80]/40 text-green-ink"
               }`}
             >
               <span className="text-xs font-mono uppercase">
@@ -341,14 +345,14 @@ export function CostCalculator() {
                   formatCurrency(breakdown.gapUsd, currency)
                 ) : (
                   <span className="inline-flex items-center gap-1.5">
-                    <Check size={20} /> Fully Covered
+                    <Check size={20} /> {tx("Fully Covered")}
                   </span>
                 )}
               </p>
               <p className="text-[11px] font-mono opacity-80">
                 {breakdown.gapUsd > 0
-                  ? "Scholarships or financial aid required"
-                  : "Family budget exceeds estimated cost"}
+                  ? tx("Scholarships or financial aid required")
+                  : tx("Family budget exceeds estimated cost")}
               </p>
             </div>
           </div>

@@ -1,10 +1,11 @@
 import type { Application } from "@/lib/types";
+import { msg } from "@/lib/i18n/catalog";
 
 export const statusLabel: Record<Application["status"], string> = {
-  researching: "Researching",
-  preparing: "Preparing",
-  submitted: "Submitted",
-  decision: "Decision received",
+  researching: msg("Researching"),
+  preparing: msg("Preparing"),
+  submitted: msg("Submitted"),
+  decision: msg("Decision received"),
 };
 
 export function applicationProgress(application: Application): number {

@@ -21,11 +21,11 @@
 }
 
 .needs_verification {
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 :global([data-theme="dark"]) .needs_verification {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .unavailable {
@@ -61,10 +61,10 @@
 .flag {
   font-size: 11px;
   font-weight: 600;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
   letter-spacing: 0.02em;
 }
 
 :global([data-theme="dark"]) .flag {
-  color: var(--amber);
+  color: var(--amber-ink);
 }

@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { universities as curated } from "@/lib/data/universities";
 import type { DirectoryPage, DirectoryUniversity } from "@/lib/directory/types";
 import styles from "./world-directory.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 const PAGE_SIZE = 30;
 
@@ -28,6 +29,7 @@ function flag(code: string | null) {
 }
 
 function Row({ university }: { university: DirectoryUniversity }) {
+  const t = useT();
   const website = university.webPages[0];
   const slug = curatedByName.get(university.name.toLowerCase());
   return (
@@ -45,11 +47,12 @@ function Row({ university }: { university: DirectoryUniversity }) {
       <div className={styles.actions}>
         {slug && (
           <a href={`/universities/${slug}`} className={styles.profile}>
-            Full profile
+            
+            {t("Full profile")}
           </a>
         )}
         {website && (
-          <a href={website} target="_blank" rel="noreferrer" className={styles.visit} aria-label={`Visit ${university.name} website`}>
+          <a href={website} target="_blank" rel="noreferrer" className={styles.visit} aria-label={t("Visit {name} website", { name: university.name })}>
             <Icon name="external" size={16} />
           </a>
         )}
@@ -74,6 +77,7 @@ async function fetchPage(q: string, country: string, page: number, signal?: Abor
 }
 
 export function WorldDirectory() {
+  const tx = useT();
   const [query, setQuery] = useState("");
   const [country, setCountry] = useState("");
   const [countries, setCountries] = useState<string[]>([]);
@@ -142,15 +146,15 @@ export function WorldDirectory() {
       <div className={styles.controls}>
         <label className={`glass ${styles.search}`}>
           <Icon name="search" size={18} className={styles.searchIcon} />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search 10,000+ universities" aria-label="Search universities by name" className={styles.input} enterKeyHint="search" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tx("Search 10,000+ universities")} aria-label={tx("Search universities by name")} className={styles.input} enterKeyHint="search" />
           {query && (
-            <button type="button" className={styles.clear} onClick={() => setQuery("")} aria-label="Clear search">
+            <button type="button" className={styles.clear} onClick={() => setQuery("")} aria-label={tx("Clear search")}>
               <Icon name="close" size={14} />
             </button>
           )}
         </label>
-        <select value={country} onChange={(e) => setCountry(e.target.value)} className={styles.select} aria-label="Filter by country">
-          <option value="">All countries</option>
+        <select value={country} onChange={(e) => setCountry(e.target.value)} className={styles.select} aria-label={tx("Filter by country")}>
+          <option value="">{tx("All countries")}</option>
           {countries.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -160,14 +164,14 @@ export function WorldDirectory() {
       </div>
 
       <p className={styles.count} aria-live="polite">
-        {meta ? `${meta.total.toLocaleString("en-US")} ${meta.total === 1 ? "university" : "universities"}` : "Loading directory…"}
+        {meta ? `${meta.total.toLocaleString("en-US")} ${meta.total === 1 ? "university" : "universities"}` : tx("Loading directory…")}
         {meta && (
           <>
             {" · "}
             <a href={meta.sourceUrl} target="_blank" rel="noreferrer">
               {meta.sourceName}
             </a>
-            {meta.source === "remote" ? " (live source)" : ""}
+            {meta.source === "remote" ? tx(" (live source)") : ""}
           </>
         )}
       </p>
@@ -187,11 +191,12 @@ export function WorldDirectory() {
 
       {status === "error" && (
         <button type="button" className={styles.retry} onClick={retry}>
-          Couldn&apos;t load universities. Tap to retry.
+          
+          {tx("Couldn't load universities. Tap to retry.")}
         </button>
       )}
-      {status === "done" && items.length === 0 && <p className={styles.empty}>No universities match your search.</p>}
-      {status === "done" && items.length > 0 && <p className={styles.end}>You&apos;ve reached the end of the list.</p>}
+      {status === "done" && items.length === 0 && <p className={styles.empty}>{tx("No universities match your search.")}</p>}
+      {status === "done" && items.length > 0 && <p className={styles.end}>{tx("You've reached the end of the list.")}</p>}
       <div ref={sentinel} className={styles.sentinel} aria-hidden />
     </section>
   );

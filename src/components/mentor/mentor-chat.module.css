@@ -100,7 +100,7 @@
 }
 
 .list li::marker {
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 .nextAction {

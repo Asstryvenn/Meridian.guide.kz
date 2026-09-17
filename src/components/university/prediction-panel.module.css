@@ -38,7 +38,7 @@
 }
 
 .confidence[data-confidence="high"] {
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 .confidence[data-confidence="low"] {

@@ -1,6 +1,7 @@
 import { universities } from "@/lib/data/universities";
 import type { FieldOfStudy, StudentProfile, Tier, University } from "@/lib/types";
 import { predictAdmission, type Prediction } from "./prediction";
+import { tr } from "@/lib/i18n/catalog";
 import { ieltsEquivalent } from "./profile-metrics";
 
 export interface FinancialFit {
@@ -48,27 +49,27 @@ export function financialFit(profile: StudentProfile, university: University): F
   const tuition = university.intlTuitionUsd.value;
   const living = university.livingCostUsd.value ?? 0;
   if (tuition === null) {
-    return { score: 0.5, label: "Needs verification", annualCostUsd: null, detail: "Tuition for your situation is not published. Confirm with admissions." };
+    return { score: 0.5, label: "Needs verification", annualCostUsd: null, detail: tr("Tuition for your situation is not published. Confirm with admissions.") };
   }
   const cost: [number, number] = [tuition[0] + living, tuition[1] + living];
   const budget = profile.annualBudgetUsd;
   const aid = university.needBasedAidIntl.value;
 
   if (budget >= cost[1]) {
-    return { score: 1, label: "Within budget", annualCostUsd: cost, detail: "Your stated budget covers estimated tuition and living costs." };
+    return { score: 1, label: "Within budget", annualCostUsd: cost, detail: tr("Your stated budget covers estimated tuition and living costs.") };
   }
   if (profile.needsAid && aid === "full_need") {
-    return { score: 0.85, label: "Needs aid", annualCostUsd: cost, detail: "Above your budget, but this university meets full demonstrated need for admitted international students." };
+    return { score: 0.85, label: "Needs aid", annualCostUsd: cost, detail: tr("Above your budget, but this university meets full demonstrated need for admitted international students.") };
   }
   const ratio = budget / cost[0];
   if (ratio >= 0.75) {
-    return { score: 0.65, label: "Stretch", annualCostUsd: cost, detail: "Close to your budget; a partial scholarship would close the gap." };
+    return { score: 0.65, label: "Stretch", annualCostUsd: cost, detail: tr("Close to your budget; a partial scholarship would close the gap.") };
   }
   return {
     score: Math.max(0.05, ratio * 0.6 + (aid === "limited" ? 0.1 : 0)),
     label: "Needs aid",
     annualCostUsd: cost,
-    detail: aid === "none" ? "Well above your budget and no need-based aid for international students." : "Well above your budget; would require a major scholarship.",
+    detail: aid === "none" ? tr("Well above your budget and no need-based aid for international students.") : tr("Well above your budget; would require a major scholarship."),
   };
 }
 
@@ -118,12 +119,12 @@ function describeGap(profile: StudentProfile, university: University, prediction
   const ielts = ieltsEquivalent(profile);
   const minimum = university.requirements.minIelts.value;
   if (minimum !== null && (ielts === null || ielts < minimum)) {
-    return ielts === null ? `No English test yet (published minimum IELTS ${minimum}).` : `English score below the published minimum of IELTS ${minimum}.`;
+    return ielts === null ? tr("No English test yet (published minimum IELTS {minimum}).", { minimum }) : tr("English score below the published minimum of IELTS {minimum}.", { minimum });
   }
   if (financial.label === "Needs aid" && financial.score < 0.5) return financial.detail;
   if (prediction.negatives[0]) return `${prediction.negatives[0].label}: ${prediction.negatives[0].detail.toLowerCase()}.`;
   if (financial.label === "Stretch") return financial.detail;
-  return "No major gap detected — focus on a strong, specific essay.";
+  return tr("No major gap detected — focus on a strong, specific essay.");
 }
 
 export function recommend(profile: StudentProfile, pool: University[] = universities, includeUnrelated = false): Recommendation[] {
@@ -140,15 +141,15 @@ export function recommend(profile: StudentProfile, pool: University[] = universi
       const matchScore = Math.round(baseScore * 100);
 
       const reasons: string[] = [];
-      if (field.score === 1) reasons.push(`Offers ${field.programs[0]}`);
-      else if (field.programs.length) reasons.push(`Related program: ${field.programs[0]}`);
-      if (financial.label === "Within budget") reasons.push("Fits your budget");
-      if (financial.label === "Needs aid" && financial.score >= 0.8) reasons.push("Meets full need for international students");
-      if (profile.preferredCountries.includes(university.country)) reasons.push(`In your preferred country (${university.country})`);
-      if (profile.gradSchool === "phd" && university.researchStrength >= 5) reasons.push("Top research environment for a PhD path");
-      if (profile.archetype === "innovator" && university.campus === "urban") reasons.push("Matches your Innovator campus vibe");
-      if (profile.archetype === "researcher" && university.researchStrength >= 4) reasons.push("Matches your Researcher scholarly focus");
-      if (university.scholarshipIds.length) reasons.push("Has scholarships you may qualify for");
+      if (field.score === 1) reasons.push(tr("Offers {program}", { program: field.programs[0] }));
+      else if (field.programs.length) reasons.push(tr("Related program: {program}", { program: field.programs[0] }));
+      if (financial.label === "Within budget") reasons.push(tr("Fits your budget"));
+      if (financial.label === "Needs aid" && financial.score >= 0.8) reasons.push(tr("Meets full need for international students"));
+      if (profile.preferredCountries.includes(university.country)) reasons.push(tr("In your preferred country ({country})", { country: tr(university.country) }));
+      if (profile.gradSchool === "phd" && university.researchStrength >= 5) reasons.push(tr("Top research environment for a PhD path"));
+      if (profile.archetype === "innovator" && university.campus === "urban") reasons.push(tr("Matches your Innovator campus vibe"));
+      if (profile.archetype === "researcher" && university.researchStrength >= 4) reasons.push(tr("Matches your Researcher scholarly focus"));
+      if (university.scholarshipIds.length) reasons.push(tr("Has scholarships you may qualify for"));
 
       const recommendation: Recommendation = {
         university,

@@ -14,14 +14,17 @@ import { ProgressRing } from "@/components/ui/progress";
 import { universities } from "@/lib/data/universities";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./landing.module.css";
+import { useT } from "@/lib/i18n/use-t";
+import { msg } from "@/lib/i18n/catalog";
 
 const steps = [
-  { title: "Diagnose", body: "Eight short steps turn your grades, tests and activities into an honest picture of where you stand." },
-  { title: "Match", body: "Dream, Target and Safety universities ranked by fit, budget and an admission range — never fake precision." },
-  { title: "Act", body: "A level-by-level roadmap and a mentor that always tells you the one thing to do next." },
+  { title: msg("Diagnose"), body: msg("Eight short steps turn your grades, tests and activities into an honest picture of where you stand.") },
+  { title: msg("Match"), body: msg("Dream, Target and Safety universities ranked by fit, budget and an admission range — never fake precision.") },
+  { title: msg("Act"), body: msg("A level-by-level roadmap and a mentor that always tells you the one thing to do next.") },
 ];
 
 export default function Landing() {
+  const t = useT();
   const { user, onboarded, hydrated } = useApp();
   const { theme, toggle } = useTheme();
   const router = useRouter();
@@ -38,20 +41,20 @@ export default function Landing() {
         <Logo />
         <div className={styles.navActions}>
           <LanguageSelector />
-          <button type="button" className={styles.themeButton} onClick={toggle} aria-label="Toggle theme">
+          <button type="button" className={styles.themeButton} onClick={toggle} aria-label={t("Toggle theme")}>
             <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
           {user ? (
             <Button href={primaryHref} size="sm">
-              Open app
+              {t("Open app")}
             </Button>
           ) : (
             <>
               <Button href="/login" variant="ghost" size="sm" className={styles.navLogin}>
-                Log in
+                {t("Log in")}
               </Button>
               <Button href="/signup" size="sm">
-                Register
+                {t("Register")}
               </Button>
             </>
           )}
@@ -61,70 +64,74 @@ export default function Landing() {
       <motion.main className={styles.hero} variants={stagger} initial="hidden" animate="show">
         <div className={styles.heroText}>
           <motion.p variants={rise} className="eyebrow">
-            University navigation for ambitious students
+            {t("University navigation for ambitious students")}
           </motion.p>
           <motion.h1 variants={rise} className={styles.headline}>
-            Find the universities <span className="display">that fit you</span>
+            {t("Find the universities")} <span className="display">{t("that fit you")}</span>
           </motion.h1>
           <motion.p variants={rise} className={styles.lede}>
-            Meridian Guide reads your whole profile — grades, tests, activities, budget and goals — and turns it into a personal shortlist, transparent admission estimates, matched scholarships and a clear next step.
+            {t(
+              "Meridian Guide reads your whole profile — grades, tests, activities, budget and goals — and turns it into a personal shortlist, transparent admission estimates, matched scholarships and a clear next step.",
+            )}
           </motion.p>
           <motion.div variants={rise} className={styles.ctaRow}>
             {user ? (
               <Button href={primaryHref} size="lg" className={styles.ctaPrimary}>
-                Continue your plan
+                {t("Continue your plan")}
                 <Icon name="arrow" size={18} />
               </Button>
             ) : (
               <>
                 <Button href="/signup" size="lg" className={styles.ctaPrimary}>
-                  Create free account
+                  {t("Create free account")}
                   <Icon name="arrow" size={18} />
                 </Button>
                 <Button href="/login" variant="secondary" size="lg" className={styles.ctaSecondary}>
-                  Log in
+                  {t("Log in")}
                 </Button>
               </>
             )}
           </motion.div>
           <motion.p variants={rise} className={styles.ctaNote}>
-            Free · about 6 minutes · Sign in with Google or email
+            {t("Free · about 6 minutes · Sign in with Google or email")}
           </motion.p>
         </div>
 
         <motion.div variants={rise} className={styles.preview} aria-hidden>
           <div className={`glass ${styles.previewCard} ${styles.previewMain}`}>
             <div className={styles.previewHeader}>
-              <span className="eyebrow">Example · next action</span>
-              <DataTag kind="rules" label="Roadmap" />
+              <span className="eyebrow">{t("Example · next action")}</span>
+              <DataTag kind="rules" label={t("Roadmap")} />
             </div>
-            <p className={styles.previewAction}>Raise English score to IELTS 7.5</p>
-            <p className={styles.previewWhy}>Unlocks 2 universities on your list · due in 41 days</p>
+            <p className={styles.previewAction}>{t("Raise English score to IELTS 7.5")}</p>
+            <p className={styles.previewWhy}>{t("Unlocks 2 universities on your list · due in 41 days")}</p>
           </div>
           <motion.div className={`glass ${styles.previewCard} ${styles.previewRing}`} animate={{ y: [0, -6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
-            <ProgressRing value={0.64} size={84} label="Roadmap progress">
+            <ProgressRing value={0.64} size={84} label={t("Roadmap progress")}>
               <span className={styles.ringValue}>64%</span>
             </ProgressRing>
-            <span className={styles.ringLabel}>Level 3 · Portfolio</span>
+            <span className={styles.ringLabel}>{t("Level 3 · Portfolio")}</span>
           </motion.div>
           <motion.div className={`glass ${styles.previewCard} ${styles.previewMatch}`} animate={{ y: [0, 5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
             <div className={styles.previewHeader}>
               <span className={styles.tierDot} />
-              <span className={styles.tierLabel}>Target</span>
+              <span className={styles.tierLabel}>{t("Target")}</span>
               <DataTag kind="prediction" />
             </div>
-            <p className={styles.previewUni}>University of Toronto</p>
-            <p className={styles.previewRange}>30–45%<span> admission range · medium confidence</span></p>
+            <p className={styles.previewUni}>{t("University of Toronto")}</p>
+            <p className={styles.previewRange}>
+              30–45%<span> {t("admission range · medium confidence")}</span>
+            </p>
           </motion.div>
         </motion.div>
       </motion.main>
 
       <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
         {[
-          [String(universities.length), "universities with sourced data"],
-          ["7", "portfolio dimensions diagnosed"],
-          ["3", "tiers: Dream, Target, Safety"],
-          ["1", "clear next action, always"],
+          [String(universities.length), t("universities with sourced data")],
+          ["7", t("portfolio dimensions diagnosed")],
+          ["3", t("tiers: Dream, Target, Safety")],
+          ["1", t("clear next action, always")],
         ].map(([value, label]) => (
           <motion.div key={label} variants={rise} className={styles.metric}>
             <span className={styles.metricValue}>{value}</span>
@@ -137,35 +144,36 @@ export default function Landing() {
         {steps.map((step, index) => (
           <motion.article key={step.title} variants={rise} className={`glass ${styles.step}`}>
             <span className={styles.stepIndex}>0{index + 1}</span>
-            <h2 className={styles.stepTitle}>{step.title}</h2>
-            <p className="muted">{step.body}</p>
+            <h2 className={styles.stepTitle}>{t(step.title)}</h2>
+            <p className="muted">{t(step.body)}</p>
           </motion.article>
         ))}
       </motion.section>
 
       <section className={styles.honesty}>
         <h2 className={styles.honestyTitle}>
-          Honest by design<span className="display">.</span>
+          {t("Honest by design")}
+          <span className="display">.</span>
         </h2>
         <div className={styles.honestyGrid}>
           <div>
             <DataTag kind="institutional" />
-            <p className="muted">Tuition, deadlines and requirements carry their source, confidence and verification status. Missing data says so.</p>
+            <p className="muted">{t("Tuition, deadlines and requirements carry their source, confidence and verification status. Missing data says so.")}</p>
           </div>
           <div>
             <DataTag kind="prediction" />
-            <p className="muted">Admission chances are ranges from a transparent model, with the factors that pushed them up or down.</p>
+            <p className="muted">{t("Admission chances are ranges from a transparent model, with the factors that pushed them up or down.")}</p>
           </div>
           <div>
             <DataTag kind="ai" />
-            <p className="muted">AI explanations are labelled as such and grounded in your computed profile — never invented statistics.</p>
+            <p className="muted">{t("AI explanations are labelled as such and grounded in your computed profile — never invented statistics.")}</p>
           </div>
         </div>
       </section>
 
       <footer className={styles.footer}>
         <Logo />
-        <span className="faint">Meridian Guide · Built by team Flaxyss</span>
+        <span className="faint">{t("Meridian Guide · Built by team Flaxyss")}</span>
       </footer>
     </div>
   );

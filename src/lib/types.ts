@@ -92,6 +92,12 @@ export interface StudentProfile {
   careerGoal: string;
   gradSchool: "phd" | "masters" | "undecided" | "none";
   archetype?: ArchetypeId;
+  attendanceRate?: number | null;
+  essayScore?: number | null;
+  recommendationScore?: number | null;
+  interviewScore?: number | null;
+  onlineCertifications?: number | null;
+  socialMediaHours?: number | null;
   pomodoroMinutes?: number;
 }
 

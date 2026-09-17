@@ -140,18 +140,18 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 .focusTag {
   align-self: flex-start;
   font-size: 12px;
   font-weight: 600;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 :global([data-theme="dark"]) .focusTag {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 @media (max-width: 960px) {

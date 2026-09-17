@@ -8,6 +8,7 @@ import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { useRecommendations } from "@/lib/store/derived";
 import type { ActivityCategory } from "@/lib/types";
+import { useT } from "@/lib/i18n/use-t";
 
 interface ChanceBoostModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ChanceBoostModalProps {
 }
 
 export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
+  const tx = useT();
   const { addAchievementBoost } = useApp();
   const { list } = useRecommendations();
   const { t } = useI18n();
@@ -27,7 +29,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const topMatchUni = list[0]?.university?.name || "Harvard University";
+  const topMatchUni = list[0]?.university?.name || tx("Harvard University");
 
   const triggerConfetti = () => {
     try {
@@ -73,20 +75,20 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-lg p-6 rounded-3xl bg-[#132228] border border-[#589C80]/40 shadow-2xl space-y-5"
+            className="w-full max-w-lg p-6 rounded-3xl bg-panel border border-[#589C80]/40 shadow-2xl space-y-5"
           >
             <div className="flex items-center justify-between pb-3 border-b border-[#589C80]/20">
               <div className="flex items-center gap-2.5">
-                <Award size={20} className="text-[#EBAE29]" />
-                <h3 className="text-base font-bold text-[#F5EED2]">
+                <Award size={20} className="text-amber-ink" />
+                <h3 className="text-base font-bold text-ink">
                   {t.diplomaModal.uploadDiploma}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-1 rounded-lg text-[#F5EED2]/50 hover:text-[#F5EED2] hover:bg-white/5 cursor-pointer"
-                aria-label="Close"
+                className="p-1 rounded-lg text-ink/50 hover:text-ink hover:bg-ink/5 cursor-pointer"
+                aria-label={tx("Close")}
               >
                 <X size={16} />
               </button>
@@ -94,40 +96,42 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-mono text-[#F5EED2]/70 uppercase">
-                  Diploma or Award Title
+                <label className="text-xs font-mono text-ink/70 uppercase">
+                  
+                  {tx("Diploma or Award Title")}
                 </label>
                 <input
                   type="text"
                   required
                   value={awardTitle}
                   onChange={(e) => setAwardTitle(e.target.value)}
-                  placeholder="e.g. 1st Place National Hackathon / IBO Silver Medal"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-xs text-[#F5EED2] focus:outline-none focus:border-[#EBAE29]"
+                  placeholder={tx("e.g. 1st Place National Hackathon / IBO Silver Medal")}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/30 text-xs text-ink focus:outline-none focus:border-[#EBAE29]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono text-[#F5EED2]/70 uppercase">
-                  Achievement Category
+                <label className="text-xs font-mono text-ink/70 uppercase">
+                  
+                  {tx("Achievement Category")}
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ActivityCategory)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#132228] border border-[#589C80]/30 text-xs text-[#F5EED2] focus:outline-none focus:border-[#EBAE29] cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-panel border border-[#589C80]/30 text-xs text-ink focus:outline-none focus:border-[#EBAE29] cursor-pointer"
                 >
-                  <option value="Olympiad">Olympiad / Academic Competition</option>
-                  <option value="Research">Research Paper / Publication</option>
-                  <option value="Competition">Hackathon / Case Competition</option>
-                  <option value="Project">Engineering / Software Project</option>
-                  <option value="Leadership">Student Leadership Initiative</option>
-                  <option value="Award">Merit Award / Grant</option>
+                  <option value="Olympiad">{tx("Olympiad / Academic Competition")}</option>
+                  <option value="Research">{tx("Research Paper / Publication")}</option>
+                  <option value="Competition">{tx("Hackathon / Case Competition")}</option>
+                  <option value="Project">{tx("Engineering / Software Project")}</option>
+                  <option value="Leadership">{tx("Student Leadership Initiative")}</option>
+                  <option value="Award">{tx("Merit Award / Grant")}</option>
                 </select>
               </div>
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="p-6 rounded-2xl border-2 border-dashed border-[#589C80]/30 hover:border-[#EBAE29] bg-[#132228]/60 transition-all cursor-pointer text-center space-y-2"
+                className="p-6 rounded-2xl border-2 border-dashed border-[#589C80]/30 hover:border-[#EBAE29] bg-panel/60 transition-all cursor-pointer text-center space-y-2"
               >
                 <input
                   ref={fileInputRef}
@@ -136,13 +140,15 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                   className="hidden"
                 />
                 <div className="flex justify-center">
-                  <FileText size={32} className="text-[#589C80]" />
+                  <FileText size={32} className="text-green-ink" />
                 </div>
-                <p className="text-xs font-semibold text-[#F5EED2]">
-                  Attach scanned certificate or verification link
+                <p className="text-xs font-semibold text-ink">
+                  
+                  {tx("Attach scanned certificate or verification link")}
                 </p>
-                <p className="text-[10px] font-mono text-[#589C80]">
-                  PDF, PNG, JPG (verified through portfolio engine)
+                <p className="text-[10px] font-mono text-green-ink">
+                  
+                  {tx("PDF, PNG, JPG (verified through portfolio engine)")}
                 </p>
               </div>
 
@@ -150,15 +156,17 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-4 py-2 rounded-xl text-xs font-mono border border-[#589C80]/30 text-[#F5EED2]/70 hover:text-[#F5EED2] cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-mono border border-[#589C80]/30 text-ink/70 hover:text-ink cursor-pointer"
                 >
-                  Cancel
+                  
+                  {tx("Cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-[#132228] hover:brightness-110 shadow-lg cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer"
                 >
-                  Verify Achievement
+                  
+                  {tx("Verify Achievement")}
                 </button>
               </div>
             </form>
@@ -169,7 +177,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-md p-8 rounded-3xl bg-[#132228] border-2 border-[#EBAE29] shadow-2xl text-center space-y-5 relative overflow-hidden"
+            className="w-full max-w-md p-8 rounded-3xl bg-panel border-2 border-[#EBAE29] shadow-2xl text-center space-y-5 relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#EBAE29]/10 to-transparent pointer-events-none" />
 
@@ -179,31 +187,33 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="w-24 h-24 rounded-full bg-[#EBAE29]/20 absolute"
               />
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#589C80] to-[#EBAE29] flex items-center justify-center text-[#132228] shadow-xl shadow-[#EBAE29]/30 relative z-10">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#589C80] to-[#EBAE29] flex items-center justify-center text-on-accent shadow-xl shadow-[#EBAE29]/30 relative z-10">
                 <Sparkles size={28} />
               </div>
             </div>
 
             <div className="space-y-2 relative z-10">
-              <span className="px-3 py-1 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-wider bg-[#EBAE29]/20 text-[#EBAE29] border border-[#EBAE29]/40">
+              <span className="px-3 py-1 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-wider bg-[#EBAE29]/20 text-amber-ink border border-[#EBAE29]/40">
                 {t.diplomaModal.heading}
               </span>
 
-              <h3 className="text-xl font-extrabold text-[#F5EED2] leading-tight">
-                Admission Probability Boosted
+              <h3 className="text-xl font-extrabold text-ink leading-tight">
+                
+                {tx("Admission Probability Boosted")}
               </h3>
 
-              <div className="p-4 rounded-2xl bg-[#132228]/90 border border-[#589C80]/30 space-y-1">
-                <p className="text-xs text-[#F5EED2]/70">
-                  {t.diplomaModal.boostText} <span className="font-bold text-[#F5EED2]">{targetUniName}</span>:
+              <div className="p-4 rounded-2xl bg-panel/90 border border-[#589C80]/30 space-y-1">
+                <p className="text-xs text-ink/70">
+                  {t.diplomaModal.boostText} <span className="font-bold text-ink">{targetUniName}</span>:
                 </p>
-                <p className="text-3xl font-extrabold font-mono text-[#EBAE29]">
+                <p className="text-3xl font-extrabold font-mono text-amber-ink">
                   +{boostAmount}%
                 </p>
               </div>
 
-              <p className="text-xs font-mono text-[#589C80]">
-                +450 XP awarded to your applicant profile
+              <p className="text-xs font-mono text-green-ink">
+                
+                {tx("+450 XP awarded to your applicant profile")}
               </p>
             </div>
 
@@ -211,7 +221,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full py-3 rounded-2xl font-mono text-xs font-bold bg-[#EBAE29] text-[#132228] hover:bg-[#EBAE29]/90 shadow-xl shadow-[#EBAE29]/20 transition-all cursor-pointer"
+                className="w-full py-3 rounded-2xl font-mono text-xs font-bold bg-[#EBAE29] text-on-accent hover:bg-[#EBAE29]/90 shadow-xl shadow-[#EBAE29]/20 transition-all cursor-pointer"
               >
                 {t.diplomaModal.claimReward}
               </button>

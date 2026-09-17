@@ -13,8 +13,10 @@ import { useApp } from "@/lib/store/app-store";
 import { useRecommendations } from "@/lib/store/derived";
 import type { Tier } from "@/lib/types";
 import styles from "./applications.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 export default function ApplicationsPage() {
+  const t = useT();
   const { applications } = useApp();
   const { list } = useRecommendations();
   const tiers = new Map(list.map((r) => [r.university.slug, r.tier]));
@@ -36,12 +38,13 @@ export default function ApplicationsPage() {
   return (
     <Page>
       <PageHeader
-        eyebrow="Application tracker"
-        title="Your applications"
-        description="One workspace per university for requirements, documents, essays, scholarships and deadlines."
+        eyebrow={t("Application tracker")}
+        title={t("Your applications")}
+        description={t("One workspace per university for requirements, documents, essays, scholarships and deadlines.")}
         actions={
           <Button variant="secondary" href="/matches">
-            Add from matches
+            
+            {t("Add from matches")}
           </Button>
         }
       />
@@ -54,12 +57,12 @@ export default function ApplicationsPage() {
               <span className={styles.balanceCount}>{counts[tier]}</span>
             </div>
           ))}
-          {(counts.Dream === 0 || counts.Target === 0 || counts.Safety === 0) && <p className={styles.balanceHint}>A balanced list has at least one university in each tier.</p>}
+          {(counts.Dream === 0 || counts.Target === 0 || counts.Safety === 0) && <p className={styles.balanceHint}>{t("A balanced list has at least one university in each tier.")}</p>}
         </Reveal>
       )}
 
       {applications.length === 0 ? (
-        <EmptyState title="No applications yet" body="Add universities from your matches or the catalog. Each one gets its own workspace." action={<Button href="/matches">See my matches</Button>} />
+        <EmptyState title={t("No applications yet")} body={t("Add universities from your matches or the catalog. Each one gets its own workspace.")} action={<Button href="/matches">{t("See my matches")}</Button>} />
       ) : (
         <ul className={styles.list}>
           {sorted.map((application) => {
@@ -79,19 +82,19 @@ export default function ApplicationsPage() {
                     </span>
                   </div>
                   <div className={styles.progress}>
-                    <span className="faint tabular">{Math.round(progress * 100)}% of checklist</span>
-                    <Meter value={progress * 100} tone="green" label={`${Math.round(progress * 100)}% of checklist complete`} />
+                    <span className="faint tabular">{t("{percent}% of checklist", { percent: Math.round(progress * 100) })}</span>
+                    <Meter value={progress * 100} tone="green" label={t("{round}% of checklist complete", { round: Math.round(progress * 100) })} />
                   </div>
                   <div className={styles.deadline}>
                     {next ? (
                       <>
                         <span className="tabular">{formatDate(next.date)}</span>
                         <span className="faint">
-                          {next.deadline.label} · {next.days} days
+                          {t(next.deadline.label)} · {t("{days} days", { days: next.days })}
                         </span>
                       </>
                     ) : (
-                      <span className="faint">Deadline unavailable</span>
+                      <span className="faint">{t("Deadline unavailable")}</span>
                     )}
                   </div>
                 </Link>

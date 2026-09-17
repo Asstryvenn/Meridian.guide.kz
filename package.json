@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:universities": "node --env-file-if-exists=.env.local scripts/seed-universities.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "i18n:check": "node scripts/i18n-check.ts --strict"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",

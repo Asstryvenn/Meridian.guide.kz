@@ -17,7 +17,7 @@
 
 .green {
   background: var(--green-soft);
-  color: var(--green-strong);
+  color: var(--green-ink);
 }
 
 :global([data-theme="dark"]) .green {

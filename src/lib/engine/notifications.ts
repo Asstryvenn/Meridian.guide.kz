@@ -2,6 +2,7 @@ import { getUniversity } from "@/lib/data/universities";
 import type { Application, StudentProfile } from "@/lib/types";
 import { formatDate, upcomingDeadlines } from "./deadlines";
 import { matchScholarships } from "./discovery";
+import { tr } from "@/lib/i18n/catalog";
 import { ieltsEquivalent } from "./profile-metrics";
 
 export type NotificationKind = "deadline" | "test_gap" | "scholarship";
@@ -34,8 +35,8 @@ export function buildNotifications(
     items.push({
       id: `deadline-${university.slug}-${next.date.getFullYear()}-${next.deadline.label}`,
       kind: "deadline",
-      title: `${university.shortName}: ${next.deadline.label} in ${next.days} days`,
-      body: `${formatDate(next.date)}${next.deadline.status === "needs_verification" ? " · confirm this date on the official site" : ""}`,
+      title: tr("{name}: {label} in {days} days", { name: university.shortName, label: tr(next.deadline.label), days: next.days }),
+      body: next.deadline.status === "needs_verification" ? tr("{date} · confirm this date on the official site", { date: formatDate(next.date) }) : formatDate(next.date),
       href: `/applications/${university.slug}`,
       priority: 100 - next.days,
     });
@@ -51,8 +52,8 @@ export function buildNotifications(
     items.push({
       id: `test-gap-english-${highest}-${ielts ?? "none"}`,
       kind: "test_gap",
-      title: ielts === null ? "English test still missing" : `English score below ${gaps.length} requirement${gaps.length > 1 ? "s" : ""}`,
-      body: `${gaps.map((u) => u.shortName).join(", ")} ask for IELTS ${highest} or equivalent.`,
+      title: ielts === null ? tr("English test still missing") : tr("English score below {count} university requirements", { count: gaps.length }),
+      body: tr("{names} ask for IELTS {score} or equivalent.", { names: gaps.map((u) => u.shortName).join(", "), score: highest }),
       href: "/roadmap",
       priority: 60,
     });
@@ -65,8 +66,8 @@ export function buildNotifications(
     items.push({
       id: `scholarship-${strongMatch.scholarship.id}`,
       kind: "scholarship",
-      title: `New scholarship match: ${strongMatch.scholarship.name}`,
-      body: `${strongMatch.eligibility}% of eligibility criteria met.`,
+      title: tr("New scholarship match: {name}", { name: tr(strongMatch.scholarship.name) }),
+      body: tr("{percent}% of eligibility criteria met.", { percent: strongMatch.eligibility }),
       href: "/scholarships",
       priority: 40,
     });

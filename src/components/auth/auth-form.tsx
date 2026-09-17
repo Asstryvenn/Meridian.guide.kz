@@ -12,6 +12,7 @@ import { sendPasswordReset, signInWithEmail, signInWithGoogle, signUpWithEmail, 
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./auth-form.module.css";
+import { useT } from "@/lib/i18n/use-t";
 
 function safeNext(value: string | null, fallback: string) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : fallback;
@@ -29,6 +30,7 @@ function GoogleMark() {
 }
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
+  const t = useT();
   const router = useRouter();
   const params = useSearchParams();
   const { signIn, user, hydrated } = useApp();
@@ -48,10 +50,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   async function finish(result: AuthResult) {
     if (result.error) return setError(result.error);
-    if (result.pendingConfirmation) return setInfo(`We sent a confirmation link to ${email}. Open it on this device to continue.`);
+    if (result.pendingConfirmation) return setInfo(t("We sent a confirmation link to {email}. Open it on this device to continue.", { email: email }));
     if (!result.user) return;
     await signIn(result.user);
-    notify({ tone: "success", title: mode === "signup" ? "Account created" : "Welcome back" });
+    notify({ tone: "success", title: mode === "signup" ? t("Account created") : t("Welcome back") });
     router.replace(next);
   }
 
@@ -59,8 +61,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     event.preventDefault();
     setError(null);
     setInfo(null);
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Enter a valid email address.");
-    if (password.length < 8) return setError("Use at least 8 characters for your password.");
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter a valid email address."));
+    if (password.length < 8) return setError(t("Use at least 8 characters for your password."));
     setBusy("email");
     try {
       await finish(mode === "signup" ? await signUpWithEmail(email.trim(), password) : await signInWithEmail(email.trim(), password));
@@ -81,12 +83,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   async function onReset() {
     setError(null);
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Enter your email above, then tap “Forgot password?” again.");
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError(t("Enter your email above, then tap “Forgot password?” again."));
     setBusy("reset");
     const resetError = await sendPasswordReset(email.trim());
     setBusy(null);
     if (resetError) setError(resetError);
-    else setInfo(`If an account exists for ${email.trim()}, a reset link is on its way.`);
+    else setInfo(t("If an account exists for {email}, a reset link is on its way.", { email: email.trim() }));
   }
 
   return (
@@ -95,41 +97,43 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         <Logo />
       </Link>
       <motion.div className={`glass ${styles.card}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
-        <div className={styles.tabs} role="tablist" aria-label="Account">
+        <div className={styles.tabs} role="tablist" aria-label={t("Account")}>
           <Link href={`/login${params.toString() ? `?${params}` : ""}`} role="tab" aria-selected={mode === "login"} className={styles.tab}>
-            Log in
+            
+            {t("Log in")}
           </Link>
           <Link href={`/signup${params.toString() ? `?${params}` : ""}`} role="tab" aria-selected={mode === "signup"} className={styles.tab}>
-            Register
+            
+            {t("Register")}
           </Link>
           <motion.span className={styles.tabThumb} data-mode={mode} layout transition={{ type: "spring", stiffness: 500, damping: 38 }} />
         </div>
 
         <div className={styles.heading}>
-          <h1 className={styles.title}>{mode === "signup" ? "Create your account" : "Welcome back"}</h1>
-          <p className={styles.subtitle}>{mode === "signup" ? "Your personal university plan starts here." : "Pick up right where you left off."}</p>
+          <h1 className={styles.title}>{mode === "signup" ? t("Create your account") : t("Welcome back")}</h1>
+          <p className={styles.subtitle}>{mode === "signup" ? t("Your personal university plan starts here.") : t("Pick up right where you left off.")}</p>
         </div>
 
         <Button type="button" variant="secondary" size="lg" block onClick={onGoogle} disabled={busy !== null}>
           <GoogleMark />
-          {busy === "google" ? "Opening Google…" : "Continue with Google"}
+          {busy === "google" ? t("Opening Google…") : t("Continue with Google")}
         </Button>
 
         <div className={styles.divider}>
-          <span>or with email</span>
+          <span>{t("or with email")}</span>
         </div>
 
         <form className={styles.form} onSubmit={onSubmit} noValidate>
-          <TextField label="Email" type="email" autoComplete="email" value={email} onChange={setEmail} placeholder="you@school.edu" />
+          <TextField label={t("Email")} type="email" autoComplete="email" value={email} onChange={setEmail} placeholder={t("you@school.edu")} />
           <div className={styles.passwordField}>
-            <TextField label="Password" type={showPassword ? "text" : "password"} autoComplete={mode === "signup" ? "new-password" : "current-password"} value={password} onChange={setPassword} placeholder="At least 8 characters" />
-            <button type="button" className={styles.reveal} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>
-              {showPassword ? "Hide" : "Show"}
+            <TextField label={t("Password")} type={showPassword ? "text" : "password"} autoComplete={mode === "signup" ? "new-password" : "current-password"} value={password} onChange={setPassword} placeholder={t("At least 8 characters")} />
+            <button type="button" className={styles.reveal} onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? t("Hide password") : t("Show password")}>
+              {showPassword ? t("Hide") : t("Show")}
             </button>
           </div>
           {mode === "login" && configured && (
             <button type="button" className={styles.forgot} onClick={onReset} disabled={busy !== null}>
-              {busy === "reset" ? "Sending…" : "Forgot password?"}
+              {busy === "reset" ? t("Sending…") : t("Forgot password?")}
             </button>
           )}
           {error && (
@@ -143,13 +147,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             </motion.p>
           )}
           <Button type="submit" size="lg" block disabled={busy !== null}>
-            {busy === "email" ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
+            {busy === "email" ? t("Please wait…") : mode === "signup" ? t("Create account") : t("Log in")}
           </Button>
         </form>
 
-        {!configured && <p className={styles.demo}>Supabase is not configured, so accounts run in local demo mode and data stays in this browser.</p>}
+        {!configured && <p className={styles.demo}>{t("Supabase is not configured, so accounts run in local demo mode and data stays in this browser.")}</p>}
       </motion.div>
-      <p className={styles.legal}>By continuing you agree to use LOCUS as guidance, not as an official admission decision.</p>
+      <p className={styles.legal}>{t("By continuing you agree to use Meridian Guide as guidance, not as an official admission decision.")}</p>
     </div>
   );
 }

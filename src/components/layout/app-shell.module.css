@@ -63,11 +63,11 @@
 }
 
 .navActive .navIcon {
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 :global([data-theme="dark"]) .navActive .navIcon {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .main {

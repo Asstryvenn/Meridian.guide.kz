@@ -55,7 +55,7 @@
   display: block;
   font-style: italic;
   font-size: 1.08em;
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 .lede {
@@ -194,11 +194,11 @@
   font-family: var(--font-display);
   font-size: 56px;
   line-height: 1;
-  color: var(--amber-strong);
+  color: var(--amber-ink);
 }
 
 :global([data-theme="dark"]) .metricValue {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .metricLabel {
@@ -223,7 +223,7 @@
 .stepIndex {
   font-size: 13px;
   font-weight: 600;
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 .stepTitle {
@@ -240,7 +240,7 @@
 }
 
 .honestyTitle :global(.display) {
-  color: var(--amber);
+  color: var(--amber-ink);
 }
 
 .honestyGrid {
