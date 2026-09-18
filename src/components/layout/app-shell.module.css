@@ -150,6 +150,33 @@
   gap: 8px;
 }
 
+.mobileActions {
+  display: none;
+}
+
+.burgerButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.burgerButton:hover {
+  border-color: var(--border-strong);
+  transform: scale(1.05);
+}
+
+.burgerButton:active {
+  transform: scale(0.95);
+}
+
 .iconButton,
 .avatar {
   position: relative;
@@ -380,6 +407,16 @@
     display: block;
   }
 
+  .topActions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .iconButton,
   .avatar {
     width: 38px;
@@ -567,3 +604,281 @@
     font-size: 10px;
   }
 }
+
+.mobileMenuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mobileMenuSheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  display: flex;
+  flex-direction: column;
+  width: min(380px, 92vw);
+  background: var(--surface-solid);
+  box-shadow: -15px 0 35px rgba(0, 0, 0, 0.35);
+  overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+}
+
+.mobileMenuHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobileMenuTitle {
+  font-size: 16px;
+  font-weight: 750;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.mobileMenuClose {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobileMenuClose:hover {
+  background: var(--surface-sunken);
+}
+
+.mobileUserProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobileUserAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.mobileUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mobileUserName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileUserEmail {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileUserMode {
+  font-size: 11px;
+  color: var(--amber-ink, #f59e0b);
+}
+
+.mobileStatsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobileStatCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.mobileStatCard:active {
+  transform: scale(0.97);
+}
+
+.mobileStatTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mobileStatValue {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--text);
+}
+
+.mobileStatDesc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.mobileSectionTitle {
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.mobileControlsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobileControlRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobileControlRow:hover {
+  background: var(--surface);
+}
+
+.mobileControlLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobileControlBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.mobileControlBadgeActive {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.mobileLangPills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobileLangPill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobileLangPillActive {
+  background: var(--amber);
+  color: var(--on-amber);
+  border-color: var(--amber);
+}
+
+.mobileLinkItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobileLinkItem:hover {
+  background: var(--surface);
+}
+
+.mobileSignOutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mobileSignOutBtn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+

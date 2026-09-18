@@ -2,13 +2,14 @@
 
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, Flame, Leaf, LifeBuoy, Sparkles } from "lucide-react";
+import { Building2, ChevronRight, Flame, Globe, Leaf, LifeBuoy, Menu, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { PomodoroProvider, PomodoroToolbarButton } from "@/components/ui/pomodoro-timer";
+import { PomodoroProvider, PomodoroToolbarButton, usePomodoro } from "@/components/ui/pomodoro-timer";
+import type { Locale } from "@/lib/types";
 import { AiAssistantDrawer } from "@/components/mentor/ai-assistant-drawer";
 import { MascotCompanion } from "@/components/companion/mascot-companion";
 import { LanguageSelector } from "@/components/i18n/language-selector";
@@ -73,6 +74,216 @@ function MoreSheet({ items, open, onClose, pathname }: { items: NavItem[]; open:
             <button type="button" className={styles.sheetRow} onClick={toggle}>
               <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
               {theme === "dark" ? t("Light mode") : t("Dark mode")}
+            </button>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function MobileMenuSheet({
+  open,
+  onClose,
+  onOpenSupport,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onOpenSupport: () => void;
+}) {
+  const tx = useT();
+  const router = useRouter();
+  const { user, profile, currentStreak, totalExp, ecoMode, toggleEcoMode, signOut } = useApp();
+  const { locale, setLocale } = useI18n();
+  const { theme, toggle } = useTheme();
+  const { running, setOpen: setPomodoroOpen } = usePomodoro();
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add("scroll-locked");
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.classList.remove("scroll-locked");
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  const initial = (profile.fullName || user?.email || "?").charAt(0).toUpperCase();
+
+  const langOptions: { code: Locale; label: string }[] = [
+    { code: "kk", label: "ҚАЗ" },
+    { code: "ru", label: "РУС" },
+    { code: "en", label: "ENG" },
+  ];
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className={styles.mobileMenuOverlay}
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+          <motion.div
+            className={styles.mobileMenuSheet}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+          >
+            <div className={styles.mobileMenuHeader}>
+              <span className={styles.mobileMenuTitle}>{tx("Control Center")}</span>
+              <button
+                type="button"
+                className={styles.mobileMenuClose}
+                onClick={onClose}
+                aria-label={tx("Close menu")}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.mobileUserProfile}>
+              <div className={styles.mobileUserAvatar}>{initial}</div>
+              <div className={styles.mobileUserInfo}>
+                <span className={styles.mobileUserName}>{profile.fullName || tx("Student")}</span>
+                <span className={styles.mobileUserEmail}>{user?.email || tx("Active Learner")}</span>
+                <span className={styles.mobileUserMode}>
+                  {user?.mode === "supabase" ? tx("Synced to Cloud") : tx("Local Workspace")}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.mobileStatsGrid}>
+              <Link href="/roadmap" className={styles.mobileStatCard} onClick={onClose}>
+                <div className={styles.mobileStatTop}>
+                  <Flame size={15} className="fill-[#ea580c] text-[#ea580c]" />
+                  <span>{tx("Streak")}</span>
+                </div>
+                <div className={styles.mobileStatValue}>{currentStreak}</div>
+                <div className={styles.mobileStatDesc}>{tx("Consecutive days")}</div>
+              </Link>
+              <Link href="/marketplace" className={styles.mobileStatCard} onClick={onClose}>
+                <div className={styles.mobileStatTop}>
+                  <Sparkles size={14} className="text-amber-ink" />
+                  <span>{tx("XP Balance")}</span>
+                </div>
+                <div className={styles.mobileStatValue}>{totalExp}</div>
+                <div className={styles.mobileStatDesc}>{tx("Rewards store")}</div>
+              </Link>
+            </div>
+
+            <div className={styles.mobileSectionTitle}>{tx("Preferences")}</div>
+            <div className={styles.mobileControlsGrid}>
+              <div className={styles.mobileControlRow}>
+                <div className={styles.mobileControlLeft}>
+                  <Globe size={16} />
+                  <span>{tx("Language")}</span>
+                </div>
+                <div className={styles.mobileLangPills}>
+                  {langOptions.map((item) => (
+                    <button
+                      key={item.code}
+                      type="button"
+                      className={clsx(
+                        styles.mobileLangPill,
+                        locale === item.code && styles.mobileLangPillActive
+                      )}
+                      onClick={() => setLocale(item.code)}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button type="button" className={styles.mobileControlRow} onClick={toggleEcoMode}>
+                <div className={styles.mobileControlLeft}>
+                  <Leaf size={16} className={ecoMode ? "text-[#589C80]" : ""} />
+                  <span>{tx("Calm Eco Mode")}</span>
+                </div>
+                <span className={clsx(styles.mobileControlBadge, ecoMode && styles.mobileControlBadgeActive)}>
+                  {ecoMode ? tx("Active") : tx("Off")}
+                </span>
+              </button>
+
+              <button type="button" className={styles.mobileControlRow} onClick={toggle}>
+                <div className={styles.mobileControlLeft}>
+                  <Icon name={theme === "dark" ? "sun" : "moon"} size={16} />
+                  <span>{theme === "dark" ? tx("Light Mode") : tx("Dark Mode")}</span>
+                </div>
+                <span className={styles.mobileControlBadge}>
+                  {theme === "dark" ? tx("Dark") : tx("Light")}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.mobileControlRow}
+                onClick={() => {
+                  onClose();
+                  setPomodoroOpen(true);
+                }}
+              >
+                <div className={styles.mobileControlLeft}>
+                  <Timer size={16} />
+                  <span>{tx("Pomodoro Timer")}</span>
+                </div>
+                <span className={clsx(styles.mobileControlBadge, running && styles.mobileControlBadgeActive)}>
+                  {running ? tx("Active") : tx("Open")}
+                </span>
+              </button>
+            </div>
+
+            <div className={styles.mobileSectionTitle}>{tx("Account & Support")}</div>
+            <div className={styles.mobileControlsGrid}>
+              <button
+                type="button"
+                className={styles.mobileLinkItem}
+                onClick={() => {
+                  onClose();
+                  onOpenSupport();
+                }}
+              >
+                <div className={styles.mobileControlLeft}>
+                  <LifeBuoy size={16} />
+                  <span>{tx("Tech Support")}</span>
+                </div>
+                <ChevronRight size={16} className="opacity-50" />
+              </button>
+
+              <Link href="/onboarding?edit=1" className={styles.mobileLinkItem} onClick={onClose}>
+                <div className={styles.mobileControlLeft}>
+                  <Icon name="user" size={16} />
+                  <span>{tx("Edit profile")}</span>
+                </div>
+                <ChevronRight size={16} className="opacity-50" />
+              </Link>
+
+              <Link href="/b2b" className={styles.mobileLinkItem} onClick={onClose}>
+                <div className={styles.mobileControlLeft}>
+                  <Building2 size={16} />
+                  <span>{tx("Switch to Business Account")}</span>
+                </div>
+                <ChevronRight size={16} className="opacity-50" />
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              className={styles.mobileSignOutBtn}
+              onClick={async () => {
+                onClose();
+                await signOut();
+                router.replace("/");
+              }}
+            >
+              <Icon name="close" size={15} />
+              <span>{tx("Sign out")}</span>
             </button>
           </motion.div>
         </>
@@ -228,6 +439,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   ];
   const [moreOpen, setMoreOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const closeMore = useCallback(() => setMoreOpen(false), []);
   const moreActive = !nav.some((item) => item.mobile && (pathname === item.href || pathname.startsWith(`${item.href}/`)));
 
@@ -318,6 +530,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Notifications />
               <UserMenu onOpenSupport={() => setSupportOpen(true)} />
             </div>
+            <div className={styles.mobileActions}>
+              <Notifications />
+              <button
+                type="button"
+                className={styles.burgerButton}
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label={tx("Open control center")}
+                title={tx("Menu")}
+              >
+                <Menu size={20} />
+              </button>
+            </div>
           </header>
           <motion.main key={pathname} className={styles.content} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}>
             {children}
@@ -345,6 +569,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AiAssistantDrawer />
         <TechSupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
         <MascotCompanion />
+        <MobileMenuSheet
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          onOpenSupport={() => setSupportOpen(true)}
+        />
       </div>
     </PomodoroProvider>
   );

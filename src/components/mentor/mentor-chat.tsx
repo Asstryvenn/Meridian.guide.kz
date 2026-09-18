@@ -114,9 +114,13 @@ export function MentorChat() {
       setNotice(null);
 
       try {
+        const customKey = typeof window !== "undefined" ? localStorage.getItem("meridian_openai_api_key") || "" : "";
         const response = await fetch("/api/mentor", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(customKey ? { "x-openai-key": customKey } : {}),
+          },
           body: JSON.stringify({
             locale,
             profile,
@@ -126,7 +130,10 @@ export function MentorChat() {
             messages: history.slice(-20).map(({ role, content }) => ({ role, content })),
           }),
         });
-        if (!response.ok || !response.body) throw new Error("Mentor unavailable");
+        if (!response.ok || !response.body) {
+          const errJson = await response.json().catch(() => null);
+          throw new Error(errJson?.message || errJson?.error || "Mentor unavailable");
+        }
         const source = response.headers.get("X-Guidance-Source") === "ai" ? "ai" : "rules";
         const headerNotice = response.headers.get("X-Guidance-Notice");
         if (headerNotice) setNotice(decodeURIComponent(headerNotice));
@@ -140,8 +147,13 @@ export function MentorChat() {
           content += decoder.decode(value, { stream: true });
           setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content, source } : m)));
         }
-      } catch {
-        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: t("I couldn't reach the mentor service. Please try again in a moment."), source: "rules" } : m)));
+      } catch (err: unknown) {
+        const raw = err instanceof Error ? err.message : "";
+        const isKey = raw.includes("OPENAI_KEY_MISSING") || /key|billing|quota/i.test(raw);
+        const fallback = isKey
+          ? t("OpenAI API key is missing. Set OPENAI_API_KEY in Vercel Project Settings > Environment Variables or provide your key in app settings.")
+          : (raw || t("I couldn't reach the mentor service. Please try again in a moment."));
+        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: fallback, source: "rules" } : m)));
       } finally {
         setStreaming(false);
       }

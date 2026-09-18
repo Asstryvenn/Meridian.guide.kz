@@ -396,7 +396,7 @@ export interface HybridEssayEvaluationResult {
   source: "openai" | "gemini" | "ml_calibrated";
 }
 
-export type TotemMascotId = "arystan" | "sunkar" | "amina" | "alikhan";
+export type TotemMascotId = "alikhan" | "zhanbolat" | "aizere" | "nurali" | "arystan" | "sunkar" | "amina";
 
 export interface ExpTransaction {
   id: string;

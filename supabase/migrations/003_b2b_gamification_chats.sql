@@ -1,6 +1,6 @@
 alter table public.profiles add column if not exists current_streak integer not null default 1;
 alter table public.profiles add column if not exists total_exp integer not null default 0;
-alter table public.profiles add column if not exists chosen_totem text not null default 'arystan';
+alter table public.profiles add column if not exists chosen_totem text not null default 'alikhan';
 alter table public.profiles add column if not exists last_active_date date not null default current_date;
 alter table public.profiles add column if not exists is_business_account boolean not null default false;
 

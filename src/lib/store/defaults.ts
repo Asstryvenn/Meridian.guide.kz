@@ -33,7 +33,7 @@ export const emptyProfile: StudentProfile = {
   gradSchool: "undecided",
   currentStreak: 1,
   totalExp: 100,
-  chosenTotem: "arystan",
+  chosenTotem: "alikhan",
   lastActiveDate: new Date().toISOString().slice(0, 10),
   isBusinessAccount: false,
 };
@@ -100,7 +100,7 @@ export const sampleProfile: StudentProfile = {
   gradSchool: "phd",
   currentStreak: 5,
   totalExp: 750,
-  chosenTotem: "arystan",
+  chosenTotem: "alikhan",
   lastActiveDate: new Date().toISOString().slice(0, 10),
   isBusinessAccount: false,
 };

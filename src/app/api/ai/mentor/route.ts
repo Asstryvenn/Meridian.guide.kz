@@ -40,15 +40,19 @@ export async function POST(request: Request) {
   const context = buildStudentContext(state);
   const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
-  if (!isOpenAIConfigured()) {
+  const customKey = request.headers.get("x-openai-key") || null;
+  if (!isOpenAIConfigured(customKey)) {
     return Response.json(
-      { error: "OpenAI API key is missing. Please configure OPENAI_API_KEY in .env.local to enable real AI mentoring." },
-      { status: 500 }
+      {
+        error: "OPENAI_KEY_MISSING",
+        message: "OpenAI API key is missing. Add OPENAI_API_KEY in Vercel Project Settings > Environment Variables and redeploy, or configure your API key in the app.",
+      },
+      { status: 503 }
     );
   }
 
   try {
-    const openai = getOpenAIClient();
+    const openai = getOpenAIClient(customKey);
     if (!openai) {
       return Response.json({ error: "Failed to initialize OpenAI client" }, { status: 500 });
     }

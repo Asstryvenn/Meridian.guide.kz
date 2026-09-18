@@ -124,7 +124,7 @@ export async function saveRemoteState(userId: string, state: PersistedState): Pr
       grad_school: profile.gradSchool,
       current_streak: profile.currentStreak ?? 1,
       total_exp: profile.totalExp ?? 0,
-      chosen_totem: profile.chosenTotem ?? "arystan",
+      chosen_totem: profile.chosenTotem ?? "alikhan",
       last_active_date: profile.lastActiveDate ?? new Date().toISOString().slice(0, 10),
       is_business_account: profile.isBusinessAccount === true,
       onboarded: state.onboarded,

@@ -691,7 +691,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       syncError,
       currentStreak: state.profile.currentStreak || 1,
       totalExp: state.profile.totalExp || 0,
-      chosenTotem: state.profile.chosenTotem || "arystan",
+      chosenTotem: state.profile.chosenTotem || "alikhan",
       isBusinessAccount: state.profile.isBusinessAccount === true,
       mascotState: state.mascotState,
       redeemedRewards: state.redeemedRewards,

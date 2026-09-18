@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { MessageSquare, Plus, Trash2, X, Send, Sparkles, Menu, CheckCircle2, RotateCcw } from "lucide-react";
+import { MessageSquare, Plus, Trash2, X, Send, Sparkles, Menu, CheckCircle2, RotateCcw, KeyRound } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
 import { useLocale, useT } from "@/lib/i18n/use-t";
@@ -77,6 +77,37 @@ export function AiAssistantDrawer() {
 
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [keySaved, setKeySaved] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("meridian_openai_api_key") || "";
+      setCustomApiKey(stored);
+    }
+  }, []);
+
+  function handleSaveKey() {
+    if (typeof window !== "undefined") {
+      if (customApiKey.trim()) {
+        localStorage.setItem("meridian_openai_api_key", customApiKey.trim());
+        setKeySaved(true);
+        setTimeout(() => setKeySaved(false), 2000);
+      } else {
+        localStorage.removeItem("meridian_openai_api_key");
+      }
+    }
+  }
+
+  function handleClearKey() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("meridian_openai_api_key");
+      setCustomApiKey("");
+      setKeySaved(false);
+    }
+  }
 
   useEffect(() => {
     try {
@@ -167,14 +198,20 @@ export function AiAssistantDrawer() {
         messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
       };
 
+      const customKey = typeof window !== "undefined" ? localStorage.getItem("meridian_openai_api_key") || "" : "";
       const response = await fetch("/api/mentor", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(customKey ? { "x-openai-key": customKey } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok || !response.body) {
-        throw new Error("Failed to send message");
+        const errJson = await response.json().catch(() => null);
+        const detail = errJson?.message || errJson?.error;
+        throw new Error(detail || "Failed to connect to admissions model");
       }
 
       const reader = response.body.getReader();
@@ -206,7 +243,13 @@ export function AiAssistantDrawer() {
           )
         );
       }
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      const isMissingKey = msg.includes("OPENAI_KEY_MISSING") || /key|billing|quota/i.test(msg);
+      const displayContent = isMissingKey
+        ? t("OpenAI API key is missing or invalid. Please configure OPENAI_API_KEY in Vercel Project Settings > Environment Variables, or enter your API key using the Key button at the top.")
+        : (msg || t("I ran into an issue connecting to the admissions model. Please try asking again in a moment."));
+
       setSessions((prev) =>
         prev.map((s) =>
           s.id === currentSession.id
@@ -217,13 +260,14 @@ export function AiAssistantDrawer() {
                   {
                     id: `err-${Date.now()}`,
                     role: "assistant",
-                    content: t("I ran into an issue connecting to the admissions model. Please try asking again in a moment."),
+                    content: displayContent,
                   },
                 ],
               }
             : s
         )
       );
+      if (isMissingKey) setShowKeyConfig(true);
     } finally {
       setLoading(false);
     }
@@ -325,6 +369,14 @@ export function AiAssistantDrawer() {
                 <button
                   type="button"
                   className={styles.iconBtn}
+                  onClick={() => setShowKeyConfig((prev) => !prev)}
+                  title={t("OpenAI API Key Configuration")}
+                >
+                  <KeyRound size={16} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
                   onClick={createNewChat}
                   title={t("New Chat")}
                 >
@@ -340,6 +392,45 @@ export function AiAssistantDrawer() {
                 </button>
               </div>
             </header>
+
+            {showKeyConfig && (
+              <div className={styles.keyBanner}>
+                <div className={styles.keyHeader}>
+                  <span className={styles.keyTitle}>
+                    <KeyRound size={14} />
+                    {t("OpenAI API Key Configuration")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyConfig(false)}
+                    className={styles.iconBtn}
+                    aria-label={t("Close")}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <p className={styles.keyDescription}>
+                  {t("For Vercel production: set OPENAI_API_KEY in Vercel Project Settings > Environment Variables and redeploy. You can also paste your personal OpenAI key directly below:")}
+                </p>
+                <div className={styles.keyForm}>
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="sk-proj-..."
+                    className={styles.keyInput}
+                  />
+                  <button type="button" onClick={handleSaveKey} className={styles.keySaveBtn}>
+                    {keySaved ? t("Saved!") : t("Save Key")}
+                  </button>
+                  {customApiKey && (
+                    <button type="button" onClick={handleClearKey} className={styles.keyClearBtn}>
+                      {t("Clear")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className={styles.messagesArea}>
               <div className={styles.threadContainer}>

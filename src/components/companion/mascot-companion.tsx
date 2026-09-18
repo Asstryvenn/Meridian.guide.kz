@@ -12,33 +12,54 @@ export const TOTEM_DETAILS: Record<
   TotemMascotId,
   { name: string; title: string; image: string; color: string; personality: string }
 > = {
-  arystan: {
-    name: "Arystan",
+  alikhan: {
+    name: "Alikhan",
     title: "The Ambitious Pioneer",
-    image: "/totems/arystan.png",
+    image: "/totems/alikhan.png",
+    color: "#589C80",
+    personality: "Driven, tech-focused, and optimistic about building global-impact solutions.",
+  },
+  zhanbolat: {
+    name: "Zhanbolat",
+    title: "The Royal Scholar",
+    image: "/totems/zhanbolat.png",
+    color: "#EBAE29",
+    personality: "Strategic, analytical, and relentless in academic excellence.",
+  },
+  aizere: {
+    name: "Aizere",
+    title: "The Creative Luminary",
+    image: "/totems/aizere.png",
+    color: "#E27A62",
+    personality: "Charismatic, expressive, and passionate about community and storytelling.",
+  },
+  nurali: {
+    name: "Nurali",
+    title: "The Determined Leader",
+    image: "/totems/nurali.png",
+    color: "#3B82F6",
+    personality: "Disciplined, articulate, and dedicated to leadership and debate.",
+  },
+  arystan: {
+    name: "Alikhan",
+    title: "The Ambitious Pioneer",
+    image: "/totems/alikhan.png",
     color: "#589C80",
     personality: "Driven, tech-focused, and optimistic about building global-impact solutions.",
   },
   sunkar: {
-    name: "Sunkar",
+    name: "Zhanbolat",
     title: "The Royal Scholar",
-    image: "/totems/sunkar.png",
+    image: "/totems/zhanbolat.png",
     color: "#EBAE29",
     personality: "Strategic, analytical, and relentless in academic excellence.",
   },
   amina: {
-    name: "Amina",
+    name: "Aizere",
     title: "The Creative Luminary",
-    image: "/totems/amina.png",
+    image: "/totems/aizere.png",
     color: "#E27A62",
     personality: "Charismatic, expressive, and passionate about community and storytelling.",
-  },
-  alikhan: {
-    name: "Alikhan",
-    title: "The Determined Leader",
-    image: "/totems/alikhan.png",
-    color: "#3B82F6",
-    personality: "Disciplined, articulate, and dedicated to leadership and debate.",
   },
 };
 
@@ -46,7 +67,7 @@ export function MascotCompanion() {
   const { chosenTotem, mascotState, currentStreak, totalExp } = useApp();
   const [bubbleOpen, setBubbleOpen] = useState(false);
 
-  const totem = TOTEM_DETAILS[chosenTotem] || TOTEM_DETAILS.arystan;
+  const totem = TOTEM_DETAILS[chosenTotem] || TOTEM_DETAILS.alikhan;
 
   useEffect(() => {
     if (mascotState !== "idle") {

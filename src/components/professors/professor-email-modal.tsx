@@ -44,9 +44,13 @@ export function ProfessorEmailModal({
     setLoading(true);
     setError(null);
     try {
+      const customKey = typeof window !== "undefined" ? localStorage.getItem("meridian_openai_api_key") || "" : "";
       const res = await fetch("/api/ai/cold-email", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(customKey ? { "x-openai-key": customKey } : {}),
+        },
         body: JSON.stringify({
           professorName: professor.name,
           professorEmail: professor.email,
@@ -65,7 +69,7 @@ export function ProfessorEmailModal({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to generate email");
+        throw new Error(data.message || data.error || "Failed to generate email");
       }
 
       setSubject(data.subject);

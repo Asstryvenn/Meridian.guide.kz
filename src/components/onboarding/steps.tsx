@@ -233,31 +233,31 @@ export function TotemStep({ profile, update }: StepProps) {
   const t = useT();
   const options = [
     {
-      id: "arystan" as const,
-      name: "Arystan",
+      id: "alikhan" as const,
+      name: "Alikhan",
       title: t("The Ambitious Pioneer"),
-      image: "/totems/arystan.png",
+      image: "/totems/alikhan.png",
       desc: t("Driven, tech-focused, and optimistic about building global-impact solutions."),
     },
     {
-      id: "sunkar" as const,
-      name: "Sunkar",
+      id: "zhanbolat" as const,
+      name: "Zhanbolat",
       title: t("The Royal Scholar"),
-      image: "/totems/sunkar.png",
+      image: "/totems/zhanbolat.png",
       desc: t("Strategic, analytical, and relentless in academic excellence."),
     },
     {
-      id: "amina" as const,
-      name: "Amina",
+      id: "aizere" as const,
+      name: "Aizere",
       title: t("The Creative Luminary"),
-      image: "/totems/amina.png",
+      image: "/totems/aizere.png",
       desc: t("Charismatic, expressive, and passionate about community and storytelling."),
     },
     {
-      id: "alikhan" as const,
-      name: "Alikhan",
+      id: "nurali" as const,
+      name: "Nurali",
       title: t("The Determined Leader"),
-      image: "/totems/alikhan.png",
+      image: "/totems/nurali.png",
       desc: t("Disciplined, articulate, and dedicated to leadership and debate."),
     },
   ];
@@ -269,7 +269,7 @@ export function TotemStep({ profile, update }: StepProps) {
       </p>
       <div className={styles.totemGrid}>
         {options.map((item) => {
-          const active = (profile.chosenTotem || "arystan") === item.id;
+          const active = (profile.chosenTotem || "alikhan") === item.id;
           return (
             <div
               key={item.id}

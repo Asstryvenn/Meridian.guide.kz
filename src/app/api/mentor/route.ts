@@ -35,6 +35,7 @@ Counseling Principles:
 - Provide a comforting, warm, and safe space for the student to vent.`;
 
 export async function POST(request: Request) {
+  const customKey = request.headers.get("x-openai-key") || null;
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return Response.json({ error: "Invalid request format" }, { status: 400 });
@@ -44,11 +45,14 @@ export async function POST(request: Request) {
   const context = inLocale(locale, () => buildStudentContext(state));
   const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : IVY_COUNSELOR_SYSTEM_PROMPT;
 
-  const openai = getOpenAI();
+  const openai = getOpenAI(customKey);
   if (!openai) {
     return Response.json(
-      { error: "OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment or .env.local file." },
-      { status: 500 }
+      {
+        error: "OPENAI_KEY_MISSING",
+        message: "OpenAI API key is missing. Add OPENAI_API_KEY in Vercel Project Settings > Environment Variables and redeploy, or configure your API key in the app.",
+      },
+      { status: 503 }
     );
   }
 
@@ -94,6 +98,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    return Response.json({ error: describeAIError(error) }, { status: 502 });
+    return Response.json({ error: "AI_ERROR", message: describeAIError(error) }, { status: 502 });
   }
 }

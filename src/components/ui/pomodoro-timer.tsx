@@ -96,7 +96,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function usePomodoro() {
+export function usePomodoro() {
   const ctx = useContext(PomodoroContext);
   if (!ctx) throw new Error("usePomodoro must be used inside PomodoroProvider");
   return ctx;

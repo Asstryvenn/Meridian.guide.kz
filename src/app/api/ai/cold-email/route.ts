@@ -38,16 +38,20 @@ Principles:
    }`;
 
 export async function POST(request: Request) {
+  const customKey = request.headers.get("x-openai-key") || null;
   const json = await request.json().catch(() => null);
   const parsed = requestSchema.safeParse(json);
   if (!parsed.success) {
     return Response.json({ error: "Invalid email parameters" }, { status: 400 });
   }
 
-  if (!isOpenAIConfigured()) {
+  if (!isOpenAIConfigured(customKey)) {
     return Response.json(
-      { error: "OpenAI API is not configured. Please set OPENAI_API_KEY in your environment or .env.local file to generate real AI cold emails." },
-      { status: 500 }
+      {
+        error: "OPENAI_KEY_MISSING",
+        message: "OpenAI API is not configured. Add OPENAI_API_KEY in Vercel Project Settings > Environment Variables or configure your API key in the app.",
+      },
+      { status: 503 }
     );
   }
 
@@ -67,7 +71,7 @@ export async function POST(request: Request) {
 - Language: English (academic standard)`;
 
   try {
-    const openai = getOpenAIClient();
+    const openai = getOpenAIClient(customKey);
     if (!openai) {
       return Response.json({ error: "Unable to initialize OpenAI client" }, { status: 500 });
     }
