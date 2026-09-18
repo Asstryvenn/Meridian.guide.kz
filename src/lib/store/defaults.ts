@@ -1,4 +1,4 @@
-import type { Application, StudentProfile, VaultDocument } from "@/lib/types";
+import type { Advertisement, Application, RewardItem, StudentProfile, VaultDocument } from "@/lib/types";
 
 export const emptyProfile: StudentProfile = {
   fullName: "",
@@ -31,6 +31,11 @@ export const emptyProfile: StudentProfile = {
   size: "any",
   careerGoal: "",
   gradSchool: "undecided",
+  currentStreak: 1,
+  totalExp: 100,
+  chosenTotem: "arystan",
+  lastActiveDate: new Date().toISOString().slice(0, 10),
+  isBusinessAccount: false,
 };
 
 export const sampleProfile: StudentProfile = {
@@ -93,6 +98,11 @@ export const sampleProfile: StudentProfile = {
   size: "any",
   careerGoal: "Machine learning engineer working on computer vision, possibly a PhD later",
   gradSchool: "phd",
+  currentStreak: 5,
+  totalExp: 750,
+  chosenTotem: "arystan",
+  lastActiveDate: new Date().toISOString().slice(0, 10),
+  isBusinessAccount: false,
 };
 
 export const defaultVaultDocuments: VaultDocument[] = [
@@ -135,6 +145,104 @@ export const defaultVaultDocuments: VaultDocument[] = [
     category: "insurance",
     name: "International Student Health Insurance Clearance",
     status: "missing",
+  },
+];
+
+export const defaultRewards: RewardItem[] = [
+  {
+    id: "rw-1",
+    title: "1-on-1 Ivy League Admissions & Career Counseling",
+    category: "counseling",
+    cost: 500,
+    description: "60-minute strategic counseling session with a Harvard/MIT graduate admissions advisor.",
+    discountCode: "MERIDIAN-IVY-1ON1",
+    provider: "IvyAdvisors Network",
+    badge: "Most Popular",
+  },
+  {
+    id: "rw-2",
+    title: "IELTS Band 8+ Intensive Preparation Course Voucher",
+    category: "ielts",
+    cost: 350,
+    description: "Full access to live masterclasses, speaking simulator, and 10 full-length mock exams.",
+    discountCode: "IELTS-BAND8-VIP",
+    provider: "IELTS Zone Academy Almaty",
+    badge: "Verified Partner",
+  },
+  {
+    id: "rw-3",
+    title: "Common App & Global University Fee Waiver Code",
+    category: "waiver",
+    cost: 700,
+    description: "Official institutional partner application fee waiver package for up to 5 universities.",
+    discountCode: "MERIDIAN-WAIVER-2026",
+    provider: "Global Admissions Consortium",
+    badge: "Limited Stock",
+  },
+  {
+    id: "rw-4",
+    title: "SAT 1550+ Digital Practice Sprint Pass",
+    category: "sat",
+    cost: 250,
+    description: "Adaptive Bluebook-style question bank with AI explanation breakdown and weak-area drills.",
+    discountCode: "SAT-1550-SPRINT",
+    provider: "IvyPrep Kazakhstan",
+    badge: "Instant Unlock",
+  },
+  {
+    id: "rw-5",
+    title: "Elite Admissions Personal Statement Dean's Review",
+    category: "essay",
+    cost: 600,
+    description: "Comprehensive line-by-line developmental edit and positioning critique by former admissions dean.",
+    discountCode: "ESSAY-DEAN-PASS",
+    provider: "Meridian Senior Review Board",
+    badge: "Highest Impact",
+  },
+];
+
+export const defaultAdvertisements: Advertisement[] = [
+  {
+    id: "ad-ielts-kz",
+    b2bAccountId: "b2b-ieltszone",
+    title: "IELTS Zone Almaty & Astana: Band 7.5+ Intensive Course",
+    subtitle: "Localized Kazakhstani group & individual prep with British Council certified instructors",
+    targetCountry: "Kazakhstan",
+    targetKeyword: "ielts",
+    ctaLabel: "Get 25% Meridian Discount",
+    ctaUrl: "https://ieltszone.kz",
+    discountNote: "Promo Code: MERIDIAN25",
+    impressions: 1420,
+    clicks: 184,
+    active: true,
+  },
+  {
+    id: "ad-sat-kz",
+    b2bAccountId: "b2b-ivyprep",
+    title: "IvyPrep Kazakhstan: Digital SAT 1500+ Weekend Bootcamp",
+    subtitle: "Proven results for NIS and Bilim-Innovation Lyceum students aiming for Top 20 US universities",
+    targetCountry: "Kazakhstan",
+    targetKeyword: "sat",
+    ctaLabel: "Claim Free Diagnostic Exam",
+    ctaUrl: "https://ivyprep.kz",
+    discountNote: "Free Mock Test Included",
+    impressions: 980,
+    clicks: 112,
+    active: true,
+  },
+  {
+    id: "ad-consulting-global",
+    b2bAccountId: "b2b-globalivy",
+    title: "AdmitMaster: Full-Ride Scholarship Advisory",
+    subtitle: "Specialized guidance for Central Asian applicants applying for need-blind and merit scholarships",
+    targetCountry: "all",
+    targetKeyword: "scholarship",
+    ctaLabel: "Schedule Free Evaluation",
+    ctaUrl: "https://admitmaster.org",
+    discountNote: "Priority Review",
+    impressions: 2150,
+    clicks: 290,
+    active: true,
   },
 ];
 

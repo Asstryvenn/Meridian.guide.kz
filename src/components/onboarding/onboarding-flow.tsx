@@ -20,6 +20,7 @@ import {
   FinancialStep,
   InterestsStep,
   PreferencesStep,
+  TotemStep,
   type StepProps,
 } from "./steps";
 import { DocumentImport } from "./document-import";
@@ -29,6 +30,7 @@ import { msg } from "@/lib/i18n/catalog";
 
 const steps: { title: string; description: string; Component: ComponentType<StepProps> }[] = [
   { title: msg("About you"), description: msg("The basics that shape which systems and deadlines apply to you."), Component: BasicInfoStep },
+  { title: msg("Mascot companion"), description: msg("Choose an animated mentor companion to accompany your journey."), Component: TotemStep },
   { title: msg("Academic profile"), description: msg("Grades and tests are the foundation of every admission estimate."), Component: AcademicStep },
   { title: msg("English proficiency"), description: msg("Most universities abroad set a minimum score."), Component: EnglishStep },
   { title: msg("Interests"), description: msg("What you want to study decides which programs we consider."), Component: InterestsStep },

@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { buildStudentContext, studentStateSchema } from "@/lib/ai/context";
-import { describeAIError, getOpenAI } from "@/lib/ai/openai";
-import { ruleBasedMentorReply } from "@/lib/ai/rule-mentor";
-import { inLocale, tr } from "@/lib/i18n/catalog";
+import { describeAIError, getOpenAI, OPENAI_MODEL } from "@/lib/ai/openai";
+import { inLocale } from "@/lib/i18n/catalog";
 
 export const runtime = "nodejs";
 
@@ -35,34 +34,27 @@ Counseling Principles:
 - Focus on self-compassion, emotional grounding, taking pauses, and small achievable steps.
 - Provide a comforting, warm, and safe space for the student to vent.`;
 
-function textResponse(body: ReadableStream<Uint8Array> | string, source: "ai" | "rules", notice?: string) {
-  const headers: Record<string, string> = {
-    "Content-Type": "text/plain; charset=utf-8",
-    "X-Guidance-Source": source,
-    "Cache-Control": "no-store",
-  };
-  if (notice) headers["X-Guidance-Notice"] = encodeURIComponent(notice);
-  return new Response(body, { headers });
-}
-
 export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
+  if (!parsed.success) {
+    return Response.json({ error: "Invalid request format" }, { status: 400 });
+  }
 
   const { messages, supportMode, locale = "en", ...state } = parsed.data;
   const context = inLocale(locale, () => buildStudentContext(state));
-  const lastQuestion = messages[messages.length - 1].content;
   const activeSystemPrompt = supportMode ? PSYCHOLOGIST_SYSTEM_PROMPT : IVY_COUNSELOR_SYSTEM_PROMPT;
-  const fallback = supportMode
-    ? inLocale(locale, () => tr("I hear how much pressure you're carrying right now. It is completely valid to feel exhausted or overwhelmed by admissions. Take a deep breath — you are doing better than you think, and it's okay to rest."))
-    : inLocale(locale, () => ruleBasedMentorReply(lastQuestion, context));
 
   const openai = getOpenAI();
-  if (!openai) return textResponse(fallback, "rules");
+  if (!openai) {
+    return Response.json(
+      { error: "OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment or .env.local file." },
+      { status: 500 }
+    );
+  }
 
   try {
     const stream = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: OPENAI_MODEL || "gpt-4o-mini",
       temperature: 0.5,
       max_tokens: 3000,
       stream: true,
@@ -76,18 +68,15 @@ export async function POST(request: Request) {
     const encoder = new TextEncoder();
     const body = new ReadableStream<Uint8Array>({
       async start(controller) {
-        let sent = false;
         try {
           for await (const chunk of stream) {
             const text = chunk.choices[0]?.delta?.content;
             if (text) {
-              sent = true;
               controller.enqueue(encoder.encode(text));
             }
           }
-          if (!sent) controller.enqueue(encoder.encode(fallback));
         } catch (error) {
-          controller.enqueue(encoder.encode(`\n\n${describeAIError(error)}\n\n${fallback}`));
+          controller.enqueue(encoder.encode(`\n\n[OpenAI Stream Error: ${describeAIError(error)}]`));
         } finally {
           controller.close();
         }
@@ -97,8 +86,14 @@ export async function POST(request: Request) {
       },
     });
 
-    return textResponse(body, "ai");
+    return new Response(body, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Guidance-Source": "openai",
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
-    return textResponse(fallback, "rules", describeAIError(error));
+    return Response.json({ error: describeAIError(error) }, { status: 502 });
   }
 }

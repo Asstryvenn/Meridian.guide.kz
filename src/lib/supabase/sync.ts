@@ -68,6 +68,11 @@ export async function loadRemoteState(userId: string): Promise<PersistedState | 
     ielts: a.ielts === null || a.ielts === undefined ? null : Number(a.ielts),
     toefl: a.toefl ?? null,
     duolingo: a.duolingo ?? null,
+    currentStreak: typeof p.current_streak === "number" ? p.current_streak : emptyProfile.currentStreak,
+    totalExp: typeof p.total_exp === "number" ? p.total_exp : emptyProfile.totalExp,
+    chosenTotem: p.chosen_totem || emptyProfile.chosenTotem,
+    lastActiveDate: p.last_active_date || emptyProfile.lastActiveDate,
+    isBusinessAccount: p.is_business_account === true,
     activities,
   };
 
@@ -117,6 +122,11 @@ export async function saveRemoteState(userId: string, state: PersistedState): Pr
       size: profile.size,
       career_goal: profile.careerGoal,
       grad_school: profile.gradSchool,
+      current_streak: profile.currentStreak ?? 1,
+      total_exp: profile.totalExp ?? 0,
+      chosen_totem: profile.chosenTotem ?? "arystan",
+      last_active_date: profile.lastActiveDate ?? new Date().toISOString().slice(0, 10),
+      is_business_account: profile.isBusinessAccount === true,
       onboarded: state.onboarded,
       updated_at: new Date().toISOString(),
     }),

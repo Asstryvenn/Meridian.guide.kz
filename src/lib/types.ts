@@ -100,6 +100,11 @@ export interface StudentProfile {
   socialMediaHours?: number | null;
   pomodoroMinutes?: number;
   careerAssessment?: CareerAssessmentResult;
+  currentStreak?: number;
+  totalExp?: number;
+  chosenTotem?: TotemMascotId;
+  lastActiveDate?: string;
+  isBusinessAccount?: boolean;
 }
 
 export type Tier = "Dream" | "Target" | "Safety";
@@ -200,6 +205,7 @@ export interface Scholarship {
 export interface Professor {
   id: string;
   name: string;
+  email: string;
   universitySlug: string;
   department: string;
   areas: string[];
@@ -389,3 +395,97 @@ export interface HybridEssayEvaluationResult {
   ml_metrics: HybridMlMetrics;
   source: "openai" | "gemini" | "ml_calibrated";
 }
+
+export type TotemMascotId = "arystan" | "sunkar" | "amina" | "alikhan";
+
+export interface ExpTransaction {
+  id: string;
+  userId?: string;
+  amount: number;
+  action: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface RewardItem {
+  id: string;
+  title: string;
+  category: "counseling" | "ielts" | "waiver" | "sat" | "essay";
+  cost: number;
+  description: string;
+  discountCode: string;
+  provider: string;
+  badge: string;
+}
+
+export interface RedeemedReward {
+  id: string;
+  rewardId: string;
+  title: string;
+  discountCode: string;
+  cost: number;
+  redeemedAt: string;
+}
+
+export interface B2BAccount {
+  id: string;
+  companyName: string;
+  contactEmail: string;
+  country: string;
+  category: "language_school" | "consultancy" | "summer_school" | "test_prep";
+  verified: boolean;
+}
+
+export interface Advertisement {
+  id: string;
+  b2bAccountId: string;
+  title: string;
+  subtitle: string;
+  targetCountry: string;
+  targetKeyword: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  discountNote?: string;
+  impressions: number;
+  clicks: number;
+  active: boolean;
+}
+
+export type ChatRole = "student" | "mentor" | "alumni" | "professor";
+
+export interface Conversation {
+  id: string;
+  recipientId: string;
+  recipientName: string;
+  recipientRole: ChatRole;
+  recipientAvatar: string;
+  recipientAffiliation: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderRole: ChatRole;
+  senderName: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface UpcomingEvent {
+  id: string;
+  title: string;
+  organizer: string;
+  date: string;
+  time: string;
+  format: "virtual" | "in_person";
+  location: string;
+  category: "fair" | "hackathon" | "masterclass" | "webinar";
+  link: string;
+  description: string;
+  attendeeCount: number;
+}
+

@@ -6,11 +6,27 @@ import { getUniversity } from "@/lib/data/universities";
 import { onAuthChange, currentSupabaseUser, signOutEverywhere } from "@/lib/supabase/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadRemoteState, persistTask, saveRemoteState } from "@/lib/supabase/sync";
-import type { ActivityCategory, Application, ArchetypeId, AuthUser, CareerAssessmentResult, RoadmapTask, StudentProfile, VaultDocument } from "@/lib/types";
-import { defaultVaultDocuments, emptyProfile, newApplication } from "./defaults";
+import type {
+  ActivityCategory,
+  Advertisement,
+  Application,
+  ArchetypeId,
+  AuthUser,
+  CareerAssessmentResult,
+  ExpTransaction,
+  RedeemedReward,
+  RewardItem,
+  RoadmapTask,
+  StudentProfile,
+  TotemMascotId,
+  VaultDocument,
+} from "@/lib/types";
+import { defaultAdvertisements, defaultRewards, defaultVaultDocuments, emptyProfile, newApplication } from "./defaults";
 
 const STORAGE_KEY = "meridian:v1";
 const SAVE_DELAY_MS = 900;
+
+export type MascotState = "idle" | "celebrating" | "streak_fire" | "warning_alert";
 
 interface AppState {
   user: AuthUser | null;
@@ -24,6 +40,10 @@ interface AppState {
   pomodoroFocusMinutes: number;
   documents: VaultDocument[];
   customRoadmapTasks: RoadmapTask[];
+  redeemedRewards: RedeemedReward[];
+  expTransactions: ExpTransaction[];
+  advertisements: Advertisement[];
+  mascotState: MascotState;
 }
 
 export type SyncStatus = "idle" | "saving" | "saved" | "error";
@@ -32,6 +52,14 @@ interface AppActions {
   hydrated: boolean;
   syncStatus: SyncStatus;
   syncError: string | null;
+  currentStreak: number;
+  totalExp: number;
+  chosenTotem: TotemMascotId;
+  isBusinessAccount: boolean;
+  mascotState: MascotState;
+  redeemedRewards: RedeemedReward[];
+  expTransactions: ExpTransaction[];
+  advertisements: Advertisement[];
   signIn: (user: AuthUser) => Promise<void>;
   signOut: () => Promise<void>;
   flush: () => Promise<string | null>;
@@ -57,6 +85,15 @@ interface AppActions {
   addCustomRoadmapTask: (task: RoadmapTask) => void;
   addAchievementBoost: (title: string, category: ActivityCategory, boostPercent: number) => void;
   saveCareerAssessment: (result: CareerAssessmentResult) => void;
+  addExp: (amount: number, reason: string) => void;
+  deductExp: (amount: number, reason: string) => void;
+  applyDeadlinePenalty: (taskTitle: string) => void;
+  purchaseReward: (reward: RewardItem) => { success: boolean; code?: string; error?: string };
+  setChosenTotem: (totem: TotemMascotId) => void;
+  setMascotState: (state: MascotState) => void;
+  toggleBusinessAccount: () => void;
+  createAdvertisement: (ad: Omit<Advertisement, "id" | "impressions" | "clicks">) => void;
+  toggleAdvertisementActive: (id: string) => void;
 }
 
 const initialState: AppState = {
@@ -71,6 +108,10 @@ const initialState: AppState = {
   pomodoroFocusMinutes: 0,
   documents: defaultVaultDocuments,
   customRoadmapTasks: [],
+  redeemedRewards: [],
+  expTransactions: [],
+  advertisements: defaultAdvertisements,
+  mascotState: "idle",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -78,12 +119,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function asArray<T>(value: unknown, fallback: T[] = []): T[] {
-  return Array.isArray(value) ? value as T[] : fallback;
+  return Array.isArray(value) ? (value as T[]) : fallback;
 }
 
 function normalizeProfile(value: unknown): StudentProfile {
   const profile = isRecord(value) ? value : {};
-  const tuitionRange = asArray<number>(profile.tuitionRange).filter((amount) => typeof amount === "number" && Number.isFinite(amount));
+  const tuitionRange = asArray<number>(profile.tuitionRange).filter(
+    (amount) => typeof amount === "number" && Number.isFinite(amount)
+  );
   const careerAssessment = isRecord(profile.careerAssessment)
     ? {
         ...profile.careerAssessment,
@@ -105,13 +148,21 @@ function normalizeProfile(value: unknown): StudentProfile {
     preferredRegions: asArray(profile.preferredRegions).filter((region): region is string => typeof region === "string"),
     tuitionRange: tuitionRange.length === 2 ? [tuitionRange[0], tuitionRange[1]] : emptyProfile.tuitionRange,
     careerAssessment: careerAssessment as StudentProfile["careerAssessment"],
+    currentStreak: typeof profile.currentStreak === "number" ? profile.currentStreak : emptyProfile.currentStreak,
+    totalExp: typeof profile.totalExp === "number" ? profile.totalExp : emptyProfile.totalExp,
+    chosenTotem: (profile.chosenTotem as TotemMascotId) || emptyProfile.chosenTotem,
+    lastActiveDate: (profile.lastActiveDate as string) || emptyProfile.lastActiveDate,
+    isBusinessAccount: profile.isBusinessAccount === true,
   };
 }
 
 function normalizeApplication(value: unknown): Application | null {
   if (!isRecord(value) || typeof value.universitySlug !== "string") return null;
 
-  const status = value.status === "preparing" || value.status === "submitted" || value.status === "decision" ? value.status : "researching";
+  const status =
+    value.status === "preparing" || value.status === "submitted" || value.status === "decision"
+      ? value.status
+      : "researching";
   const normalizeItems = (items: unknown): Application["documents"] =>
     asArray(items)
       .filter(isRecord)
@@ -136,7 +187,9 @@ function normalizeState(value: unknown): AppState {
     ...initialState,
     ...state,
     profile: normalizeProfile(state.profile),
-    applications: asArray(state.applications).map(normalizeApplication).filter((application): application is Application => application !== null),
+    applications: asArray(state.applications)
+      .map(normalizeApplication)
+      .filter((application): application is Application => application !== null),
     completedTasks: asArray<string>(state.completedTasks),
     dismissedNotifications: asArray<string>(state.dismissedNotifications),
     compare: asArray<string>(state.compare),
@@ -144,6 +197,10 @@ function normalizeState(value: unknown): AppState {
     customRoadmapTasks: asArray<RoadmapTask>(state.customRoadmapTasks),
     ecoMode: state.ecoMode === true,
     pomodoroFocusMinutes: typeof state.pomodoroFocusMinutes === "number" ? state.pomodoroFocusMinutes : 0,
+    redeemedRewards: asArray<RedeemedReward>(state.redeemedRewards),
+    expTransactions: asArray<ExpTransaction>(state.expTransactions),
+    advertisements: asArray<Advertisement>(state.advertisements, defaultAdvertisements),
+    mascotState: "idle",
   };
 }
 
@@ -225,7 +282,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const local = readLocal();
         const next = await resolveSession(local).catch(() => local);
         if (!active) return;
-        setState(next || local || initialState);
+        const resolved = next || local || initialState;
+        const today = new Date().toISOString().slice(0, 10);
+        const lastActive = resolved.profile.lastActiveDate;
+        let streak = resolved.profile.currentStreak || 1;
+        if (lastActive && lastActive !== today) {
+          const diffDays = Math.round((new Date(today).getTime() - new Date(lastActive).getTime()) / (1000 * 3600 * 24));
+          if (diffDays === 1) {
+            streak += 1;
+          } else if (diffDays > 1) {
+            streak = 1;
+          }
+        }
+        resolved.profile = {
+          ...resolved.profile,
+          currentStreak: streak,
+          lastActiveDate: today,
+        };
+        setState(resolved);
       } catch {
         if (!active) return;
         setState(readLocal() || initialState);
@@ -320,8 +394,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((prev) => {
       const has = prev.completedTasks.includes(id);
       if (has === done) return prev;
-      return { ...prev, completedTasks: done ? [...prev.completedTasks, id] : prev.completedTasks.filter((t) => t !== id) };
+      const expDelta = done ? 100 : -100;
+      const newTotalExp = Math.max(0, (prev.profile.totalExp || 0) + expDelta);
+      const newTx: ExpTransaction = {
+        id: `tx-${Date.now()}`,
+        amount: expDelta,
+        action: done ? "task_completed" : "task_reopened",
+        description: done ? "Completed roadmap milestone" : "Reopened milestone",
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        ...prev,
+        completedTasks: done ? [...prev.completedTasks, id] : prev.completedTasks.filter((t) => t !== id),
+        profile: {
+          ...prev.profile,
+          totalExp: newTotalExp,
+        },
+        expTransactions: [newTx, ...prev.expTransactions],
+        mascotState: done ? "celebrating" : "idle",
+      };
     });
+
+    if (done) {
+      setTimeout(() => {
+        setState((prev) => (prev.mascotState === "celebrating" ? { ...prev, mascotState: "idle" } : prev));
+      }, 4000);
+    }
+
     if (user?.mode === "supabase") {
       persistTask(user.id, id, done).then((error) => {
         if (error) {
@@ -334,7 +433,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const markTask = useCallback((id: string) => setTaskDone(id, true), [setTaskDone]);
 
-  const toggleTask = useCallback((id: string) => setTaskDone(id, !stateRef.current.completedTasks.includes(id)), [setTaskDone]);
+  const toggleTask = useCallback(
+    (id: string) => setTaskDone(id, !stateRef.current.completedTasks.includes(id)),
+    [setTaskDone]
+  );
 
   const dismissNotification = useCallback((id: string) => {
     setState((prev) => ({ ...prev, dismissedNotifications: [...prev.dismissedNotifications, id] }));
@@ -442,12 +544,159 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const addExp = useCallback((amount: number, reason: string) => {
+    setState((prev) => {
+      const newTotal = (prev.profile.totalExp || 0) + amount;
+      const newTx: ExpTransaction = {
+        id: `tx-${Date.now()}`,
+        amount,
+        action: "exp_gain",
+        description: reason,
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        ...prev,
+        profile: { ...prev.profile, totalExp: newTotal },
+        expTransactions: [newTx, ...prev.expTransactions],
+        mascotState: amount > 0 ? "celebrating" : "idle",
+      };
+    });
+  }, []);
+
+  const deductExp = useCallback((amount: number, reason: string) => {
+    setState((prev) => {
+      const newTotal = Math.max(0, (prev.profile.totalExp || 0) - amount);
+      const newTx: ExpTransaction = {
+        id: `tx-${Date.now()}`,
+        amount: -amount,
+        action: "exp_deduction",
+        description: reason,
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        ...prev,
+        profile: { ...prev.profile, totalExp: newTotal },
+        expTransactions: [newTx, ...prev.expTransactions],
+      };
+    });
+  }, []);
+
+  const applyDeadlinePenalty = useCallback((taskTitle: string) => {
+    setState((prev) => {
+      const penaltyAmount = 50;
+      const newTotal = Math.max(0, (prev.profile.totalExp || 0) - penaltyAmount);
+      const newTx: ExpTransaction = {
+        id: `tx-penalty-${Date.now()}`,
+        amount: -penaltyAmount,
+        action: "penalty_overdue_deadline",
+        description: `Overdue deadline penalty: ${taskTitle}`,
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        ...prev,
+        profile: { ...prev.profile, totalExp: newTotal },
+        expTransactions: [newTx, ...prev.expTransactions],
+        mascotState: "warning_alert",
+      };
+    });
+    setTimeout(() => {
+      setState((prev) => (prev.mascotState === "warning_alert" ? { ...prev, mascotState: "idle" } : prev));
+    }, 6000);
+  }, []);
+
+  const purchaseReward = useCallback((reward: RewardItem) => {
+    const currentExp = stateRef.current.profile.totalExp || 0;
+    if (currentExp < reward.cost) {
+      return { success: false, error: "Insufficient EXP balance" };
+    }
+    const uniqueCode = `${reward.discountCode}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const redeemed: RedeemedReward = {
+      id: `red-${Date.now()}`,
+      rewardId: reward.id,
+      title: reward.title,
+      discountCode: uniqueCode,
+      cost: reward.cost,
+      redeemedAt: new Date().toISOString(),
+    };
+    const expTx: ExpTransaction = {
+      id: `tx-reward-${Date.now()}`,
+      amount: -reward.cost,
+      action: "reward_redemption",
+      description: `Redeemed ${reward.title}`,
+      createdAt: new Date().toISOString(),
+    };
+    setState((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        totalExp: Math.max(0, (prev.profile.totalExp || 0) - reward.cost),
+      },
+      redeemedRewards: [redeemed, ...prev.redeemedRewards],
+      expTransactions: [expTx, ...prev.expTransactions],
+      mascotState: "celebrating",
+    }));
+    setTimeout(() => {
+      setState((prev) => (prev.mascotState === "celebrating" ? { ...prev, mascotState: "idle" } : prev));
+    }, 4000);
+    return { success: true, code: uniqueCode };
+  }, []);
+
+  const setChosenTotem = useCallback((totem: TotemMascotId) => {
+    setState((prev) => ({
+      ...prev,
+      profile: { ...prev.profile, chosenTotem: totem },
+      mascotState: "celebrating",
+    }));
+    setTimeout(() => {
+      setState((prev) => (prev.mascotState === "celebrating" ? { ...prev, mascotState: "idle" } : prev));
+    }, 3000);
+  }, []);
+
+  const setMascotState = useCallback((mascotState: MascotState) => {
+    setState((prev) => ({ ...prev, mascotState }));
+  }, []);
+
+  const toggleBusinessAccount = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      profile: { ...prev.profile, isBusinessAccount: !prev.profile.isBusinessAccount },
+    }));
+  }, []);
+
+  const createAdvertisement = useCallback((adData: Omit<Advertisement, "id" | "impressions" | "clicks">) => {
+    const newAd: Advertisement = {
+      ...adData,
+      id: `ad-${Date.now()}`,
+      impressions: 0,
+      clicks: 0,
+    };
+    setState((prev) => ({
+      ...prev,
+      advertisements: [newAd, ...prev.advertisements],
+    }));
+  }, []);
+
+  const toggleAdvertisementActive = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      advertisements: prev.advertisements.map((ad) => (ad.id === id ? { ...ad, active: !ad.active } : ad)),
+    }));
+  }, []);
+
   const value = useMemo(
     () => ({
       ...state,
       hydrated,
       syncStatus,
       syncError,
+      currentStreak: state.profile.currentStreak || 1,
+      totalExp: state.profile.totalExp || 0,
+      chosenTotem: state.profile.chosenTotem || "arystan",
+      isBusinessAccount: state.profile.isBusinessAccount === true,
+      mascotState: state.mascotState,
+      redeemedRewards: state.redeemedRewards,
+      expTransactions: state.expTransactions,
+      advertisements: state.advertisements,
       signIn,
       signOut,
       flush: () => saveNow(),
@@ -473,6 +722,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addCustomRoadmapTask,
       addAchievementBoost,
       saveCareerAssessment,
+      addExp,
+      deductExp,
+      applyDeadlinePenalty,
+      purchaseReward,
+      setChosenTotem,
+      setMascotState,
+      toggleBusinessAccount,
+      createAdvertisement,
+      toggleAdvertisementActive,
     }),
     [
       state,
@@ -504,7 +762,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addCustomRoadmapTask,
       addAchievementBoost,
       saveCareerAssessment,
-    ],
+      addExp,
+      deductExp,
+      applyDeadlinePenalty,
+      purchaseReward,
+      setChosenTotem,
+      setMascotState,
+      toggleBusinessAccount,
+      createAdvertisement,
+      toggleAdvertisementActive,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

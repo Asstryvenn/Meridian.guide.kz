@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { Leaf, LifeBuoy } from "lucide-react";
+import { Building2, Flame, Leaf, LifeBuoy, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -10,6 +10,7 @@ import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { PomodoroProvider, PomodoroToolbarButton } from "@/components/ui/pomodoro-timer";
 import { AiAssistantDrawer } from "@/components/mentor/ai-assistant-drawer";
+import { MascotCompanion } from "@/components/companion/mascot-companion";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { TechSupportModal, TechSupportTrigger } from "@/components/support/tech-support-modal";
 import { useI18n } from "@/components/i18n/i18n-context";
@@ -176,6 +177,10 @@ function UserMenu({ onOpenSupport }: { onOpenSupport: () => void }) {
               <Icon name="user" size={16} />
               <span>{t("Edit profile")}</span>
             </Link>
+            <Link href="/b2b" className={styles.menuItem} onClick={() => setOpen(false)}>
+              <Building2 size={16} />
+              <span>{t("Switch to Business Account")}</span>
+            </Link>
             <button
               type="button"
               className={styles.menuItem}
@@ -198,7 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const tx = useT();
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
-  const { ecoMode, toggleEcoMode } = useApp();
+  const { ecoMode, toggleEcoMode, currentStreak, totalExp } = useApp();
   const { t } = useI18n();
 
   const nav: NavItem[] = [
@@ -208,6 +213,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/mentor", label: t.nav.mentor, icon: "chat", mobile: true },
     { href: "/essays", label: t.nav.essays, icon: "fileText" },
     { href: "/diagnostics", label: t.nav.diagnostics, icon: "spark" },
+    { href: "/marketplace", label: tx("Marketplace"), icon: "award" },
+    { href: "/messages", label: tx("Messages"), icon: "chat" },
+    { href: "/events", label: tx("Events"), icon: "calendar" },
     { href: "/calendar", label: t.nav.calendar, icon: "calendar" },
     { href: "/interview", label: t.nav.interview, icon: "spark" },
     { href: "/documents", label: t.nav.documents, icon: "folder" },
@@ -250,6 +258,22 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Logo />
             </Link>
             <div className={styles.topActions}>
+              <Link
+                href="/roadmap"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#f97316]/15 text-[#ea580c] border border-[#f97316]/30 hover:bg-[#f97316]/25 transition-all select-none"
+                title={tx("Daily Streak")}
+              >
+                <Flame size={14} className="fill-[#ea580c]" />
+                <span>{currentStreak}</span>
+              </Link>
+              <Link
+                href="/marketplace"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#EBAE29]/15 text-amber-ink border border-[#EBAE29]/30 hover:bg-[#EBAE29]/25 transition-all select-none"
+                title={tx("Rewards Marketplace")}
+              >
+                <Sparkles size={13} />
+                <span>{totalExp} XP</span>
+              </Link>
               <LanguageSelector />
               <button
                 type="button"
@@ -320,6 +344,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
         <AiAssistantDrawer />
         <TechSupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
+        <MascotCompanion />
       </div>
     </PomodoroProvider>
   );

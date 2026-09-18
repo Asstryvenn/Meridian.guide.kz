@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.4-mini";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
 let client: OpenAI | null = null;
 
@@ -18,24 +18,34 @@ export function getOpenAI(): OpenAI | null {
   return client;
 }
 
-const reasoningModel = /^(gpt-5|o\d)/.test(OPENAI_MODEL);
+const isReasoningModel = /^(o1|o3)/.test(OPENAI_MODEL);
 
 export function modelOptions(effort: "minimal" | "low" | "medium", maxTokens: number) {
-  return reasoningModel
-    ? { model: OPENAI_MODEL, max_completion_tokens: maxTokens, reasoning_effort: effort }
-    : { model: OPENAI_MODEL, max_completion_tokens: maxTokens };
+  if (isReasoningModel) {
+    return { model: OPENAI_MODEL, max_completion_tokens: maxTokens, reasoning_effort: effort };
+  }
+  return { model: OPENAI_MODEL, max_completion_tokens: maxTokens };
 }
 
 export function describeAIError(error: unknown): string {
   if (error instanceof OpenAI.RateLimitError) {
     return /credit|quota|billing/i.test(error.message)
-      ? "The OpenAI account has run out of credit. Showing rule-based guidance instead."
-      : "The AI service is busy. Showing rule-based guidance instead.";
+      ? "OpenAI API quota or credit limit reached. Please check your OpenAI account billing."
+      : "OpenAI API rate limit reached. Please retry in a few moments.";
   }
-  if (error instanceof OpenAI.AuthenticationError) return "The OpenAI API key is invalid. Showing rule-based guidance instead.";
-  if (error instanceof OpenAI.APIConnectionError) return "Could not reach the AI service. Showing rule-based guidance instead.";
-  if (error instanceof OpenAI.APIError) return "The AI service returned an error. Showing rule-based guidance instead.";
-  return "AI guidance is unavailable. Showing rule-based guidance instead.";
+  if (error instanceof OpenAI.AuthenticationError) {
+    return "The OPENAI_API_KEY configured on the server is invalid or unauthorized.";
+  }
+  if (error instanceof OpenAI.APIConnectionError) {
+    return "Could not connect to OpenAI API server.";
+  }
+  if (error instanceof OpenAI.APIError) {
+    return `OpenAI API Error: ${error.message}`;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An unexpected error occurred while communicating with OpenAI.";
 }
 
 export const getOpenAIClient = getOpenAI;

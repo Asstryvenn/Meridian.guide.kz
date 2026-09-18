@@ -71,6 +71,17 @@
 
 .name {
   font-size: 18px;
+  font-weight: 700;
+}
+
+.emailRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--green-ink);
+  font-family: monospace;
+  margin-top: 4px;
 }
 
 .uni {
@@ -112,6 +123,54 @@
   background: var(--amber-soft);
   color: var(--text);
   font-weight: 560;
+}
+
+.outreachRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.draftBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+  border: 1px solid var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.draftBtn:hover {
+  background: var(--amber);
+  color: #132228;
+}
+
+.chatBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chatBtn:hover {
+  border-color: var(--green);
+  color: var(--green-ink);
 }
 
 .footer {

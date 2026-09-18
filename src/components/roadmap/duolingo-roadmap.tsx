@@ -13,6 +13,8 @@ import { useRoadmap } from "@/lib/store/derived";
 import { useTaskCompletion } from "@/lib/store/use-task-completion";
 import type { RoadmapTask } from "@/lib/types";
 import type { RoadmapLevel } from "@/lib/engine/roadmap";
+import { ContextualAdBanner } from "@/components/b2b/contextual-ad-banner";
+import { useApp } from "@/lib/store/app-store";
 import styles from "@/app/(app)/roadmap/roadmap.module.css";
 import { useT } from "@/lib/i18n/use-t";
 import { msg } from "@/lib/i18n/catalog";
@@ -229,7 +231,7 @@ export function DuolingoRoadmap({ onCompleteTask }: DuolingoRoadmapProps) {
                                       {formatDate(task.dueDate)}
                                       {days !== null && !task.done && (
                                         <span className={days < 14 ? "text-red-400 font-bold" : "text-green-ink"}>
-                                          ({days < 0 ? tx("{days}d overdue", { days: -days }) : tx("{days}d left", { days: days })})
+                                          ({days < 0 ? tx("{days}d overdue · -50 EXP penalty", { days: -days }) : tx("{days}d left", { days: days })})
                                         </span>
                                       )}
                                     </span>
@@ -245,6 +247,8 @@ export function DuolingoRoadmap({ onCompleteTask }: DuolingoRoadmapProps) {
                                     </Link>
                                   )}
                                 </div>
+
+                                <ContextualAdBanner task={task} />
                               </div>
 
                               <div className="relative shrink-0 text-right">

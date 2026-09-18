@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChipGroup, NumberField, RangeField, Segmented, SelectField, TextArea, TextField, Toggle } from "@/components/ui/fields";
@@ -227,3 +228,68 @@ export function CareerStep({ profile, update }: StepProps) {
     </div>
   );
 }
+
+export function TotemStep({ profile, update }: StepProps) {
+  const t = useT();
+  const options = [
+    {
+      id: "arystan" as const,
+      name: "Arystan",
+      title: t("The Ambitious Pioneer"),
+      image: "/totems/arystan.png",
+      desc: t("Driven, tech-focused, and optimistic about building global-impact solutions."),
+    },
+    {
+      id: "sunkar" as const,
+      name: "Sunkar",
+      title: t("The Royal Scholar"),
+      image: "/totems/sunkar.png",
+      desc: t("Strategic, analytical, and relentless in academic excellence."),
+    },
+    {
+      id: "amina" as const,
+      name: "Amina",
+      title: t("The Creative Luminary"),
+      image: "/totems/amina.png",
+      desc: t("Charismatic, expressive, and passionate about community and storytelling."),
+    },
+    {
+      id: "alikhan" as const,
+      name: "Alikhan",
+      title: t("The Determined Leader"),
+      image: "/totems/alikhan.png",
+      desc: t("Disciplined, articulate, and dedicated to leadership and debate."),
+    },
+  ];
+
+  return (
+    <div className={styles.stack}>
+      <p className={styles.note}>
+        {t("Select an animated companion that will accompany you through your application journey, celebrating streaks and milestone accomplishments.")}
+      </p>
+      <div className={styles.totemGrid}>
+        {options.map((item) => {
+          const active = (profile.chosenTotem || "arystan") === item.id;
+          return (
+            <div
+              key={item.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => update({ chosenTotem: item.id })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") update({ chosenTotem: item.id });
+              }}
+              className={`${styles.totemCard} ${active ? styles.totemCardActive : ""}`}
+            >
+              <Image src={item.image} alt={item.name} width={90} height={90} className={styles.totemAvatar} />
+              <h3 className={styles.totemName}>{item.name}</h3>
+              <span className={styles.totemTitle}>{item.title}</span>
+              <p className={styles.totemDesc}>{item.desc}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
