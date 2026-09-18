@@ -26,6 +26,23 @@
   min-width: 0;
 }
 
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rankBadge {
+  font-size: 11px;
+  font-weight: 620;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+  white-space: nowrap;
+}
+
 .name {
   font-size: 19px;
   font-weight: 620;
@@ -93,6 +110,20 @@
 
 .gap {
   font-size: 14px;
+  color: var(--text-muted);
+}
+
+.majorsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.majorChip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface-muted);
   color: var(--text-muted);
 }
 

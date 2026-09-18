@@ -32,33 +32,53 @@
   top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 12px;
+  width: 248px;
+  max-width: 248px;
   height: calc(100dvh - 32px);
-  padding: 22px 14px;
+  max-height: calc(100dvh - 32px);
+  padding: 14px 10px;
   border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .brand {
-  padding: 0 10px;
+  padding: 0 8px;
+  flex-shrink: 0;
 }
 
 .nav {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
 }
 
 .navItem {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 42px;
-  padding: 0 12px;
-  border-radius: 14px;
+  gap: 10px;
+  height: 33px;
+  min-height: 33px;
+  padding: 0 10px;
+  border-radius: 10px;
   color: var(--text-muted);
   font-weight: 520;
-  transition: color 0.2s ease;
+  font-size: 13px;
+  transition: color 0.15s ease;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .navItem:hover {
@@ -72,15 +92,28 @@
 .navHighlight {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--surface-strong);
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
 }
 
-.navIcon,
+.navIcon {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .navLabel {
   position: relative;
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 .navActive .navIcon {

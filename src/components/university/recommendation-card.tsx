@@ -21,11 +21,18 @@ export function RecommendationCard({ recommendation }: { recommendation: Recomme
   const tracked = applications.some((a) => a.universitySlug === university.slug);
   const comparing = compare.includes(university.slug);
 
+  const globalRank = university.ranking?.global ?? university.globalRanking;
+  const nationalRank = university.ranking?.national ?? university.nationalRanking;
+  const rankLabel = globalRank ? `#${globalRank} Global` : nationalRank ? `#${nationalRank} National` : null;
+
   return (
     <article className={`glass ${styles.card}`}>
       <header className={styles.header}>
         <div className={styles.titleBlock}>
-          <TierBadge tier={tier} />
+          <div className={styles.badgeRow}>
+            <TierBadge tier={tier} />
+            {rankLabel && <span className={styles.rankBadge}>{rankLabel}</span>}
+          </div>
           <Link href={`/universities/${university.slug}`} className={styles.name}>
             {university.name}
           </Link>
@@ -48,6 +55,16 @@ export function RecommendationCard({ recommendation }: { recommendation: Recomme
           <Badge tone={financialTone[financial.label]}>{financial.label}</Badge>
         </div>
       </div>
+
+      {university.popularMajors && university.popularMajors.length > 0 && (
+        <div className={styles.majorsList}>
+          {university.popularMajors.slice(0, 3).map((major) => (
+            <span key={major} className={styles.majorChip}>
+              {major}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className={styles.explain}>
         <div>
@@ -78,7 +95,6 @@ export function RecommendationCard({ recommendation }: { recommendation: Recomme
           {comparing ? t("Comparing") : t("Compare")}
         </Button>
         <Button size="sm" variant="quiet" href={`/universities/${university.slug}`}>
-          
           {t("Details")}
         </Button>
       </footer>

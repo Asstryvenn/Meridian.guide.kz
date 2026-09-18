@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { PomodoroProvider, PomodoroToolbarButton } from "@/components/ui/pomodoro-timer";
+import { AiAssistantDrawer } from "@/components/mentor/ai-assistant-drawer";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { useApp } from "@/lib/store/app-store";
@@ -220,9 +221,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             {nav.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
-                <Link key={item.href} href={item.href} className={clsx(styles.navItem, active && styles.navActive)} aria-current={active ? "page" : undefined}>
+                <Link key={item.href} href={item.href} className={clsx(styles.navItem, active && styles.navActive)} aria-current={active ? "page" : undefined} title={item.label}>
                   {active && <motion.span layoutId="nav-active" className={styles.navHighlight} transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
-                  <Icon name={item.icon} size={18} className={styles.navIcon} />
+                  <Icon name={item.icon} size={16} className={styles.navIcon} />
                   <span className={styles.navLabel}>{item.label}</span>
                 </Link>
               );
@@ -303,6 +304,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </nav>
         <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
+        <AiAssistantDrawer />
       </div>
     </PomodoroProvider>
   );

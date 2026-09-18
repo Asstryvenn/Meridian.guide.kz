@@ -131,6 +131,14 @@ export interface University {
   size: "small" | "medium" | "large";
   summary: string;
   programs: Program[];
+  popularMajors?: string[];
+  ranking?: {
+    global?: number;
+    national?: number;
+    source?: string;
+  };
+  globalRanking?: number;
+  nationalRanking?: number;
   acceptanceRate: Sourced<number>;
   selectivityTier: 1 | 2 | 3 | 4 | 5;
   intlTuitionUsd: Sourced<[number, number]>;

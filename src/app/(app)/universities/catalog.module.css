@@ -95,7 +95,7 @@
   flex-direction: column;
   gap: 12px;
   list-style: none;
-  padding-bottom: 80px;
+  padding-bottom: 20px;
 }
 
 .row {
@@ -109,8 +109,25 @@
 .rowMain {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
+}
+
+.rowTitleBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rankBadge {
+  font-size: 11px;
+  font-weight: 620;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+  white-space: nowrap;
 }
 
 .rowName {
@@ -140,6 +157,21 @@
   overflow: hidden;
 }
 
+.majorsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.majorChip {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
 .facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -160,6 +192,13 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.paginationWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+  padding-bottom: 60px;
 }
 
 @media (max-width: 1100px) {

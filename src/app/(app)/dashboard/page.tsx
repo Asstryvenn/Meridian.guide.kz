@@ -16,6 +16,7 @@ import { ArchetypeQuiz } from "@/components/onboarding/archetype-quiz";
 import { CareerAssessmentModal } from "@/components/onboarding/career-assessment-modal";
 import { ActivityRecommender } from "@/components/activities/activity-recommender";
 import { ChanceBoostModal } from "@/components/diploma/chance-boost-modal";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ARCHETYPES } from "@/lib/data/archetype";
 import { PredictionRange } from "@/components/university/prediction-panel";
 import { TierBadge } from "@/components/university/tier";
@@ -29,14 +30,14 @@ import styles from "./dashboard.module.css";
 import { useT } from "@/lib/i18n/use-t";
 import { msg } from "@/lib/i18n/catalog";
 
-function greeting() {
-  const hour = new Date().getHours();
+function greeting(date: Date) {
+  const hour = date.getHours();
   if (hour < 12) return msg("Good morning");
   if (hour < 18) return msg("Good afternoon");
   return msg("Good evening");
 }
 
-export default function Dashboard() {
+function DashboardView() {
   const t = useT();
   const { profile, applications, ecoMode } = useApp();
   const completeTask = useTaskCompletion();
@@ -47,16 +48,22 @@ export default function Dashboard() {
   const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false);
   const [showCareerAssessment, setShowCareerAssessment] = useState(false);
   const [showChanceBoostModal, setShowChanceBoostModal] = useState(false);
-  const firstName = profile.fullName.split(" ")[0];
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
+  const firstName = typeof profile.fullName === "string" ? profile.fullName.split(" ")[0] : "";
+  const primaryCareerMatch = profile.careerAssessment?.topMatches?.[0];
 
   useEffect(() => {
-    if (!profile.careerAssessment) {
+    setCurrentDate(new Date());
+  }, []);
+
+  useEffect(() => {
+    if (!primaryCareerMatch) {
       const timer = setTimeout(() => {
         setShowCareerAssessment(true);
       }, 1200);
       return () => clearTimeout(timer);
     }
-  }, [profile.careerAssessment]);
+  }, [primaryCareerMatch]);
 
   const deadlines = applications
     .map((a) => getUniversity(a.universitySlug))
@@ -107,8 +114,8 @@ export default function Dashboard() {
       )}
 
       <PageHeader
-        eyebrow={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
-        title={`${greeting()}${firstName ? `, ${firstName}` : ""}.`}
+        eyebrow={currentDate?.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) ?? ""}
+        title={currentDate ? `${greeting(currentDate)}${firstName ? `, ${firstName}` : ""}.` : ""}
         description={ecoMode ? t("Pace yourself today. You are making steady progress.") : diagnostics.summary}
         actions={
           <div className="flex items-center gap-2">
@@ -146,19 +153,19 @@ export default function Dashboard() {
             <Compass size={14} className="text-[#EBAE29]" />
             <span>{t("Career Guidance & Trajectory")}</span>
           </div>
-          {profile.careerAssessment ? (
+          {primaryCareerMatch ? (
             <div>
               <h3 className="text-lg font-extrabold text-ink flex items-center gap-2 justify-center md:justify-start">
-                <span>{profile.careerAssessment.topMatches[0]?.title}</span>
+                <span>{primaryCareerMatch.title}</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#589C80]/20 text-green-ink border border-[#589C80]/40">
-                  {profile.careerAssessment.topMatches[0]?.matchPercent}% {t("Fit")}
+                  {primaryCareerMatch.matchPercent}% {t("Fit")}
                 </span>
               </h3>
               <p className="text-xs text-ink/80 max-w-xl">
-                {profile.careerAssessment.topMatches[0]?.description}
+                {primaryCareerMatch.description}
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2 justify-center md:justify-start">
-                {profile.careerAssessment.topMatches[0]?.foundationalSkills.map((skill) => (
+                {primaryCareerMatch.foundationalSkills.map((skill) => (
                   <span key={skill} className="px-2 py-0.5 rounded-md text-[10px] font-mono font-medium bg-black/5 dark:bg-white/5 border border-line text-ink/70">
                     {skill}
                   </span>
@@ -178,7 +185,7 @@ export default function Dashboard() {
           onClick={() => setShowCareerAssessment(true)}
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#EBAE29] to-[#589C80] text-xs font-bold text-white shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
         >
-          {profile.careerAssessment ? t("Review Assessment") : t("Start Career Assessment")}
+          {primaryCareerMatch ? t("Review Assessment") : t("Start Career Assessment")}
         </button>
       </div>
 
@@ -288,8 +295,8 @@ export default function Dashboard() {
                 }
               />
               <div className={styles.tiers}>
-                {([t("Dream"), t("Target"), t("Safety")] as Tier[]).map((tier) => {
-                  const top = tiers[tier][0];
+                {(["Dream", "Target", "Safety"] as Tier[]).map((tier) => {
+                  const top = tiers?.[tier]?.[0];
                   return (
                     <div key={tier} className={styles.tierCol}>
                       <TierBadge tier={tier} />
@@ -397,5 +404,13 @@ export default function Dashboard() {
         />
       )}
     </Page>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <ErrorBoundary>
+      <DashboardView />
+    </ErrorBoundary>
   );
 }

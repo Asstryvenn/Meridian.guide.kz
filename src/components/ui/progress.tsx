@@ -23,20 +23,21 @@ export function ProgressRing({ value, size = 96, stroke = 8, tone = "amber", chi
     <div className={styles.ring} role="img" aria-label={label}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={styles.svg}>
         <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={stroke} className={styles.track} fill="none" />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          strokeWidth={stroke}
-          fill="none"
-          strokeLinecap="round"
-          className={clsx(styles.indicator, styles[tone])}
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference * (1 - clamped) }}
-          transition={{ type: "spring", stiffness: 60, damping: 18 }}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
+        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            strokeWidth={stroke}
+            fill="none"
+            strokeLinecap="round"
+            className={clsx(styles.indicator, styles[tone])}
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: circumference * (1 - clamped) }}
+            transition={{ type: "spring", stiffness: 60, damping: 18 }}
+          />
+        </g>
       </svg>
       {children && <div className={styles.center}>{children}</div>}
     </div>

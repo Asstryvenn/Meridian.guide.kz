@@ -73,20 +73,87 @@ const initialState: AppState = {
   customRoadmapTasks: [],
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asArray<T>(value: unknown, fallback: T[] = []): T[] {
+  return Array.isArray(value) ? value as T[] : fallback;
+}
+
+function normalizeProfile(value: unknown): StudentProfile {
+  const profile = isRecord(value) ? value : {};
+  const tuitionRange = asArray<number>(profile.tuitionRange).filter((amount) => typeof amount === "number" && Number.isFinite(amount));
+  const careerAssessment = isRecord(profile.careerAssessment)
+    ? {
+        ...profile.careerAssessment,
+        topMatches: asArray(profile.careerAssessment.topMatches).filter(isRecord).map((match) => ({
+          ...match,
+          foundationalSkills: asArray<string>(match.foundationalSkills),
+          recommendedMajors: asArray<string>(match.recommendedMajors),
+        })),
+        dominantStrengths: asArray<string>(profile.careerAssessment.dominantStrengths),
+      }
+    : undefined;
+
+  return {
+    ...emptyProfile,
+    ...profile,
+    fields: asArray(profile.fields).filter((field): field is StudentProfile["fields"][number] => typeof field === "string"),
+    activities: asArray(profile.activities).filter(isRecord) as unknown as StudentProfile["activities"],
+    preferredCountries: asArray(profile.preferredCountries).filter((country): country is string => typeof country === "string"),
+    preferredRegions: asArray(profile.preferredRegions).filter((region): region is string => typeof region === "string"),
+    tuitionRange: tuitionRange.length === 2 ? [tuitionRange[0], tuitionRange[1]] : emptyProfile.tuitionRange,
+    careerAssessment: careerAssessment as StudentProfile["careerAssessment"],
+  };
+}
+
+function normalizeApplication(value: unknown): Application | null {
+  if (!isRecord(value) || typeof value.universitySlug !== "string") return null;
+
+  const status = value.status === "preparing" || value.status === "submitted" || value.status === "decision" ? value.status : "researching";
+  const normalizeItems = (items: unknown): Application["documents"] =>
+    asArray(items)
+      .filter(isRecord)
+      .filter((item) => typeof item.id === "string" && typeof item.name === "string")
+      .map((item) => ({ id: item.id as string, name: item.name as string, done: item.done === true }));
+
+  return {
+    universitySlug: value.universitySlug,
+    status,
+    documents: normalizeItems(value.documents),
+    essays: normalizeItems(value.essays),
+    scholarshipIds: asArray(value.scholarshipIds).filter((id): id is string => typeof id === "string"),
+    notes: typeof value.notes === "string" ? value.notes : "",
+    addedAt: typeof value.addedAt === "string" ? value.addedAt : new Date().toISOString(),
+  };
+}
+
+function normalizeState(value: unknown): AppState {
+  const state = isRecord(value) ? value : {};
+
+  return {
+    ...initialState,
+    ...state,
+    profile: normalizeProfile(state.profile),
+    applications: asArray(state.applications).map(normalizeApplication).filter((application): application is Application => application !== null),
+    completedTasks: asArray<string>(state.completedTasks),
+    dismissedNotifications: asArray<string>(state.dismissedNotifications),
+    compare: asArray<string>(state.compare),
+    documents: asArray<VaultDocument>(state.documents, defaultVaultDocuments),
+    customRoadmapTasks: asArray<RoadmapTask>(state.customRoadmapTasks),
+    ecoMode: state.ecoMode === true,
+    pomodoroFocusMinutes: typeof state.pomodoroFocusMinutes === "number" ? state.pomodoroFocusMinutes : 0,
+  };
+}
+
 const AppContext = createContext<(AppState & AppActions) | null>(null);
 
 function readLocal(): AppState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState;
-    const parsed = JSON.parse(raw) as Partial<AppState>;
-    return {
-      ...initialState,
-      ...parsed,
-      profile: { ...emptyProfile, ...parsed.profile },
-      documents: parsed.documents && parsed.documents.length > 0 ? parsed.documents : defaultVaultDocuments,
-      customRoadmapTasks: parsed.customRoadmapTasks || [],
-    };
+    return normalizeState(JSON.parse(raw));
   } catch {
     return initialState;
   }
@@ -105,9 +172,9 @@ async function resolveSession(local: AppState): Promise<AppState> {
     return staleSession ? { ...local, user: null } : local;
   }
   const remote = await loadRemoteState(remoteUser.id);
-  if (remote) return { ...local, ...remote, user: remoteUser };
+  if (remote) return normalizeState({ ...local, ...remote, user: remoteUser });
   const sameUser = local.user?.id === remoteUser.id;
-  return sameUser || local.user === null ? { ...local, user: remoteUser } : { ...initialState, user: remoteUser };
+  return sameUser || local.user === null ? normalizeState({ ...local, user: remoteUser }) : { ...initialState, user: remoteUser };
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Globe } from "lucide-react";
 import { useI18n } from "./i18n-context";
+import { useT } from "@/lib/i18n/use-t";
 import type { Locale } from "@/lib/types";
 
 const languages: { code: Locale; label: string; badge: string }[] = [
@@ -12,6 +13,7 @@ const languages: { code: Locale; label: string; badge: string }[] = [
 ];
 
 export function LanguageSelector() {
+  const t = useT();
   const { locale, setLocale } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -34,7 +36,7 @@ export function LanguageSelector() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-semibold border border-[#589C80]/30 bg-panel/50 text-ink hover:border-[#EBAE29] transition-all cursor-pointer"
-        aria-label="Select language"
+        aria-label={t("Select language")}
       >
         <Globe size={13} className="text-green-ink" />
         <span className="uppercase">{current.badge}</span>

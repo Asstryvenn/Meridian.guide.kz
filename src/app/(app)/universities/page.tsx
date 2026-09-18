@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, useEffect, type FormEvent } from "react";
 import { Page, PageHeader, Reveal } from "@/components/layout/page";
 import { DataTag } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,11 +32,16 @@ function MatchedCatalog() {
   const [filters, setFilters] = useState<SearchFilters>(emptyFilters);
   const [source, setSource] = useState<"ai" | "rules" | null>(null);
   const [loading, setLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const locale = useLocale();
   const recommendations = useMemo(() => inLocale(locale, () => new Map(recommend(profile, universities).map((r) => [r.university.slug, r]))), [profile, locale]);
   const results = useMemo(() => applyFilters(filters), [filters]);
   const chips = describeFilters(filters);
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [filters]);
 
   async function search(text: string) {
     setQuery(text);
@@ -67,6 +72,8 @@ function MatchedCatalog() {
   function removeChip(chip: FilterChip) {
     setFilters((f) => removeFilter(f, chip));
   }
+
+  const visibleResults = results.slice(0, visibleCount);
 
   return (
     <>
@@ -101,7 +108,6 @@ function MatchedCatalog() {
             </AnimatePresence>
           </div>
           <Button variant="quiet" size="sm" onClick={() => search("")}>
-            
             {t("Clear")}
           </Button>
         </Reveal>
@@ -113,19 +119,35 @@ function MatchedCatalog() {
 
       <ul className={styles.results}>
         <AnimatePresence mode="popLayout">
-          {results.map((u) => {
+          {visibleResults.map((u) => {
             const rec = recommendations.get(u.slug);
             const comparing = compare.includes(u.slug);
+            const globalRank = u.ranking?.global ?? u.globalRanking;
+            const nationalRank = u.ranking?.national ?? u.nationalRanking;
+            const rankLabel = globalRank ? `#${globalRank} Global` : nationalRank ? `#${nationalRank} National` : null;
+
             return (
               <motion.li key={u.slug} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className={`glass ${styles.row}`}>
                 <div className={styles.rowMain}>
-                  <Link href={`/universities/${u.slug}`} className={styles.rowName}>
-                    {u.name}
-                  </Link>
+                  <div className={styles.rowTitleBlock}>
+                    <Link href={`/universities/${u.slug}`} className={styles.rowName}>
+                      {u.name}
+                    </Link>
+                    {rankLabel && <span className={styles.rankBadge}>{rankLabel}</span>}
+                  </div>
                   <p className={styles.rowPlace}>
                     {t(u.city)} · {t(u.country)} · {t(u.type)}
                   </p>
                   <p className={styles.rowSummary}>{t(u.summary)}</p>
+                  {u.popularMajors && u.popularMajors.length > 0 && (
+                    <div className={styles.majorsList}>
+                      {u.popularMajors.slice(0, 3).map((major) => (
+                        <span key={major} className={styles.majorChip}>
+                          {major}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <dl className={styles.facts}>
                   <div>
@@ -154,7 +176,6 @@ function MatchedCatalog() {
                     {comparing ? t("Comparing") : t("Compare")}
                   </Button>
                   <Button size="sm" variant="secondary" href={`/universities/${u.slug}`}>
-                    
                     {t("View profile")}
                   </Button>
                 </div>
@@ -163,6 +184,14 @@ function MatchedCatalog() {
           })}
         </AnimatePresence>
       </ul>
+
+      {visibleCount < results.length && (
+        <div className={styles.paginationWrap}>
+          <Button variant="secondary" size="md" onClick={() => setVisibleCount((prev) => prev + 10)}>
+            {t("Load more")} ({results.length - visibleCount} {t("remaining")})
+          </Button>
+        </div>
+      )}
 
       {results.length === 0 && <p className="muted">{t("No universities in the catalog match every filter. Remove a filter to widen the search.")}</p>}
       <CompareTray />

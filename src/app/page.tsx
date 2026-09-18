@@ -16,12 +16,19 @@ import { universities } from "@/lib/data/universities";
 import { useApp } from "@/lib/store/app-store";
 import styles from "./landing.module.css";
 import { useT } from "@/lib/i18n/use-t";
-import { msg } from "@/lib/i18n/catalog";
 
 const steps = [
   { id: "diagnose", title: "Diagnose", body: "Eight short steps turn your grades, tests and activities into an honest picture of where you stand." },
   { id: "match", title: "Match", body: "Dream, Target and Safety universities ranked by fit, budget and an admission range — never fake precision." },
   { id: "act", title: "Act", body: "A level-by-level roadmap and a mentor that always tells you the one thing to do next." },
+];
+
+const categoryTabs = [
+  { id: "all", label: "All Regions" },
+  { id: "us", label: "Ivy League & US" },
+  { id: "eu", label: "Europe & UK" },
+  { id: "kz", label: "Central Asia & KZ" },
+  { id: "asia", label: "Asia & Canada" },
 ];
 
 function LandingView() {
@@ -30,6 +37,8 @@ function LandingView() {
   const { theme, toggle } = useTheme();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
     setMounted(true);
@@ -47,6 +56,29 @@ function LandingView() {
   }, [mounted, hydrated, hasUser, isOnboarded, router]);
 
   const primaryHref = hasUser ? (isOnboarded ? "/dashboard" : "/onboarding") : "/signup";
+
+  const filteredUniversities = universities.filter((u) => {
+    if (activeCategory === "us") {
+      return u.country === "United States";
+    }
+    if (activeCategory === "eu") {
+      return ["United Kingdom", "Germany", "Switzerland", "Netherlands"].includes(u.country);
+    }
+    if (activeCategory === "kz") {
+      return u.country === "Kazakhstan";
+    }
+    if (activeCategory === "asia") {
+      return ["Singapore", "South Korea", "Japan", "China", "Canada"].includes(u.country);
+    }
+    return true;
+  });
+
+  const displayedUniversities = filteredUniversities.slice(0, visibleCount);
+
+  function handleCategoryChange(catId: string) {
+    setActiveCategory(catId);
+    setVisibleCount(6);
+  }
 
   return (
     <div className={styles.wrap}>
@@ -123,13 +155,13 @@ function LandingView() {
             <p className={styles.previewAction}>{t("Raise English score to IELTS 7.5")}</p>
             <p className={styles.previewWhy}>{t("Unlocks 2 universities on your list · due in 41 days")}</p>
           </div>
-          <motion.div className={`glass ${styles.previewCard} ${styles.previewRing}`} animate={{ y: [0, -6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+          <div className={`glass ${styles.previewCard} ${styles.previewRing}`}>
             <ProgressRing value={0.64} size={84} label={t("Roadmap progress")}>
               <span className={styles.ringValue}>64%</span>
             </ProgressRing>
             <span className={styles.ringLabel}>{t("Level 3 · Portfolio")}</span>
-          </motion.div>
-          <motion.div className={`glass ${styles.previewCard} ${styles.previewMatch}`} animate={{ y: [0, 5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+          </div>
+          <div className={`glass ${styles.previewCard} ${styles.previewMatch}`}>
             <div className={styles.previewHeader}>
               <span className={styles.tierDot} />
               <span className={styles.tierLabel}>{t("Target")}</span>
@@ -139,11 +171,11 @@ function LandingView() {
             <p className={styles.previewRange}>
               30–45%<span> {t("admission range · medium confidence")}</span>
             </p>
-          </motion.div>
+          </div>
         </motion.div>
       </motion.main>
 
-      <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
+      <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1, margin: "0px 0px -20px 0px" }}>
         {[
           [String(universities && Array.isArray(universities) ? universities.length : 0), t("universities with sourced data")],
           ["7", t("portfolio dimensions diagnosed")],
@@ -157,7 +189,96 @@ function LandingView() {
         ))}
       </motion.section>
 
-      <motion.section className={styles.steps} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
+      <section className={styles.showcase}>
+        <div className={styles.showcaseHeader}>
+          <p className="eyebrow">{t("Verified Catalog")}</p>
+          <h2 className={styles.showcaseTitle}>
+            {t("Explore Top Global & Regional Universities")}
+          </h2>
+          <p className={styles.showcaseSubtitle}>
+            {t("Authentic acceptance rates, international tuition data, world rankings, and leading academic disciplines.")}
+          </p>
+        </div>
+
+        <div className={styles.tabsBar}>
+          {categoryTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`${styles.tabItem} ${activeCategory === tab.id ? styles.tabActive : ""}`}
+              onClick={() => handleCategoryChange(tab.id)}
+            >
+              {t(tab.label)}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.uniGrid}>
+          {displayedUniversities.map((uni) => {
+            const globalRank = uni.ranking?.global ?? uni.globalRanking;
+            const nationalRank = uni.ranking?.national ?? uni.nationalRanking;
+            const rankLabel = globalRank ? `#${globalRank} Global` : nationalRank ? `#${nationalRank} National` : "Top Tier";
+            const admitPct = uni.acceptanceRate?.value != null ? `${Math.round(uni.acceptanceRate.value * 100)}%` : "N/A";
+            const tuitionVal = Array.isArray(uni.intlTuitionUsd?.value)
+              ? `$${Math.round(uni.intlTuitionUsd.value[0] / 1000)}k`
+              : typeof uni.intlTuitionUsd?.value === "number"
+              ? `$${Math.round(uni.intlTuitionUsd.value / 1000)}k`
+              : "N/A";
+
+            return (
+              <article key={uni.slug} className={`glass ${styles.uniCard}`}>
+                <div className={styles.uniCardHeader}>
+                  <div>
+                    <h3 className={styles.uniName}>{uni.name}</h3>
+                    <p className={styles.uniMeta}>{uni.city}, {uni.country}</p>
+                  </div>
+                  <span className={styles.uniRankBadge}>{rankLabel}</span>
+                </div>
+
+                <div className={styles.uniStatsList}>
+                  <div className={styles.uniStatItem}>
+                    <span className={styles.uniStatVal}>{admitPct}</span>
+                    <span className={styles.uniStatKey}>{t("Acceptance")}</span>
+                  </div>
+                  <div className={styles.uniStatItem}>
+                    <span className={styles.uniStatVal}>{tuitionVal}</span>
+                    <span className={styles.uniStatKey}>{t("Tuition / yr")}</span>
+                  </div>
+                </div>
+
+                {uni.popularMajors && uni.popularMajors.length > 0 && (
+                  <div className={styles.uniMajorsWrap}>
+                    {uni.popularMajors.slice(0, 3).map((major) => (
+                      <span key={major} className={styles.uniMajorChip}>
+                        {major}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <Button href={hasUser ? `/universities/${uni.slug}` : `/signup?uni=${uni.slug}`} variant="quiet" size="sm">
+                  {t("Explore profile")} <Icon name="arrow" size={14} />
+                </Button>
+              </article>
+            );
+          })}
+        </div>
+
+        {visibleCount < filteredUniversities.length && (
+          <div className={styles.paginationWrap}>
+            <Button
+              variant="secondary"
+              size="md"
+              className={styles.loadMoreBtn}
+              onClick={() => setVisibleCount((prev) => prev + 6)}
+            >
+              {t("Load more universities")} ({filteredUniversities.length - visibleCount} {t("remaining")})
+            </Button>
+          </div>
+        )}
+      </section>
+
+      <motion.section className={styles.steps} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1, margin: "0px 0px -20px 0px" }}>
         {steps.map((step, index) => (
           <motion.article key={step.id} variants={rise} className={`glass ${styles.step}`}>
             <span className={styles.stepIndex}>0{index + 1}</span>

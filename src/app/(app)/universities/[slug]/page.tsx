@@ -46,7 +46,12 @@ export default function UniversityProfile() {
   return (
     <Page>
       <PageHeader
-        eyebrow={`${tx(university.city)} · ${tx(university.country)}`}
+        eyebrow={[
+          `${tx(university.city)} · ${tx(university.country)}`,
+          university.ranking?.global ? `#${university.ranking.global} Global` : university.ranking?.national ? `#${university.ranking.national} National` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         title={university.name}
         description={tx(university.summary)}
         actions={
@@ -111,6 +116,15 @@ export default function UniversityProfile() {
       <Reveal>
         <Card id="programs" className={styles.section}>
           <CardHeader eyebrow={tx("Programs")} title={tx("Undergraduate programs")} />
+          {university.popularMajors && university.popularMajors.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+              {university.popularMajors.map((m) => (
+                <Badge key={m} tone="neutral">
+                  {m}
+                </Badge>
+              ))}
+            </div>
+          )}
           <ul className={styles.programs}>
             {university.programs.map((p) => (
               <li key={p.name} className={profile.fields.includes(p.field) ? styles.programMatch : undefined}>
@@ -129,6 +143,12 @@ export default function UniversityProfile() {
         <Card id="admissions" className={styles.section}>
           <CardHeader eyebrow={tx("Admissions")} title={tx("Requirements and deadlines")} action={<DataTag kind="institutional" />} />
           <div className={styles.factGrid}>
+            {(university.ranking?.global || university.globalRanking) && (
+              <div className={styles.fact}>
+                <p className={styles.factLabel}>{tx("Global rank")}</p>
+                <p className={styles.factValue}>#{university.ranking?.global ?? university.globalRanking}</p>
+              </div>
+            )}
             <Fact label={tx("Acceptance rate")} source={university.acceptanceRate}>
               <SourcedValue data={university.acceptanceRate} format={(v) => `${Math.round(v * 1000) / 10}%`} />
             </Fact>
