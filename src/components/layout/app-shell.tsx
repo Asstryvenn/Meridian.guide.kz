@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { Leaf } from "lucide-react";
+import { Leaf, LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -137,7 +137,7 @@ function Notifications() {
   );
 }
 
-function UserMenu() {
+function UserMenu({ onOpenSupport }: { onOpenSupport: () => void }) {
   const t = useT();
   const { user, profile, signOut } = useApp();
   const router = useRouter();
@@ -161,9 +161,20 @@ function UserMenu() {
             <p className={styles.menuName}>{profile.fullName || t("Student")}</p>
             <p className={styles.menuEmail}>{user?.email}</p>
             <p className={styles.menuMode}>{user?.mode === "supabase" ? t("Synced to your account") : t("Local demo mode — saved in this browser")}</p>
+            <button
+              type="button"
+              className={styles.menuItem}
+              onClick={() => {
+                setOpen(false);
+                onOpenSupport();
+              }}
+            >
+              <LifeBuoy size={16} />
+              <span>{t("Tech Support")}</span>
+            </button>
             <Link href="/onboarding?edit=1" className={styles.menuItem} onClick={() => setOpen(false)}>
-              
-              {t("Edit profile")}
+              <Icon name="user" size={16} />
+              <span>{t("Edit profile")}</span>
             </Link>
             <button
               type="button"
@@ -173,8 +184,8 @@ function UserMenu() {
                 router.replace("/");
               }}
             >
-              
-              {t("Sign out")}
+              <Icon name="close" size={16} />
+              <span>{t("Sign out")}</span>
             </button>
           </motion.div>
         )}
@@ -281,7 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <PomodoroToolbarButton />
               <TechSupportTrigger onClick={() => setSupportOpen(true)} />
               <Notifications />
-              <UserMenu />
+              <UserMenu onOpenSupport={() => setSupportOpen(true)} />
             </div>
           </header>
           <motion.main key={pathname} className={styles.content} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}>

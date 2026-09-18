@@ -1,8 +1,8 @@
 .fab {
   position: fixed;
-  right: 172px;
-  bottom: 24px;
-  z-index: 45;
+  right: 24px;
+  bottom: 80px;
+  z-index: 47;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -333,7 +333,8 @@
 @media (max-width: 960px) {
   .fab {
     right: 16px;
-    bottom: calc(76px + env(safe-area-inset-bottom));
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    z-index: 47;
     width: 46px;
     height: 46px;
   }
