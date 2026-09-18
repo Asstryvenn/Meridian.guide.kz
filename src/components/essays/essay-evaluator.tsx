@@ -21,6 +21,12 @@ import {
   Cpu,
   BrainCircuit,
   ChevronRight,
+  Lightbulb,
+  Wand2,
+  UserCheck,
+  X,
+  Layers,
+  FileCheck2,
 } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useI18n } from "@/components/i18n/i18n-context";
@@ -29,17 +35,10 @@ import {
   computeStage1MlMetrics,
   CORPUS_BENCHMARKS,
 } from "@/lib/engine/essay-dataset-corpus";
-import type {
-  HybridEssayEvaluationResult,
-  HybridSentenceImprovement,
-} from "@/lib/types";
-
-const SAMPLE_PROMPTS = [
-  "Common App: Some students have a background, identity, interest, or talent that is so meaningful they believe their application would be incomplete without it.",
-  "Common App: The lessons we take from obstacles we encounter can be fundamental to later success. Recount a time when you faced a challenge, setback, or failure.",
-  "Supplemental: Why are you applying to our university, and how will our academic community support your intellectual aspirations?",
-  "Supplemental: Reflect on a time when you questioned or challenged a belief or idea. What prompted your thinking? What was the outcome?",
-];
+import { STANDARD_ESSAY_PROMPTS, type EssayStandardPrompt } from "@/lib/data/essay-prompts";
+import type { HybridEssayEvaluationResult } from "@/lib/types";
+import type { BrainstormAngle } from "@/app/api/ai/essay-angles/route";
+import type { EssayEnhanceResult } from "@/app/api/ai/essay-enhance/route";
 
 function ScoreGauge({ score }: { score: number }) {
   const radius = 54;
@@ -81,9 +80,9 @@ function ScoreGauge({ score }: { score: number }) {
 export function EssayEvaluator() {
   const tx = useT();
   const { locale } = useI18n();
-  const { applications } = useApp();
+  const { profile, applications } = useApp();
 
-  const [prompt, setPrompt] = useState(SAMPLE_PROMPTS[0]);
+  const [selectedPromptId, setSelectedPromptId] = useState<string>(STANDARD_ESSAY_PROMPTS[0].id);
   const [customPrompt, setCustomPrompt] = useState("");
   const [isCustomPrompt, setIsCustomPrompt] = useState(false);
   const [targetUniversity, setTargetUniversity] = useState(
@@ -96,15 +95,28 @@ export function EssayEvaluator() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
+  const [brainstormLoading, setBrainstormLoading] = useState(false);
+  const [angles, setAngles] = useState<BrainstormAngle[] | null>(null);
+  const [showBrainstormModal, setShowBrainstormModal] = useState(false);
+
+  const [enhanceLoading, setEnhanceLoading] = useState(false);
+  const [enhancedResult, setEnhancedResult] = useState<EssayEnhanceResult | null>(null);
+  const [showEnhanceModal, setShowEnhanceModal] = useState(false);
+  const [enhanceTab, setEnhanceTab] = useState<"critiques" | "polished">("polished");
+
+  const [humanizeLoading, setHumanizeLoading] = useState(false);
+  const [humanizeSuccess, setHumanizeSuccess] = useState(false);
+
+  const currentStandardPrompt = STANDARD_ESSAY_PROMPTS.find((p) => p.id === selectedPromptId) || STANDARD_ESSAY_PROMPTS[0];
+  const activePromptText = isCustomPrompt ? customPrompt : currentStandardPrompt.prompt;
+
   const liveStage1Metrics = useMemo(() => {
     return computeStage1MlMetrics(essayText);
   }, [essayText]);
 
-  const activePromptText = isCustomPrompt ? customPrompt : prompt;
-
   async function handleEvaluate() {
-    if (liveStage1Metrics.word_count < 40) {
-      setError(tx("Please enter at least 40 words before evaluating."));
+    if (liveStage1Metrics.word_count < 30) {
+      setError(tx("Please enter at least 30 words before evaluating."));
       return;
     }
 
@@ -138,6 +150,96 @@ export function EssayEvaluator() {
     }
   }
 
+  async function handleBrainstorm() {
+    setBrainstormLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/essay-angles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: activePromptText,
+          profile,
+          locale,
+        }),
+      });
+      if (!res.ok) throw new Error("Brainstorm request failed");
+      const data = await res.json();
+      setAngles(data.angles || []);
+      setShowBrainstormModal(true);
+    } catch {
+      setError(tx("Could not generate brainstorming angles. Please try again."));
+    } finally {
+      setBrainstormLoading(false);
+    }
+  }
+
+  async function handleEnhance() {
+    if (liveStage1Metrics.word_count < 40) {
+      setError(tx("Please enter at least 40 words before enhancing."));
+      return;
+    }
+    setEnhanceLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/essay-enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          essayText,
+          prompt: activePromptText,
+          targetUniversity,
+          locale,
+        }),
+      });
+      if (!res.ok) throw new Error("Enhance request failed");
+      const data = await res.json();
+      setEnhancedResult(data.result);
+      setEnhanceTab("polished");
+      setShowEnhanceModal(true);
+    } catch {
+      setError(tx("Failed to enhance essay. Please check connection."));
+    } finally {
+      setEnhanceLoading(false);
+    }
+  }
+
+  async function handleHumanize() {
+    if (liveStage1Metrics.word_count < 40) {
+      setError(tx("Please enter at least 40 words before humanizing."));
+      return;
+    }
+    setHumanizeLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/essay-humanize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          essayText,
+          locale,
+        }),
+      });
+      if (!res.ok) throw new Error("Humanize request failed");
+      const data = await res.json();
+      if (data.humanizedText) {
+        setEssayText(data.humanizedText);
+        setHumanizeSuccess(true);
+        setTimeout(() => setHumanizeSuccess(false), 3500);
+      }
+    } catch {
+      setError(tx("Failed to humanize essay. Please try again."));
+    } finally {
+      setHumanizeLoading(false);
+    }
+  }
+
+  function applyAngle(angle: BrainstormAngle) {
+    const outlineBlock = `Title: ${angle.hookTheme}\n\nStory Arc:\n${angle.narrativeArc}\n\nOutline:\n${angle.outlinePoints.map((p, i) => `${i + 1}. ${p}`).join("\n")}\n\n[Begin drafting your personal story here...]`;
+    setEssayText(outlineBlock);
+    setShowBrainstormModal(false);
+  }
+
   function copyText(text: string, id: string) {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -157,7 +259,7 @@ export function EssayEvaluator() {
               {tx("Admissions Essay Evaluation Engine")}
             </h2>
             <p className="text-xs text-ink/70 leading-relaxed max-w-2xl">
-              {tx("Stage 1 executes quantitative ML feature extraction against 1,002 Kaggle admitted essays. Stage 2 applies an elite OpenAI supervisory review to validate narrative friction, cadence, and personal agency.")}
+              {tx("Calibrated against 1,002 admitted applicant essays. Select standard prompts, brainstorm unique narrative angles, enhance prose, and humanize authentic voice.")}
             </p>
           </div>
 
@@ -171,50 +273,79 @@ export function EssayEvaluator() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-xs font-mono font-bold text-ink/80 block">
-              {tx("Admissions Prompt")}
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono font-bold text-ink/80 block">
+                {tx("Standard Admissions Prompt")}
+              </label>
+              <button
+                type="button"
+                onClick={handleBrainstorm}
+                disabled={brainstormLoading}
+                className="text-xs font-mono text-[#EBAE29] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                {brainstormLoading ? <RefreshCw size={12} className="animate-spin" /> : <Lightbulb size={12} />}
+                <span>{tx("Brainstorm 3 Angles")}</span>
+              </button>
+            </div>
+
             {!isCustomPrompt ? (
               <div className="relative">
                 <select
-                  value={prompt}
-                  onChange={(e) => {
-                    if (e.target.value === "__custom__") {
-                      setIsCustomPrompt(true);
-                    } else {
-                      setPrompt(e.target.value);
-                    }
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-line text-xs text-ink appearance-none pr-8 cursor-pointer focus:outline-none focus:border-[#589C80]"
+                  value={selectedPromptId}
+                  onChange={(e) => setSelectedPromptId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-line text-xs text-ink focus:outline-none focus:border-[#589C80] appearance-none pr-8 cursor-pointer"
                 >
-                  {SAMPLE_PROMPTS.map((p, idx) => (
-                    <option key={idx} value={p} className="bg-panel text-ink">
-                      {p.slice(0, 85)}...
-                    </option>
-                  ))}
-                  <option value="__custom__" className="bg-panel text-amber-ink font-semibold">
-                    {tx("+ Write custom prompt...")}
-                  </option>
+                  <optgroup label="Common Application Prompts">
+                    {STANDARD_ESSAY_PROMPTS.filter((p) => p.category === "Common App").map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.wordLimit} words)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="UC System Personal Insight Questions (PIQ)">
+                    {STANDARD_ESSAY_PROMPTS.filter((p) => p.category === "UC System PIQ").map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.wordLimit} words)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Supplemental Archetypes">
+                    {STANDARD_ESSAY_PROMPTS.filter((p) => p.category === "Supplemental Archetypes").map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.wordLimit} words)
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-3.5 pointer-events-none text-ink/60" />
+                <ChevronDown size={14} className="absolute right-3 top-3 text-ink/40 pointer-events-none" />
               </div>
             ) : (
-              <div className="space-y-1.5">
-                <input
-                  type="text"
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder={tx("Enter custom essay prompt...")}
-                  className="w-full px-3.5 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-[#589C80] text-xs text-ink focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setIsCustomPrompt(false)}
-                  className="text-[11px] text-amber-ink hover:underline cursor-pointer"
-                >
-                  {tx("← Choose from standard prompts")}
-                </button>
-              </div>
+              <textarea
+                rows={2}
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder={tx("Type your custom prompt here...")}
+                className="w-full p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-line text-xs text-ink focus:outline-none focus:border-[#589C80]"
+              />
+            )}
+
+            <div className="flex items-center justify-between text-[11px] text-ink/60 font-mono">
+              <button
+                type="button"
+                onClick={() => setIsCustomPrompt((prev) => !prev)}
+                className="hover:underline text-green-ink cursor-pointer"
+              >
+                {isCustomPrompt ? tx("Choose standard prompt") : tx("+ Write custom prompt...")}
+              </button>
+              {!isCustomPrompt && (
+                <span>{tx("Max limit")}: {currentStandardPrompt.wordLimit} {tx("words")}</span>
+              )}
+            </div>
+
+            {!isCustomPrompt && (
+              <p className="text-[11px] text-ink/70 italic p-2 rounded-lg bg-surface-sunken border border-line/30 leading-relaxed">
+                &ldquo;{currentStandardPrompt.prompt}&rdquo;
+              </p>
             )}
           </div>
 
@@ -229,6 +360,10 @@ export function EssayEvaluator() {
               placeholder="e.g. Stanford, MIT, Harvard, Oxford..."
               className="w-full px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-line text-xs text-ink focus:outline-none focus:border-[#589C80]"
             />
+            <div className="p-3 rounded-xl bg-surface-sunken border border-line/40 text-[11px] text-ink/70 space-y-1">
+              <span className="font-bold text-green-ink font-mono uppercase text-[10px] block">{tx("Target Calibrations")}</span>
+              <p>{tx("Evaluates thematic fit and admissions committee standards for {school}.", { school: targetUniversity })}</p>
+            </div>
           </div>
         </div>
 
@@ -252,10 +387,17 @@ export function EssayEvaluator() {
             rows={12}
             value={essayText}
             onChange={(e) => setEssayText(e.target.value)}
-            placeholder={tx("Paste or write your admissions essay draft here. The ML model evaluates structural coherence and lexical density, followed by OpenAI supervisory calibration...")}
+            placeholder={tx("Paste or write your admissions essay draft here. Use the toolbar buttons below to brainstorm angles, polish prose, or humanize the voice...")}
             className="w-full p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-line text-sm text-ink leading-relaxed font-sans focus:outline-none focus:border-[#589C80] resize-y"
           />
         </div>
+
+        {humanizeSuccess && (
+          <div className="p-3 rounded-xl bg-[#589C80]/15 border border-[#589C80]/30 text-xs text-green-ink font-mono flex items-center gap-2">
+            <CheckCircle2 size={15} />
+            <span>{tx("Essay successfully humanized! Robotic phrasing eliminated while preserving your authentic meaning.")}</span>
+          </div>
+        )}
 
         {error && (
           <div className="p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 text-xs text-red-500 flex items-center gap-2">
@@ -264,10 +406,27 @@ export function EssayEvaluator() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-          <div className="flex items-center gap-2 text-xs font-mono text-ink/60">
-            <Cpu size={14} className="text-[#589C80]" />
-            <span>{tx("Two-Stage Validation: Kaggle ML Ingestion + OpenAI Review")}</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleEnhance}
+              disabled={enhanceLoading || liveStage1Metrics.word_count < 30}
+              className="px-4 py-2.5 rounded-xl text-xs font-mono font-bold bg-[#EBAE29]/20 text-amber-ink hover:bg-[#EBAE29]/30 border border-[#EBAE29]/40 flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+            >
+              {enhanceLoading ? <RefreshCw size={13} className="animate-spin" /> : <Wand2 size={13} />}
+              <span>{tx("Enhance Essay")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleHumanize}
+              disabled={humanizeLoading || liveStage1Metrics.word_count < 30}
+              className="px-4 py-2.5 rounded-xl text-xs font-mono font-bold bg-[#589C80]/20 text-green-ink hover:bg-[#589C80]/30 border border-[#589C80]/40 flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+            >
+              {humanizeLoading ? <RefreshCw size={13} className="animate-spin" /> : <UserCheck size={13} />}
+              <span>{tx("Humanize Voice")}</span>
+            </button>
           </div>
 
           <button
@@ -284,7 +443,7 @@ export function EssayEvaluator() {
             {isLoading ? (
               <>
                 <RefreshCw size={14} className="animate-spin" />
-                <span>{tx("Processing ML & OpenAI Pipeline...")}</span>
+                <span>{tx("Evaluating with Hybrid Engine...")}</span>
               </>
             ) : (
               <>
@@ -295,6 +454,195 @@ export function EssayEvaluator() {
           </button>
         </div>
       </div>
+
+      {showBrainstormModal && angles && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 rounded-3xl bg-panel border border-[#589C80]/40 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#589C80]/20">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="text-[#EBAE29]" size={20} />
+                <h3 className="text-base font-bold text-ink">
+                  {tx("3 Creative Narrative Angles Tailored to Your Profile")}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBrainstormModal(false)}
+                className="p-1 rounded-lg text-ink/60 hover:text-ink cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {angles.map((angle) => (
+                <div
+                  key={angle.angleNumber}
+                  className="p-5 rounded-2xl bg-surface-sunken border border-[#589C80]/30 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#EBAE29]/20 text-amber-ink">
+                      {tx("Angle {number}", { number: angle.angleNumber })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => applyAngle(angle)}
+                      className="text-xs font-mono font-bold text-green-ink hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{tx("Use this outline")}</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+
+                  <h4 className="text-sm font-bold text-ink">{angle.hookTheme}</h4>
+                  <p className="text-xs text-ink/80 leading-relaxed">{angle.narrativeArc}</p>
+
+                  <div className="p-2.5 rounded-xl bg-panel border border-[#589C80]/20 text-[11px] text-ink/70">
+                    <strong>{tx("Profile Fit")}: </strong>
+                    {angle.profileConnection}
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-mono uppercase text-ink/50">{tx("Story Arc Progression")}</p>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-ink/90 font-sans">
+                      {angle.outlinePoints.map((pt, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-green-ink font-bold">•</span>
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEnhanceModal && enhancedResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 rounded-3xl bg-panel border border-[#589C80]/40 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#589C80]/20">
+              <div className="flex items-center gap-2">
+                <Wand2 className="text-[#EBAE29]" size={20} />
+                <h3 className="text-base font-bold text-ink">
+                  {tx("Advanced Essay Polishing & Version Comparison")}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEnhanceModal(false)}
+                className="p-1 rounded-lg text-ink/60 hover:text-ink cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 border-b border-line/40 pb-2">
+              <button
+                type="button"
+                onClick={() => setEnhanceTab("polished")}
+                className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  enhanceTab === "polished"
+                    ? "bg-[#589C80] text-on-accent shadow-sm"
+                    : "text-ink/70 hover:text-ink"
+                }`}
+              >
+                {tx("AI-Enhanced Final Version")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEnhanceTab("critiques")}
+                className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  enhanceTab === "critiques"
+                    ? "bg-[#589C80] text-on-accent shadow-sm"
+                    : "text-ink/70 hover:text-ink"
+                }`}
+              >
+                {tx("Original & Structural Critiques")} ({enhancedResult.critiques.length})
+              </button>
+            </div>
+
+            {enhanceTab === "polished" && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-[#589C80]/15 border border-[#589C80]/30 space-y-1">
+                  <span className="text-[10px] font-mono text-green-ink font-bold uppercase">{tx("Tone & Impact Verdict")}</span>
+                  <p className="text-xs text-ink leading-relaxed">{enhancedResult.toneVerdict}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-ink/80">{tx("Polished Essay Text")}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => copyText(enhancedResult.enhancedText, "polished_copy")}
+                        className="text-xs font-mono text-green-ink hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedId === "polished_copy" ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{copiedId === "polished_copy" ? tx("Copied") : tx("Copy Text")}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEssayText(enhancedResult.enhancedText);
+                          setShowEnhanceModal(false);
+                        }}
+                        className="px-3 py-1 rounded-xl text-xs font-mono font-bold bg-[#EBAE29] text-on-accent hover:bg-[#EBAE29]/90 cursor-pointer"
+                      >
+                        {tx("Apply to Editor")}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-surface-sunken border border-line text-sm text-ink leading-relaxed font-sans whitespace-pre-wrap max-h-[50vh] overflow-y-auto">
+                    {enhancedResult.enhancedText}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-panel border border-line space-y-2">
+                  <span className="text-xs font-mono font-bold text-ink uppercase">{tx("Key Improvements Executed")}</span>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-ink/80">
+                    {enhancedResult.keyImprovements.map((imp, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-green-ink shrink-0 mt-0.5" />
+                        <span>{imp}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {enhanceTab === "critiques" && (
+              <div className="space-y-3">
+                {enhancedResult.critiques.map((crit, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-surface-sunken border border-line space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EBAE29]/20 text-amber-ink uppercase font-bold">
+                        {crit.type}
+                      </span>
+                      <span className="text-xs text-ink/50 font-mono">#{idx + 1}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 font-serif">
+                      &ldquo;{crit.originalSnippet}&rdquo;
+                    </div>
+                    <p className="text-xs text-ink/80 leading-relaxed">{crit.critique}</p>
+                    <div className="p-2.5 rounded-xl bg-green-500/10 border border-green-500/20 text-xs text-green-600 font-serif">
+                      <strong>{tx("Suggested Revision")}: </strong>
+                      &ldquo;{crit.suggestedRevision}&rdquo;
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {evaluation && (
         <motion.div

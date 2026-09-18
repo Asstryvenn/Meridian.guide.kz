@@ -13,6 +13,7 @@ import { SourcedValue, SourceNote } from "@/components/ui/source-note";
 import { PredictionPanel } from "@/components/university/prediction-panel";
 import { TrueCostCalculator } from "@/components/university/true-cost-calculator";
 import { TierBadge } from "@/components/university/tier";
+import { AdmissionsBreakdown } from "@/components/university/admissions-breakdown";
 import { professors } from "@/lib/data/professors";
 import { getScholarship } from "@/lib/data/scholarships";
 import { getUniversity } from "@/lib/data/universities";
@@ -31,7 +32,7 @@ export default function UniversityProfile() {
   const tx = useT();
   const { slug } = useParams<{ slug: string }>();
   const university = getUniversity(slug);
-  const { profile, applications, addApplication, compare, toggleCompare } = useApp();
+  const { profile, applications, addApplication, compare, toggleCompare, documents } = useApp();
 
   const locale = useLocale();
   const recommendation = useMemo(() => (university ? inLocale(locale, () => recommend(profile, [university], true)[0]) : undefined), [profile, university, locale]);
@@ -188,6 +189,7 @@ export default function UniversityProfile() {
               <SourceNote data={university.deadlineSource} compact />
             </div>
           </div>
+          <AdmissionsBreakdown university={university} profile={profile} vaultDocuments={documents} />
         </Card>
       </Reveal>
 

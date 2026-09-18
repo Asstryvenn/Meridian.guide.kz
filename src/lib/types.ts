@@ -110,6 +110,7 @@ export interface Deadline {
   day: number;
   status: VerificationStatus;
   confidence: Confidence;
+  type?: "EA" | "ED" | "RD" | "Priority";
 }
 
 export interface Program {
@@ -162,6 +163,19 @@ export interface University {
   visa_fees?: number;
   food_estimate?: number;
   flight_estimate?: number;
+  requiredDocuments?: string[];
+  standardizedTests?: {
+    sat?: { min?: number; typical?: number; policy?: string };
+    act?: { min?: number; typical?: number; policy?: string };
+    ielts?: { min: number; recommended?: number };
+    toefl?: { min: number; recommended?: number };
+  };
+  supplementalEssays?: {
+    title: string;
+    prompt: string;
+    wordCount: number;
+    required: boolean;
+  }[];
 }
 
 export interface Scholarship {
@@ -245,6 +259,8 @@ export interface VaultDocument {
   name: string;
   fileName?: string;
   fileSize?: string;
+  fileData?: string;
+  mimeType?: string;
   status: DocumentStatus;
   uploadedAt?: string;
   notes?: string;

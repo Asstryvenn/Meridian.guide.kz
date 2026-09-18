@@ -42,7 +42,7 @@ function MessageBody({ content }: { content: string }) {
           return (
             <p key={i} className={styles.nextAction}>
               <span>{t("Next action")}</span>
-              {block.trim().replace(/^(next action|следующий шаг|келесі қадам):\s*/i, "")}
+              {block.trim().replace(new RegExp("^(next action|следующий шаг|келесі қадам):\\s*", "i"), "")}
             </p>
           );
         }
@@ -50,14 +50,14 @@ function MessageBody({ content }: { content: string }) {
           return (
             <ul key={i} className={styles.list}>
               {lines.filter((l) => l.trim()).map((l, j) => (
-                <li key={j}>{l.replace(/^\s*([•\-*]|\d+\.)\s+/, "").replace(/\*\*/g, "")}</li>
+                <li key={j}>{l.replace(new RegExp("^\\s*([•\\-*]|\\d+\\.)\\s+"), "").replaceAll("**", "")}</li>
               ))}
             </ul>
           );
         }
         return (
           <p key={i} className={styles.paragraph}>
-            {block.replace(/\*\*/g, "").replace(/^#+\s*/gm, "")}
+            {block.replaceAll("**", "").replace(new RegExp("^#+\\s*", "gm"), "")}
           </p>
         );
       })}
@@ -114,7 +114,7 @@ export function MentorChat() {
       setNotice(null);
 
       try {
-        const response = await fetch("/api/ai/mentor", {
+        const response = await fetch("/api/mentor", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

@@ -11,6 +11,7 @@ import { Radar } from "@/components/ui/radar";
 import { useApp } from "@/lib/store/app-store";
 import { useDiagnostics } from "@/lib/store/derived";
 import { AdmissionSimulator } from "@/components/diagnostics/admission-simulator";
+import { PortfolioDeepScan } from "@/components/diagnostics/portfolio-deep-scan";
 import styles from "./diagnostics.module.css";
 import { useLocale, useT } from "@/lib/i18n/use-t";
 import { msg } from "@/lib/i18n/catalog";
@@ -60,11 +61,14 @@ export default function DiagnosticsPage() {
         description={t("Seven signals admissions officers read, scored from the profile you entered. Scores are relative guides, not official ratings.")}
         actions={
           <Button variant="secondary" href="/onboarding?edit=1">
-            
             {t("Update profile")}
           </Button>
         }
       />
+
+      <Reveal>
+        <PortfolioDeepScan />
+      </Reveal>
 
       <div className={styles.overview}>
         <Reveal>

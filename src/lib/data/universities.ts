@@ -1651,7 +1651,9 @@ export const universities: University[] = [
 ];
 
 export function getUniversity(slug: string): University | undefined {
-  return universities.find((u) => u.slug === slug);
+  if (!slug) return undefined;
+  const decoded = decodeURIComponent(slug).toLowerCase().trim();
+  return universities.find((u) => u.slug.toLowerCase() === decoded);
 }
 
 export const countries = Array.from(new Set(universities.map((u) => u.country))).sort();
