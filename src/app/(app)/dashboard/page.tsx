@@ -183,7 +183,7 @@ function DashboardView() {
         <button
           type="button"
           onClick={() => setShowCareerAssessment(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#EBAE29] to-[#589C80] text-xs font-bold text-white shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
+          className="px-4 py-2 rounded-xl bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-xs font-bold text-white shadow-md shadow-[#4e9377]/20 border border-white/10 hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer flex-shrink-0"
         >
           {primaryCareerMatch ? t("Review Assessment") : t("Start Career Assessment")}
         </button>
@@ -214,7 +214,7 @@ function DashboardView() {
         <button
           type="button"
           onClick={() => setShowArchetypeQuiz(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-xs font-bold text-on-accent shadow-lg hover:brightness-110 transition-all cursor-pointer flex-shrink-0"
+          className="px-4 py-2 rounded-xl bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-xs font-bold text-white shadow-md shadow-[#4e9377]/20 border border-white/10 hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer flex-shrink-0"
         >
           {userArchetype ? t("Retake Archetype Quiz") : t("Take Archetype Quiz")}
         </button>

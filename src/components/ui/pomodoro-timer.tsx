@@ -108,6 +108,7 @@ function PomodoroPanel() {
   const { roadmap } = useRoadmap();
   const { mode, running, secondsLeft, open, setOpen, toggle, reset, switchMode } = usePomodoro();
   const [selectedTaskId, setSelectedTaskId] = useState("");
+  const isDraggingRef = useRef(false);
   const activeTasks = roadmap.levels.flatMap((l) => l.tasks).filter((task) => !completedTasks.includes(task.id));
   const selectedTask = activeTasks.find((task) => task.id === selectedTaskId) ?? activeTasks[0];
   const progress = 1 - secondsLeft / DURATION[mode];
@@ -121,18 +122,39 @@ function PomodoroPanel() {
 
   return (
     <>
-      <motion.button
-        type="button"
-        className={clsx(styles.fab, running && styles.fabRunning)}
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        aria-label={t("Focus timer")}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+      <motion.div
+        drag
+        dragMomentum={false}
+        dragElastic={0.08}
+        onDragStart={() => {
+          isDraggingRef.current = true;
+        }}
+        onDragEnd={() => {
+          setTimeout(() => {
+            isDraggingRef.current = false;
+          }, 120);
+        }}
+        className={styles.draggableWrap}
       >
-        <Icon name="clock" size={16} />
-        <span className="tabular">{running ? format(secondsLeft) : t("Focus timer")}</span>
-      </motion.button>
+        <button
+          type="button"
+          className={clsx(styles.fab, running && styles.fabRunning)}
+          onClick={() => {
+            if (!isDraggingRef.current) {
+              setOpen(!open);
+            }
+          }}
+          aria-expanded={open}
+          aria-label={t("Focus timer")}
+        >
+          <div className={styles.dragHandle} aria-hidden>
+            <span className={styles.handleBar} />
+            <span className={styles.handleBar} />
+          </div>
+          <Icon name="clock" size={16} />
+          <span className="tabular">{running ? format(secondsLeft) : t("Focus timer")}</span>
+        </button>
+      </motion.div>
 
       <AnimatePresence>
         {open && (
@@ -142,10 +164,10 @@ function PomodoroPanel() {
               role="dialog"
               aria-label={t("Focus timer")}
               className={clsx(styles.panel, running && styles.panelRunning)}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.96 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             >
               <header className={styles.header}>
                 <span className={styles.modeLabel}>

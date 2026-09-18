@@ -197,7 +197,7 @@ export function ActivityRecommender() {
                       className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold font-mono tracking-wide transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
                         isAdded
                           ? "bg-[#589C80]/20 border border-[#589C80]/50 text-green-ink"
-                          : "bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg shadow-[#589C80]/15"
+                          : "bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10"
                       }`}
                     >
                       {isAdded ? <Check size={14} /> : <Plus size={14} />}

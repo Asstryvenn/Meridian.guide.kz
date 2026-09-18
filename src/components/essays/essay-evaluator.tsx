@@ -278,7 +278,7 @@ export function EssayEvaluator() {
               "px-6 py-3 rounded-2xl text-xs font-bold transition-all shadow-lg flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center",
               isLoading || liveStage1Metrics.word_count < 30
                 ? "bg-line text-ink/40 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#EBAE29] via-[#589C80] to-[#EBAE29] text-white hover:brightness-110 active:scale-95"
+                : "bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10"
             )}
           >
             {isLoading ? (

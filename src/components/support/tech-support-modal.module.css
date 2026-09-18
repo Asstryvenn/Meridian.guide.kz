@@ -1,0 +1,328 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 16, 19, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(680px, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface-solid);
+  color: var(--text);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(88, 156, 128, 0.18), rgba(235, 174, 41, 0.18));
+  border: 1px solid rgba(88, 156, 128, 0.25);
+  color: var(--green-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: var(--border-strong);
+  color: var(--text);
+}
+
+.body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.typeSelector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: var(--surface-sunken);
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.typeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.typeBtnActive {
+  background: var(--surface-solid);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(88, 156, 128, 0.18);
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.errorBox {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(196, 86, 63, 0.12);
+  border: 1px solid rgba(196, 86, 63, 0.25);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.successBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 36px 20px;
+  gap: 14px;
+}
+
+.successIcon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(88, 156, 128, 0.2), rgba(235, 174, 41, 0.2));
+  border: 1px solid var(--green);
+  color: var(--green-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticketBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber-ink);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.cancelBtn {
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #4e9377 0%, #5ea489 36%, #d4a342 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px -3px rgba(78, 147, 119, 0.35);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.triggerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.triggerBtn:hover {
+  border-color: var(--green);
+  color: var(--green-ink);
+  background: var(--surface-strong);
+}
+
+.floatingTrigger {
+  position: fixed;
+  left: 24px;
+  bottom: 28px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lift);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floatingTrigger:hover {
+  border-color: var(--green);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 960px) {
+  .floatingTrigger {
+    left: 16px;
+    bottom: 84px;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}

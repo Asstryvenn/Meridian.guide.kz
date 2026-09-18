@@ -163,9 +163,8 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10 cursor-pointer transition-all"
                 >
-                  
                   {tx("Verify Achievement")}
                 </button>
               </div>
@@ -187,7 +186,7 @@ export function ChanceBoostModal({ isOpen, onClose }: ChanceBoostModalProps) {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="w-24 h-24 rounded-full bg-[#EBAE29]/20 absolute"
               />
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#589C80] to-[#EBAE29] flex items-center justify-center text-on-accent shadow-xl shadow-[#EBAE29]/30 relative z-10">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] flex items-center justify-center text-white shadow-xl shadow-[#4e9377]/25 relative z-10 border border-white/15">
                 <Sparkles size={28} />
               </div>
             </div>

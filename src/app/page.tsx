@@ -33,8 +33,15 @@ const categoryTabs = [
 
 function LandingView() {
   const t = useT();
-  const { user, onboarded, hydrated } = useApp();
-  const { theme, toggle } = useTheme();
+  const app = useApp();
+  const user = app?.user ?? null;
+  const onboarded = app?.onboarded ?? false;
+  const hydrated = app?.hydrated ?? false;
+
+  const themeContext = useTheme();
+  const theme = themeContext?.theme ?? "light";
+  const toggle = themeContext?.toggle ?? (() => {});
+
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -57,18 +64,22 @@ function LandingView() {
 
   const primaryHref = hasUser ? (isOnboarded ? "/dashboard" : "/onboarding") : "/signup";
 
-  const filteredUniversities = universities.filter((u) => {
+  const safeUniversities = Array.isArray(universities) ? universities : [];
+
+  const filteredUniversities = safeUniversities.filter((u) => {
+    if (!u || typeof u !== "object") return false;
+    const country = typeof u.country === "string" ? u.country : "";
     if (activeCategory === "us") {
-      return u.country === "United States";
+      return country === "United States";
     }
     if (activeCategory === "eu") {
-      return ["United Kingdom", "Germany", "Switzerland", "Netherlands"].includes(u.country);
+      return ["United Kingdom", "Germany", "Switzerland", "Netherlands"].includes(country);
     }
     if (activeCategory === "kz") {
-      return u.country === "Kazakhstan";
+      return country === "Kazakhstan";
     }
     if (activeCategory === "asia") {
-      return ["Singapore", "South Korea", "Japan", "China", "Canada"].includes(u.country);
+      return ["Singapore", "South Korea", "Japan", "China", "Canada"].includes(country);
     }
     return true;
   });
@@ -175,9 +186,9 @@ function LandingView() {
         </motion.div>
       </motion.main>
 
-      <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1, margin: "0px 0px -20px 0px" }}>
+      <motion.section className={styles.metrics} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1 }}>
         {[
-          [String(universities && Array.isArray(universities) ? universities.length : 0), t("universities with sourced data")],
+          [String(safeUniversities.length), t("universities with sourced data")],
           ["7", t("portfolio dimensions diagnosed")],
           ["3", t("tiers: Dream, Target, Safety")],
           ["1", t("clear next action, always")],
@@ -215,22 +226,30 @@ function LandingView() {
 
         <div className={styles.uniGrid}>
           {displayedUniversities.map((uni) => {
+            if (!uni) return null;
             const globalRank = uni.ranking?.global ?? uni.globalRanking;
             const nationalRank = uni.ranking?.national ?? uni.nationalRanking;
             const rankLabel = globalRank ? `#${globalRank} Global` : nationalRank ? `#${nationalRank} National` : "Top Tier";
-            const admitPct = uni.acceptanceRate?.value != null ? `${Math.round(uni.acceptanceRate.value * 100)}%` : "N/A";
-            const tuitionVal = Array.isArray(uni.intlTuitionUsd?.value)
-              ? `$${Math.round(uni.intlTuitionUsd.value[0] / 1000)}k`
-              : typeof uni.intlTuitionUsd?.value === "number"
-              ? `$${Math.round(uni.intlTuitionUsd.value / 1000)}k`
-              : "N/A";
+            
+            const admitVal = uni.acceptanceRate?.value;
+            const admitPct = typeof admitVal === "number" && !isNaN(admitVal) ? `${Math.round(admitVal * 100)}%` : "N/A";
+            
+            const tuitionRaw = uni.intlTuitionUsd?.value;
+            const tuitionNum = Array.isArray(tuitionRaw) ? tuitionRaw[0] : typeof tuitionRaw === "number" ? tuitionRaw : null;
+            const tuitionVal = typeof tuitionNum === "number" && !isNaN(tuitionNum) ? `$${Math.round(tuitionNum / 1000)}k` : "N/A";
+
+            const slug = typeof uni.slug === "string" ? uni.slug : "";
+            const name = typeof uni.name === "string" ? uni.name : "University";
+            const city = typeof uni.city === "string" ? uni.city : "";
+            const country = typeof uni.country === "string" ? uni.country : "";
+            const popularMajors = Array.isArray(uni.popularMajors) ? uni.popularMajors : [];
 
             return (
-              <article key={uni.slug} className={`glass ${styles.uniCard}`}>
+              <article key={slug || name} className={`glass ${styles.uniCard}`}>
                 <div className={styles.uniCardHeader}>
                   <div>
-                    <h3 className={styles.uniName}>{uni.name}</h3>
-                    <p className={styles.uniMeta}>{uni.city}, {uni.country}</p>
+                    <h3 className={styles.uniName}>{name}</h3>
+                    <p className={styles.uniMeta}>{city}{city && country ? ", " : ""}{country}</p>
                   </div>
                   <span className={styles.uniRankBadge}>{rankLabel}</span>
                 </div>
@@ -246,9 +265,9 @@ function LandingView() {
                   </div>
                 </div>
 
-                {uni.popularMajors && uni.popularMajors.length > 0 && (
+                {popularMajors.length > 0 && (
                   <div className={styles.uniMajorsWrap}>
-                    {uni.popularMajors.slice(0, 3).map((major) => (
+                    {popularMajors.slice(0, 3).map((major) => (
                       <span key={major} className={styles.uniMajorChip}>
                         {major}
                       </span>
@@ -256,7 +275,7 @@ function LandingView() {
                   </div>
                 )}
 
-                <Button href={hasUser ? `/universities/${uni.slug}` : `/signup?uni=${uni.slug}`} variant="quiet" size="sm">
+                <Button href={hasUser ? `/universities/${slug}` : `/signup?uni=${slug}`} variant="quiet" size="sm">
                   {t("Explore profile")} <Icon name="arrow" size={14} />
                 </Button>
               </article>
@@ -278,7 +297,7 @@ function LandingView() {
         )}
       </section>
 
-      <motion.section className={styles.steps} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1, margin: "0px 0px -20px 0px" }}>
+      <motion.section className={styles.steps} variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.1 }}>
         {steps.map((step, index) => (
           <motion.article key={step.id} variants={rise} className={`glass ${styles.step}`}>
             <span className={styles.stepIndex}>0{index + 1}</span>

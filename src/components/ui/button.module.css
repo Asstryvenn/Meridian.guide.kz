@@ -51,14 +51,16 @@
 }
 
 .primary {
-  background: var(--amber);
-  color: var(--on-amber);
-  box-shadow: 0 8px 24px -10px rgba(235, 174, 41, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--btn-gradient, linear-gradient(135deg, #4e9377 0%, #5ea489 36%, #d4a342 100%));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px -8px rgba(78, 147, 119, 0.45), 0 2px 8px -3px rgba(212, 163, 66, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--amber-strong);
-  box-shadow: 0 12px 28px -10px rgba(235, 174, 41, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--btn-gradient-hover, linear-gradient(135deg, #438268 0%, #53947b 36%, #c59637 100%));
+  filter: brightness(1.05);
+  box-shadow: 0 8px 24px -8px rgba(78, 147, 119, 0.55), 0 4px 12px -3px rgba(212, 163, 66, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .secondary {

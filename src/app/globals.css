@@ -32,6 +32,8 @@
   --shadow-lift: 0 2px 4px rgba(19, 34, 40, 0.05), 0 24px 48px -16px rgba(19, 34, 40, 0.26);
   --on-amber: #132228;
   --track: rgba(19, 34, 40, 0.1);
+  --btn-gradient: linear-gradient(135deg, #4e9377 0%, #5ea489 36%, #d4a342 100%);
+  --btn-gradient-hover: linear-gradient(135deg, #438268 0%, #53947b 36%, #c59637 100%);
 
   --radius-sm: 12px;
   --radius-md: 18px;
@@ -68,6 +70,8 @@
   --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.25), 0 28px 56px -18px rgba(0, 0, 0, 0.7);
   --track: rgba(245, 238, 210, 0.1);
   --danger: #e27a62;
+  --btn-gradient: linear-gradient(135deg, #428267 0%, #529479 36%, #c59738 100%);
+  --btn-gradient-hover: linear-gradient(135deg, #4c9274 0%, #5da486 36%, #d3a23f 100%);
   color-scheme: dark;
 }
 

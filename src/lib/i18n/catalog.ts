@@ -17,12 +17,15 @@ export function getActiveLocale(): Locale {
 }
 
 function interpolate(text: string, params?: Params) {
-  if (!params) return text;
-  return text.replace(/\{(\w+)\}/g, (match, key: string) => (key in params ? String(params[key]) : match));
+  if (!text || typeof text !== "string") return "";
+  if (!params || typeof params !== "object") return text;
+  return text.replace(/\{(\w+)\}/g, (match, key: string) => (key in params && params[key] !== undefined && params[key] !== null ? String(params[key]) : match));
 }
 
 export function translate(source: string, params: Params | undefined, locale: Locale): string {
-  const template = locale === "en" ? source : (dictionaries[locale][source] ?? source);
+  if (!source || typeof source !== "string") return "";
+  const dict = dictionaries[locale as Exclude<Locale, "en">];
+  const template = locale === "en" || !dict ? source : (dict[source] ?? source);
   return interpolate(template, params);
 }
 

@@ -277,7 +277,7 @@ export function InterviewSimulator() {
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="px-6 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10 cursor-pointer transition-all"
                 >
                   {t.interview.startCamera}
                 </button>
@@ -300,7 +300,7 @@ export function InterviewSimulator() {
                 <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-panel/85 border border-[#589C80]/40 backdrop-blur-md">
                   <span className="text-[11px] sm:text-xs font-mono text-ink/70">{tx("Mic Level:")}</span>
                   <div className="w-12 sm:w-16 h-1.5 sm:h-2 rounded-full bg-panel overflow-hidden border border-[#589C80]/30">
-                    <div className="h-full bg-gradient-to-r from-[#589C80] to-[#EBAE29] w-3/4" />
+                    <div className="h-full bg-gradient-to-r from-[#4e9377] via-[#5ea489] to-[#d4a342] w-3/4" />
                   </div>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export function InterviewSimulator() {
                   type="button"
                   onClick={startRecording}
                   disabled={!cameraActive || analyzing}
-                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10 cursor-pointer disabled:opacity-50 flex items-center gap-2 transition-all"
                 >
                   <Circle size={13} className="fill-current text-red-500" />
                   <span>{t.interview.startRecording}</span>

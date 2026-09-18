@@ -11,6 +11,7 @@ import { Icon, type IconName } from "@/components/ui/icon";
 import { PomodoroProvider, PomodoroToolbarButton } from "@/components/ui/pomodoro-timer";
 import { AiAssistantDrawer } from "@/components/mentor/ai-assistant-drawer";
 import { LanguageSelector } from "@/components/i18n/language-selector";
+import { TechSupportModal, TechSupportTrigger } from "@/components/support/tech-support-modal";
 import { useI18n } from "@/components/i18n/i18n-context";
 import { useApp } from "@/lib/store/app-store";
 import { useNotifications } from "@/lib/store/derived";
@@ -207,6 +208,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { href: "/applications", label: t.nav.applications, icon: "folder" },
   ];
   const [moreOpen, setMoreOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
   const closeMore = useCallback(() => setMoreOpen(false), []);
   const moreActive = !nav.some((item) => item.mobile && (pathname === item.href || pathname.startsWith(`${item.href}/`)));
 
@@ -277,6 +279,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Icon name={theme === "dark" ? "sun" : "moon"} />
               </button>
               <PomodoroToolbarButton />
+              <TechSupportTrigger onClick={() => setSupportOpen(true)} />
               <Notifications />
               <UserMenu />
             </div>
@@ -305,6 +308,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
         <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
         <AiAssistantDrawer />
+        <TechSupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
       </div>
     </PomodoroProvider>
   );

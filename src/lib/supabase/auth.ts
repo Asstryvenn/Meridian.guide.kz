@@ -100,24 +100,40 @@ export async function completeAuthRedirect(url: URL): Promise<AuthResult> {
 }
 
 export async function currentSupabaseUser(): Promise<AuthUser | null> {
-  const supabase = getSupabase();
-  if (!supabase) return null;
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) return null;
-  const { data } = await supabase.auth.getUser();
-  return data.user ? toAuthUser(data.user) : null;
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return null;
+    const sessionRes = await supabase.auth.getSession().catch(() => ({ data: { session: null }, error: null }));
+    if (!sessionRes?.data?.session) return null;
+    const userRes = await supabase.auth.getUser().catch(() => ({ data: { user: null }, error: null }));
+    return userRes?.data?.user ? toAuthUser(userRes.data.user) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function onAuthChange(listener: (event: string, user: AuthUser | null) => void): () => void {
-  const supabase = getSupabase();
-  if (!supabase) return () => {};
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    listener(event, session?.user ? toAuthUser(session.user) : null);
-  });
-  return () => data.subscription.unsubscribe();
+  try {
+    const supabase = getSupabase();
+    if (!supabase) return () => {};
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      try {
+        listener(event, session?.user ? toAuthUser(session.user) : null);
+      } catch {}
+    });
+    return () => {
+      try {
+        data?.subscription?.unsubscribe();
+      } catch {}
+    };
+  } catch {
+    return () => {};
+  }
 }
 
 export async function signOutEverywhere(): Promise<void> {
-  const supabase = getSupabase();
-  if (supabase) await supabase.auth.signOut();
+  try {
+    const supabase = getSupabase();
+    if (supabase) await supabase.auth.signOut().catch(() => {});
+  } catch {}
 }

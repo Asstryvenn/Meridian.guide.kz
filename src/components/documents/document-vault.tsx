@@ -161,7 +161,7 @@ export function DocumentVault() {
         <button
           type="button"
           onClick={() => setShowUploadModal(true)}
-          className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-r from-[#589C80] to-[#EBAE29] text-on-accent hover:brightness-110 shadow-lg cursor-pointer flex items-center gap-2 shrink-0"
+          className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold bg-gradient-to-br from-[#4e9377] via-[#5ea489] to-[#d4a342] text-white hover:brightness-105 active:scale-[0.98] shadow-md shadow-[#4e9377]/20 border border-white/10 cursor-pointer flex items-center gap-2 shrink-0 transition-all"
         >
           <Plus size={14} />
           <span>{t.common.upload}</span>

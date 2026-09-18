@@ -150,6 +150,7 @@ function normalizeState(value: unknown): AppState {
 const AppContext = createContext<(AppState & AppActions) | null>(null);
 
 function readLocal(): AppState {
+  if (typeof window === "undefined" || !window.localStorage) return initialState;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState;
@@ -160,21 +161,26 @@ function readLocal(): AppState {
 }
 
 function writeLocal(state: AppState) {
+  if (typeof window === "undefined" || !window.localStorage) return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {}
 }
 
 async function resolveSession(local: AppState): Promise<AppState> {
-  const remoteUser = await currentSupabaseUser();
-  if (!remoteUser) {
-    const staleSession = local.user?.mode === "supabase" || (local.user?.mode === "local" && isSupabaseConfigured());
-    return staleSession ? { ...local, user: null } : local;
+  try {
+    const remoteUser = await currentSupabaseUser().catch(() => null);
+    if (!remoteUser) {
+      const staleSession = local.user?.mode === "supabase" || (local.user?.mode === "local" && isSupabaseConfigured());
+      return staleSession ? { ...local, user: null } : local;
+    }
+    const remote = await loadRemoteState(remoteUser.id).catch(() => null);
+    if (remote) return normalizeState({ ...local, ...remote, user: remoteUser });
+    const sameUser = local.user?.id === remoteUser.id;
+    return sameUser || local.user === null ? normalizeState({ ...local, user: remoteUser }) : { ...initialState, user: remoteUser };
+  } catch {
+    return local;
   }
-  const remote = await loadRemoteState(remoteUser.id);
-  if (remote) return normalizeState({ ...local, ...remote, user: remoteUser });
-  const sameUser = local.user?.id === remoteUser.id;
-  return sameUser || local.user === null ? normalizeState({ ...local, user: remoteUser }) : { ...initialState, user: remoteUser };
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -213,24 +219,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    resolveSession(readLocal())
-      .catch(() => readLocal())
-      .then((next) => {
-        if (!active) return;
-        setState(next);
-        setHydrated(true);
-      });
 
-    const unsubscribe = onAuthChange((event, user) => {
-      if (event === "SIGNED_OUT") setState((prev) => (prev.user?.mode === "supabase" ? { ...prev, user: null } : prev));
-      if (event === "SIGNED_IN" && user) {
-        setState((prev) => (prev.user?.id === user.id ? prev : { ...prev, user }));
+    const bootstrap = async () => {
+      try {
+        const local = readLocal();
+        const next = await resolveSession(local).catch(() => local);
+        if (!active) return;
+        setState(next || local || initialState);
+      } catch {
+        if (!active) return;
+        setState(readLocal() || initialState);
+      } finally {
+        if (active) {
+          setHydrated(true);
+        }
       }
-    });
+    };
+
+    bootstrap();
+
+    let unsubscribe = () => {};
+    try {
+      unsubscribe = onAuthChange((event, user) => {
+        if (!active) return;
+        if (event === "SIGNED_OUT") setState((prev) => (prev.user?.mode === "supabase" ? { ...prev, user: null } : prev));
+        if (event === "SIGNED_IN" && user) {
+          setState((prev) => (prev.user?.id === user.id ? prev : { ...prev, user }));
+        }
+      });
+    } catch {}
 
     return () => {
       active = false;
-      unsubscribe();
+      try {
+        unsubscribe();
+      } catch {}
     };
   }, []);
 

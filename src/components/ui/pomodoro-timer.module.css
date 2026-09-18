@@ -1,13 +1,19 @@
-.fab {
+.draggableWrap {
   position: fixed;
   right: 24px;
-  bottom: 24px;
+  bottom: 28px;
   z-index: 45;
+  touch-action: none;
+  user-select: none;
+}
+
+.fab {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 44px;
-  padding: 0 16px;
+  padding: 0 16px 0 10px;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   background: var(--surface-solid);
@@ -16,9 +22,12 @@
   font-size: 13px;
   font-weight: 650;
   box-shadow: var(--shadow-lift);
+  cursor: grab;
+  touch-action: none;
   transition:
     border-color 0.2s ease,
-    transform 0.2s var(--ease-spring);
+    background-color 0.2s ease,
+    transform 0.15s var(--ease-spring);
 }
 
 .fab:hover {
@@ -26,9 +35,30 @@
   transform: translateY(-1px);
 }
 
+.fab:active {
+  cursor: grabbing;
+}
+
 .fabRunning {
   border-color: var(--green);
   color: var(--green-ink);
+}
+
+.dragHandle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  margin-right: 1px;
+}
+
+.handleBar {
+  width: 11px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .toolbar {
@@ -40,7 +70,9 @@
   inset: 0;
   z-index: 55;
   border: 0;
-  background: rgba(8, 16, 19, 0.25);
+  background: rgba(8, 16, 19, 0.28);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .panel {
@@ -51,13 +83,17 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: 320px;
+  width: min(340px, calc(100vw - 32px));
+  max-height: min(520px, calc(100dvh - 110px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 18px;
   border: 1px solid var(--border);
   border-radius: 24px;
   background: var(--surface-solid);
   color: var(--text);
   box-shadow: var(--shadow-lift);
+  touch-action: pan-y;
 }
 
 .panelRunning {
@@ -200,9 +236,15 @@
 }
 
 .primary {
-  border: 0;
-  background: var(--amber);
-  color: var(--on-amber);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #4e9377 0%, #5ea489 36%, #d4a342 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px -3px rgba(78, 147, 119, 0.35);
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
 .secondary {
@@ -212,8 +254,15 @@
 }
 
 @media (max-width: 960px) {
+  .draggableWrap {
+    right: 16px;
+    bottom: 84px;
+  }
+
   .fab {
-    display: none;
+    height: 40px;
+    padding: 0 14px 0 10px;
+    font-size: 12px;
   }
 
   .toolbar {
@@ -239,15 +288,16 @@
   }
 
   .scrim {
-    background: rgba(8, 16, 19, 0.45);
+    background: rgba(8, 16, 19, 0.4);
   }
 
   .panel {
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 12px;
+    right: 12px;
+    bottom: 84px;
     width: auto;
-    padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
-    border-radius: 28px 28px 0 0;
+    max-height: calc(100dvh - 130px);
+    border-radius: 24px;
+    padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
   }
 }
