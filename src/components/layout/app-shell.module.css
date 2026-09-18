@@ -419,6 +419,15 @@
       transform 0.2s var(--ease-spring);
   }
 
+  .tab > span {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+
   .tab:active {
     transform: scale(0.92);
   }
