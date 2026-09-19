@@ -15,7 +15,7 @@ export function FloatingDock() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50 pointer-events-none select-none">
+      <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 flex flex-col items-center gap-3 z-50 pointer-events-none select-none">
         <MascotCompanion embedded />
 
         <div className="pointer-events-auto flex items-center gap-2">

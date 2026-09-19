@@ -189,7 +189,7 @@ export function MascotCompanion({ embedded = false }: MascotCompanionProps) {
 
   return (
     <aside
-      className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50 pointer-events-none"
+      className="fixed bottom-24 md:bottom-6 right-4 md:right-6 flex flex-col items-center gap-3 z-50 pointer-events-none"
       aria-label="Totem Companion"
     >
       {content}
