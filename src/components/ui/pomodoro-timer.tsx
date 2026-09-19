@@ -102,13 +102,47 @@ export function usePomodoro() {
   return ctx;
 }
 
+export function PomodoroDockButton() {
+  const t = useT();
+  const { running, secondsLeft, open, setOpen } = usePomodoro();
+
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen(!open)}
+      aria-label={t("Focus timer")}
+      aria-expanded={open}
+      className={clsx(
+        "group relative inline-flex items-center gap-2 h-10 px-3.5 rounded-full border shadow-xl backdrop-blur-md transition-all duration-200 hover:scale-[1.03] cursor-pointer select-none",
+        running
+          ? "border-emerald-500/50 bg-neutral-900/95 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+          : "border-white/[0.12] bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 hover:border-emerald-500/40"
+      )}
+    >
+      <div className="flex items-center gap-1.5">
+        <span
+          className={clsx(
+            "w-2 h-2 rounded-full transition-all duration-300",
+            running
+              ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)] animate-pulse"
+              : "bg-neutral-500"
+          )}
+        />
+        <Icon name="clock" size={15} />
+      </div>
+      <span className="text-xs font-semibold tabular tracking-tight">
+        {running ? format(secondsLeft) : t("Focus timer")}
+      </span>
+    </button>
+  );
+}
+
 function PomodoroPanel() {
   const t = useT();
   const { completedTasks } = useApp();
   const { roadmap } = useRoadmap();
   const { mode, running, secondsLeft, open, setOpen, toggle, reset, switchMode } = usePomodoro();
   const [selectedTaskId, setSelectedTaskId] = useState("");
-  const isDraggingRef = useRef(false);
   const activeTasks = roadmap.levels.flatMap((l) => l.tasks).filter((task) => !completedTasks.includes(task.id));
   const selectedTask = activeTasks.find((task) => task.id === selectedTaskId) ?? activeTasks[0];
   const progress = 1 - secondsLeft / DURATION[mode];
@@ -121,48 +155,13 @@ function PomodoroPanel() {
   }, [open, setOpen]);
 
   return (
-    <>
-      <motion.div
-        drag
-        dragMomentum={false}
-        dragElastic={0.08}
-        onDragStart={() => {
-          isDraggingRef.current = true;
-        }}
-        onDragEnd={() => {
-          setTimeout(() => {
-            isDraggingRef.current = false;
-          }, 120);
-        }}
-        className={styles.draggableWrap}
-      >
-        <button
-          type="button"
-          className={clsx(styles.fab, running && styles.fabRunning)}
-          onClick={() => {
-            if (!isDraggingRef.current) {
-              setOpen(!open);
-            }
-          }}
-          aria-expanded={open}
-          aria-label={t("Focus timer")}
-        >
-          <div className={styles.dragHandle} aria-hidden>
-            <span className={styles.handleBar} />
-            <span className={styles.handleBar} />
-          </div>
-          <Icon name="clock" size={16} />
-          <span className="tabular">{running ? format(secondsLeft) : t("Focus timer")}</span>
-        </button>
-      </motion.div>
-
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.button type="button" aria-label={t("Close")} className={styles.scrim} onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-            <motion.div
-              role="dialog"
-              aria-label={t("Focus timer")}
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.button type="button" aria-label={t("Close")} className={styles.scrim} onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.div
+            role="dialog"
+            aria-label={t("Focus timer")}
               className={clsx(styles.panel, running && styles.panelRunning)}
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -220,9 +219,8 @@ function PomodoroPanel() {
           </>
         )}
       </AnimatePresence>
-    </>
-  );
-}
+    );
+  }
 
 export function PomodoroToolbarButton() {
   const t = useT();
