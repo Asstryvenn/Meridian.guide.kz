@@ -146,21 +146,21 @@ export function MascotCompanion({ embedded = false }: MascotCompanionProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-full mb-2 right-0 z-20 w-max max-w-[240px] pointer-events-auto p-3 rounded-2xl bg-neutral-900/90 border border-white/[0.08] shadow-2xl backdrop-blur-xl text-neutral-100"
+            className="absolute bottom-full mb-2 right-0 z-20 w-max max-w-[240px] pointer-events-auto p-3 rounded-2xl bg-white/95 dark:bg-neutral-900/90 border border-neutral-200/80 dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-2xl backdrop-blur-xl text-neutral-900 dark:text-neutral-100"
           >
             <span className={styles.bubbleTitle}>
               {speech.badge}
               <span>{speech.title}</span>
             </span>
-            <p className="text-xs mt-1 text-neutral-300 leading-relaxed">{speech.text}</p>
-            <span className="text-[10px] text-neutral-500 font-mono mt-1.5 block">
+            <p className="text-xs mt-1 text-neutral-600 dark:text-neutral-300 leading-relaxed">{speech.text}</p>
+            <span className="text-[10px] text-neutral-400 dark:text-neutral-500 font-mono mt-1.5 block">
               Click to dismiss
             </span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-white/[0.04] border border-white/[0.08] backdrop-blur-md p-1.5 rounded-full shadow-lg">
+      <div className="bg-white/80 dark:bg-white/[0.04] border border-neutral-200/80 dark:border-white/[0.08] backdrop-blur-xl p-1.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
         <button
           type="button"
           className={clsx(styles.mascotButton, stateClass)}

@@ -25,10 +25,10 @@ export function FloatingDock() {
             aria-label={t("AI Assistant")}
             title={t("AI Assistant")}
             aria-expanded={assistantOpen}
-            className="group relative inline-flex items-center gap-2 h-10 px-3.5 rounded-full border border-white/[0.12] bg-neutral-900/90 hover:bg-neutral-800 text-white shadow-xl backdrop-blur-md transition-all duration-200 hover:scale-[1.03] hover:border-amber-400/50 cursor-pointer select-none"
+            className="group relative inline-flex items-center gap-2 h-10 px-3.5 rounded-full border border-neutral-200/90 dark:border-white/[0.12] bg-white/90 hover:bg-white dark:bg-neutral-900/90 dark:hover:bg-neutral-800 text-neutral-800 dark:text-white shadow-lg dark:shadow-xl backdrop-blur-md transition-all duration-200 ease-out hover:scale-[1.03] hover:border-amber-400/60 dark:hover:border-amber-400/50 cursor-pointer select-none"
           >
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <Sparkles size={16} className="text-amber-400 group-hover:rotate-12 transition-transform duration-200" />
+            <Sparkles size={16} className="text-amber-500 dark:text-amber-400 group-hover:rotate-12 transition-transform duration-200 ease-out" />
             <span className="text-xs font-semibold tracking-tight">{t("AI Assistant")}</span>
           </button>
 
@@ -37,7 +37,7 @@ export function FloatingDock() {
             onClick={() => setVoiceOpen(true)}
             aria-label={t("Voice Admissions Mentor")}
             title={t("Voice Admissions Mentor")}
-            className="w-10 h-10 rounded-full border border-white/[0.12] bg-neutral-900/90 hover:bg-neutral-800 text-emerald-400 shadow-xl backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-[1.05] hover:border-emerald-400/50 cursor-pointer select-none"
+            className="w-10 h-10 rounded-full border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-lg dark:shadow-xl backdrop-blur-md flex items-center justify-center transition-all duration-200 ease-out hover:scale-[1.05] hover:border-emerald-300 dark:hover:border-emerald-500/40 cursor-pointer select-none"
           >
             <Mic size={17} />
           </button>

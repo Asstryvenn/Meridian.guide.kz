@@ -113,10 +113,10 @@ export function PomodoroDockButton() {
       aria-label={t("Focus timer")}
       aria-expanded={open}
       className={clsx(
-        "group relative inline-flex items-center gap-2 h-10 px-3.5 rounded-full border shadow-xl backdrop-blur-md transition-all duration-200 hover:scale-[1.03] cursor-pointer select-none",
+        "group relative inline-flex items-center gap-2 h-10 px-3.5 rounded-full border shadow-lg dark:shadow-xl backdrop-blur-md transition-all duration-200 ease-out hover:scale-[1.03] cursor-pointer select-none",
         running
-          ? "border-emerald-500/50 bg-neutral-900/95 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-          : "border-white/[0.12] bg-neutral-900/90 hover:bg-neutral-800 text-neutral-200 hover:border-emerald-500/40"
+          ? "border-emerald-300 dark:border-emerald-500/50 bg-emerald-50 dark:bg-neutral-900/95 text-emerald-700 dark:text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)] dark:shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+          : "border-neutral-200/90 dark:border-white/[0.12] bg-white/90 hover:bg-white dark:bg-neutral-900/90 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200 hover:border-emerald-500/40"
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -124,8 +124,8 @@ export function PomodoroDockButton() {
           className={clsx(
             "w-2 h-2 rounded-full transition-all duration-300",
             running
-              ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)] animate-pulse"
-              : "bg-neutral-500"
+              ? "bg-emerald-500 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)] animate-pulse"
+              : "bg-neutral-400 dark:bg-neutral-500"
           )}
         />
         <Icon name="clock" size={15} />

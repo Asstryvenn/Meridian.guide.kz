@@ -164,7 +164,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
         <motion.div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-md"
           onClick={handleClose}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -172,7 +172,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
           transition={{ duration: 0.2 }}
         >
           <motion.div
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl text-white"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-neutral-200/90 dark:border-white/[0.08] bg-white/95 dark:bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl text-neutral-900 dark:text-white"
             onClick={(event) => event.stopPropagation()}
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -183,20 +183,20 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
               type="button"
               onClick={handleClose}
               aria-label={t("Close")}
-              className="absolute top-5 right-5 p-2 rounded-full text-neutral-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.08] transition-all duration-200 group focus:outline-none"
+              className="absolute top-5 right-5 p-2 rounded-full text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white bg-neutral-100/80 hover:bg-neutral-200/80 dark:bg-white/[0.04] dark:hover:bg-white/[0.1] border border-neutral-200 dark:border-white/[0.08] transition-all duration-200 group focus:outline-none"
             >
               <X size={18} className="hover:rotate-90 transition-transform duration-200" />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Sparkles size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold tracking-tight text-white">
+                <h3 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-white">
                   {t("Voice Admissions Mentor")}
                 </h3>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                   {t("Real-time conversational strategy & interview practice")}
                 </p>
               </div>
@@ -226,7 +226,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
                   className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border ${
                     isListening
                       ? "bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/30 scale-105"
-                      : "bg-white/[0.05] hover:bg-white/[0.1] text-neutral-200 border-white/[0.1]"
+                      : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border-neutral-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-neutral-200 dark:border-white/[0.1]"
                   }`}
                 >
                   {isListening ? <Mic size={30} /> : <MicOff size={30} className="text-neutral-400" />}
@@ -243,7 +243,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
                     <motion.span
                       key={index}
                       className={`w-1 rounded-full transition-all duration-150 ${
-                        isListening ? "bg-emerald-400" : "bg-white/20"
+                        isListening ? "bg-emerald-400" : "bg-neutral-300 dark:bg-white/20"
                       }`}
                       animate={{ height: `${barHeight}px` }}
                     />
@@ -252,17 +252,17 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
               </div>
 
               <div className="text-center px-4">
-                <p className="text-sm font-medium text-neutral-200">{statusMessage}</p>
+                <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{statusMessage}</p>
                 {activeTopic && (
-                  <p className="text-xs text-neutral-400 mt-1 line-clamp-1 italic">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-1 italic">
                     {activeTopic}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/[0.06]">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 block mb-2.5">
+            <div className="pt-4 border-t border-neutral-200/80 dark:border-white/[0.06]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 block mb-2.5">
                 {t("Suggested prompts")}
               </span>
               <div className="flex flex-wrap gap-2">
@@ -271,7 +271,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
                     key={topic}
                     type="button"
                     onClick={() => handleSelectTopic(topic)}
-                    className="text-xs text-left px-3 py-1.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-emerald-500/30 text-neutral-300 hover:text-white transition-all duration-200"
+                    className="text-xs text-left px-3 py-1.5 rounded-lg bg-neutral-100/80 hover:bg-neutral-200/80 border border-neutral-200/80 hover:border-emerald-500/40 text-neutral-700 hover:text-neutral-900 dark:bg-white/[0.03] dark:hover:bg-white/[0.07] dark:border-white/[0.06] dark:hover:border-emerald-500/30 dark:text-neutral-300 dark:hover:text-white transition-all duration-200"
                   >
                     {topic}
                   </button>
@@ -279,7 +279,7 @@ export function VoiceMentorModal({ isOpen, onClose }: VoiceMentorModalProps) {
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between text-[11px] text-neutral-500">
+            <div className="mt-5 flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400">
               <span className="flex items-center gap-1.5">
                 <Volume2 size={13} className="text-neutral-400" />
                 {t("Audio stream encrypted")}
