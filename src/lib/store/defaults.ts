@@ -36,6 +36,7 @@ export const emptyProfile: StudentProfile = {
   chosenTotem: "alikhan",
   lastActiveDate: new Date().toISOString().slice(0, 10),
   isBusinessAccount: false,
+  avatarUrl: "",
 };
 
 export const sampleProfile: StudentProfile = {

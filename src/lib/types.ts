@@ -105,6 +105,7 @@ export interface StudentProfile {
   chosenTotem?: TotemMascotId;
   lastActiveDate?: string;
   isBusinessAccount?: boolean;
+  avatarUrl?: string;
 }
 
 export type Tier = "Dream" | "Target" | "Safety";

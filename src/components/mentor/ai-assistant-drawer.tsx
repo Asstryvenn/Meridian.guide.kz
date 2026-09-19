@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { MessageSquare, Plus, Trash2, X, Send, Sparkles, Menu, CheckCircle2, RotateCcw, KeyRound } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { MessageSquare, Plus, Trash2, X, Send, Sparkles, Menu, RotateCcw, KeyRound, Mic } from "lucide-react";
 import { useApp } from "@/lib/store/app-store";
 import { useRoadmap } from "@/lib/store/derived";
 import { useLocale, useT } from "@/lib/i18n/use-t";
+import { VoiceMentorModal } from "./VoiceMentorModal";
 import styles from "./ai-assistant-drawer.module.css";
 
 interface ChatMessage {
@@ -44,12 +46,34 @@ function createDefaultSession(greeting: string): ChatSession {
   };
 }
 
-export function AiAssistantDrawer() {
+interface AiAssistantDrawerProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+}
+
+export function AiAssistantDrawer({
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  hideTrigger = false,
+}: AiAssistantDrawerProps = {}) {
   const t = useT();
   const locale = useLocale();
   const { profile, applications, completedTasks } = useApp();
   const { next } = useRoadmap();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
+  const setIsOpen = useCallback(
+    (val: boolean | ((prev: boolean) => boolean)) => {
+      setInternalOpen((current) => {
+        const nextVal = typeof val === "function" ? val(current) : val;
+        onOpenChange?.(nextVal);
+        return nextVal;
+      });
+    },
+    [onOpenChange]
+  );
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,15 +103,11 @@ export function AiAssistantDrawer() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [showKeyConfig, setShowKeyConfig] = useState(false);
-  const [customApiKey, setCustomApiKey] = useState("");
+  const [customApiKey, setCustomApiKey] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("meridian_openai_api_key") || "";
+  });
   const [keySaved, setKeySaved] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("meridian_openai_api_key") || "";
-      setCustomApiKey(stored);
-    }
-  }, []);
 
   function handleSaveKey() {
     if (typeof window !== "undefined") {
@@ -122,7 +142,7 @@ export function AiAssistantDrawer() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -162,116 +182,119 @@ export function AiAssistantDrawer() {
     });
   }
 
-  async function sendMessage(text: string) {
-    const trimmed = text.trim();
-    if (!trimmed || loading) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || loading) return;
 
-    const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: trimmed };
-    const updatedMessages = [...messages, userMsg];
+      const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: trimmed };
+      const updatedMessages = [...messages, userMsg];
 
-    const currentTitle =
-      currentSession.title === "New admissions chat" || currentSession.title === t("New admissions chat")
-        ? trimmed.slice(0, 36) + (trimmed.length > 36 ? "..." : "")
-        : currentSession.title;
-
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === currentSession.id
-          ? { ...s, title: currentTitle, messages: updatedMessages }
-          : s
-      )
-    );
-
-    setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-    setLoading(true);
-
-    try {
-      const payload = {
-        profile,
-        applications,
-        completedTasks,
-        nextTask: next,
-        locale,
-        messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-      };
-
-      const customKey = typeof window !== "undefined" ? localStorage.getItem("meridian_openai_api_key") || "" : "";
-      const response = await fetch("/api/mentor", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(customKey ? { "x-openai-key": customKey } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok || !response.body) {
-        const errJson = await response.json().catch(() => null);
-        const detail = errJson?.message || errJson?.error;
-        throw new Error(detail || "Failed to connect to admissions model");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let assistantText = "";
-      const assistantId = `assistant-${Date.now()}`;
+      const currentTitle =
+        currentSession.title === "New admissions chat" || currentSession.title === t("New admissions chat")
+          ? trimmed.slice(0, 36) + (trimmed.length > 36 ? "..." : "")
+          : currentSession.title;
 
       setSessions((prev) =>
         prev.map((s) =>
           s.id === currentSession.id
-            ? { ...s, messages: [...updatedMessages, { id: assistantId, role: "assistant", content: "" }] }
+            ? { ...s, title: currentTitle, messages: updatedMessages }
             : s
         )
       );
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        assistantText += decoder.decode(value, { stream: true });
-        const snapshot = assistantText;
+      setInput("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+      setLoading(true);
+
+      try {
+        const payload = {
+          profile,
+          applications,
+          completedTasks,
+          nextTask: next,
+          locale,
+          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+        };
+
+        const customKey = typeof window !== "undefined" ? localStorage.getItem("meridian_openai_api_key") || "" : "";
+        const response = await fetch("/api/mentor", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(customKey ? { "x-openai-key": customKey } : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok || !response.body) {
+          const errJson = await response.json().catch(() => null);
+          const detail = errJson?.message || errJson?.error;
+          throw new Error(detail || "Failed to connect to admissions model");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantText = "";
+        const assistantId = `assistant-${Date.now()}`;
+
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === currentSession.id
+              ? { ...s, messages: [...updatedMessages, { id: assistantId, role: "assistant", content: "" }] }
+              : s
+          )
+        );
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          assistantText += decoder.decode(value, { stream: true });
+          const snapshot = assistantText;
+          setSessions((prev) =>
+            prev.map((s) =>
+              s.id === currentSession.id
+                ? {
+                    ...s,
+                    messages: s.messages.map((m) => (m.id === assistantId ? { ...m, content: snapshot } : m)),
+                  }
+                : s
+            )
+          );
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "";
+        const isMissingKey = msg.includes("OPENAI_KEY_MISSING") || /key|billing|quota/i.test(msg);
+        const displayContent = isMissingKey
+          ? t("OpenAI API key is missing or invalid. Please configure OPENAI_API_KEY in Vercel Project Settings > Environment Variables, or enter your API key using the Key button at the top.")
+          : (msg || t("I ran into an issue connecting to the admissions model. Please try asking again in a moment."));
+
         setSessions((prev) =>
           prev.map((s) =>
             s.id === currentSession.id
               ? {
                   ...s,
-                  messages: s.messages.map((m) => (m.id === assistantId ? { ...m, content: snapshot } : m)),
+                  messages: [
+                    ...s.messages,
+                    {
+                      id: `err-${Date.now()}`,
+                      role: "assistant",
+                      content: displayContent,
+                    },
+                  ],
                 }
               : s
           )
         );
+        if (isMissingKey) setShowKeyConfig(true);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "";
-      const isMissingKey = msg.includes("OPENAI_KEY_MISSING") || /key|billing|quota/i.test(msg);
-      const displayContent = isMissingKey
-        ? t("OpenAI API key is missing or invalid. Please configure OPENAI_API_KEY in Vercel Project Settings > Environment Variables, or enter your API key using the Key button at the top.")
-        : (msg || t("I ran into an issue connecting to the admissions model. Please try asking again in a moment."));
-
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSession.id
-            ? {
-                ...s,
-                messages: [
-                  ...s.messages,
-                  {
-                    id: `err-${Date.now()}`,
-                    role: "assistant",
-                    content: displayContent,
-                  },
-                ],
-              }
-            : s
-        )
-      );
-      if (isMissingKey) setShowKeyConfig(true);
-    } finally {
-      setLoading(false);
-    }
-  }
+    },
+    [loading, messages, currentSession, t, profile, applications, completedTasks, next, locale]
+  );
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -282,21 +305,41 @@ export function AiAssistantDrawer() {
 
   return (
     <>
-      <button
-        type="button"
-        className={`${styles.fab} ${isOpen ? styles.fabActive : ""}`}
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={t("AI Assistant")}
-        title={t("AI Assistant")}
-        aria-expanded={isOpen}
-      >
-        <span className={styles.fabBadge} />
-        <Sparkles size={18} />
-        <span className={styles.fabLabel}>{t("AI Assistant")}</span>
-      </button>
+      {!hideTrigger && (
+        <button
+          type="button"
+          className={`${styles.fab} ${isOpen ? styles.fabActive : ""}`}
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-label={t("AI Assistant")}
+          title={t("AI Assistant")}
+          aria-expanded={isOpen}
+        >
+          <span className={styles.fabBadge} />
+          <Sparkles size={18} />
+          <span className={styles.fabLabel}>{t("AI Assistant")}</span>
+        </button>
+      )}
 
-      {isOpen && (
-        <div className={styles.fullscreenOverlay} role="dialog" aria-modal="true">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 bg-black/70 backdrop-blur-md"
+            onClick={() => setIsOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className={styles.fullscreenOverlay}
+              onClick={(event) => event.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
           {sidebarOpen && (
             <div
               className={styles.sidebarOverlay}
@@ -369,6 +412,15 @@ export function AiAssistantDrawer() {
                 <button
                   type="button"
                   className={styles.iconBtn}
+                  onClick={() => setVoiceModalOpen(true)}
+                  title={t("Voice Admissions Mentor")}
+                  aria-label={t("Voice Admissions Mentor")}
+                >
+                  <Mic size={16} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
                   onClick={() => setShowKeyConfig((prev) => !prev)}
                   title={t("OpenAI API Key Configuration")}
                 >
@@ -384,11 +436,11 @@ export function AiAssistantDrawer() {
                 </button>
                 <button
                   type="button"
-                  className={styles.iconBtn}
+                  className="p-2 rounded-full text-neutral-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.08] transition-all duration-200 group focus:outline-none"
                   onClick={() => setIsOpen(false)}
                   aria-label={t("Close")}
                 >
-                  <X size={18} />
+                  <X size={18} className="hover:rotate-90 transition-transform duration-200" />
                 </button>
               </div>
             </header>
@@ -534,8 +586,15 @@ export function AiAssistantDrawer() {
               </div>
             </footer>
           </main>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <VoiceMentorModal
+        isOpen={voiceModalOpen}
+        onClose={() => setVoiceModalOpen(false)}
+      />
     </>
   );
 }

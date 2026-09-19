@@ -4,14 +4,14 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, ChevronRight, Flame, Globe, Leaf, LifeBuoy, Menu, Sparkles, Timer, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { PomodoroProvider, PomodoroToolbarButton, usePomodoro } from "@/components/ui/pomodoro-timer";
 import type { Locale } from "@/lib/types";
-import { AiAssistantDrawer } from "@/components/mentor/ai-assistant-drawer";
-import { MascotCompanion } from "@/components/companion/mascot-companion";
+import { FloatingDock } from "./floating-dock";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 import { TechSupportModal, TechSupportTrigger } from "@/components/support/tech-support-modal";
 import { useI18n } from "@/components/i18n/i18n-context";
@@ -148,7 +148,20 @@ function MobileMenuSheet({
             </div>
 
             <div className={styles.mobileUserProfile}>
-              <div className={styles.mobileUserAvatar}>{initial}</div>
+              <div className={styles.mobileUserAvatar}>
+                {profile.avatarUrl ? (
+                  <Image
+                    src={profile.avatarUrl}
+                    alt={profile.fullName || "User"}
+                    width={44}
+                    height={44}
+                    unoptimized
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  initial
+                )}
+              </div>
               <div className={styles.mobileUserInfo}>
                 <span className={styles.mobileUserName}>{profile.fullName || tx("Student")}</span>
                 <span className={styles.mobileUserEmail}>{user?.email || tx("Active Learner")}</span>
@@ -359,7 +372,18 @@ function UserMenu({ onOpenSupport }: { onOpenSupport: () => void }) {
   return (
     <div className={styles.popoverAnchor}>
       <button type="button" className={styles.avatar} aria-label={t("Account")} aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        {initial}
+        {profile.avatarUrl ? (
+          <Image
+            src={profile.avatarUrl}
+            alt={profile.fullName || "User"}
+            width={40}
+            height={40}
+            unoptimized
+            className="w-full h-full object-cover rounded-full"
+          />
+        ) : (
+          initial
+        )}
       </button>
       <AnimatePresence>
         {open && (
@@ -566,9 +590,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </nav>
         <MoreSheet items={nav} open={moreOpen} onClose={closeMore} pathname={pathname} />
-        <AiAssistantDrawer />
+        <FloatingDock />
         <TechSupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
-        <MascotCompanion />
         <MobileMenuSheet
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}

@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/icon";
 import { countries, regions } from "@/lib/data/universities";
 import { fieldOptions } from "@/lib/engine/search";
 import type { Activity, ActivityCategory, ActivityLevel, GradingSystem, StudentProfile } from "@/lib/types";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import styles from "./steps.module.css";
 import { useT } from "@/lib/i18n/use-t";
 import { msg } from "@/lib/i18n/catalog";
@@ -23,6 +24,13 @@ export function BasicInfoStep({ profile, update }: StepProps) {
   const t = useT();
   return (
     <div className={styles.grid}>
+      <div className={`${styles.span2} flex justify-center pb-2`}>
+        <AvatarUpload
+          value={profile.avatarUrl}
+          fallbackInitial={profile.fullName}
+          onChange={(avatarUrl) => update({ avatarUrl })}
+        />
+      </div>
       <TextField label={t("Full name")} value={profile.fullName} onChange={(fullName) => update({ fullName })} placeholder={t("How should your mentor address you?")} className={styles.span2} />
       <SelectField label={t("Country of citizenship")} value={profile.country} onChange={(country) => update({ country })} options={[{ value: "", label: t("Select a country") }, ...homeCountries.map((c) => ({ value: c, label: c }))]} />
       <TextField label={t("School")} value={profile.school} onChange={(school) => update({ school })} placeholder={t("School name and city")} />

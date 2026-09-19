@@ -73,6 +73,7 @@ export async function loadRemoteState(userId: string): Promise<PersistedState | 
     chosenTotem: p.chosen_totem || emptyProfile.chosenTotem,
     lastActiveDate: p.last_active_date || emptyProfile.lastActiveDate,
     isBusinessAccount: p.is_business_account === true,
+    avatarUrl: p.avatar_url || "",
     activities,
   };
 
@@ -127,6 +128,7 @@ export async function saveRemoteState(userId: string, state: PersistedState): Pr
       chosen_totem: profile.chosenTotem ?? "alikhan",
       last_active_date: profile.lastActiveDate ?? new Date().toISOString().slice(0, 10),
       is_business_account: profile.isBusinessAccount === true,
+      avatar_url: profile.avatarUrl || null,
       onboarded: state.onboarded,
       updated_at: new Date().toISOString(),
     }),
